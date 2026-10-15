@@ -96,13 +96,32 @@ nav>*{pointer-events:auto}
 /* ---------- Photo Wall ---------- */
 .photo-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 .photo-note{color:var(--muted);font-size:13.5px;margin:14px 0 0}
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:18px}
-.photo-tile{position:relative;display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.04);aspect-ratio:1}
+.photo-day{font-size:17px;font-weight:600;color:#fff;margin:22px 0 8px;letter-spacing:.01em}
+.photo-day:first-of-type{margin-top:14px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+@media(min-width:700px){.photo-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}}
+.photo-tile{position:relative;display:block;overflow:hidden;background:#10101c;aspect-ratio:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
-.photo-tile .pt-meta{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 6px;font-size:10.5px;color:#fff;background:linear-gradient(transparent,rgba(4,5,16,.85));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.photo-tile .pt-play{position:absolute;top:6px;right:6px;background:rgba(4,5,16,.75);color:#fff;font-size:10px;padding:3px 8px;border-radius:99px}
+.photo-tile .pt-play{position:absolute;right:5px;bottom:5px;color:#fff;font-size:11px;line-height:1;padding:4px 6px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:3px}
 .photo-empty{color:var(--muted);font-size:14px;margin:18px 0 0}
 .photo-status{min-height:20px}
+.pv{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column}
+.pv[hidden]{display:none}
+.pv-top{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 8px;color:#fff}
+.pv-count{font-size:13.5px;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+.pv-spacer{flex:1}
+.pv-btn{appearance:none;border:0;background:rgba(255,255,255,.14);color:#fff;width:34px;height:34px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pv-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:pan-y}
+.pv-stage img{max-width:100%;max-height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
+.pv-stage video{max-width:100%;max-height:100%}
+.pv-nav{position:absolute;top:50%;transform:translateY(-50%);appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.pv-prev{left:10px}.pv-next{right:10px}
+.pv-nav.off{opacity:.25;pointer-events:none}
+@media(hover:none){.pv-nav{display:none}}
+.pv-meta{padding:10px 16px calc(12px + env(safe-area-inset-bottom));color:#fff;font-size:13.5px;text-align:center}
+.pv-meta small{display:block;color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
+.pv.chrome-off .pv-top,.pv.chrome-off .pv-meta,.pv.chrome-off .pv-nav{opacity:0;pointer-events:none}
+.pv-top,.pv-meta,.pv-nav{transition:opacity .25s ease}
 /* ---------- Sections ---------- */
 main{position:relative;background:linear-gradient(180deg,var(--deep),var(--sky) 240px)}
 section{padding:72px 0 8px}
@@ -617,8 +636,15 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
         <input type="file" id="photoInput" accept="image/*,video/*,.heic,.heif" multiple hidden>
       </div>
       <p class="photo-note photo-status" id="photoStatus" aria-live="polite"></p>
-      <div class="photo-grid" id="photoGrid"></div>
+      <div id="photoWall"></div>
       <p class="photo-empty" id="photoEmpty">Nothing on the wall yet. First shot of the weekend goes here.</p>
+    </div>
+    <div class="pv" id="photoViewer" hidden>
+      <div class="pv-top"><button class="pv-btn" type="button" id="pvClose" aria-label="Close viewer">✕</button><span class="pv-count" id="pvCount"></span><span class="pv-spacer"></span></div>
+      <div class="pv-stage" id="pvStage"></div>
+      <button class="pv-nav pv-prev" type="button" id="pvPrev" aria-label="Previous photo">‹</button>
+      <button class="pv-nav pv-next" type="button" id="pvNext" aria-label="Next photo">›</button>
+      <div class="pv-meta" id="pvMeta"></div>
     </div>
   </div></section>
   </div>
@@ -1293,37 +1319,134 @@ applyRoute();
 <script>
 /* ============ PHOTO WALL (self-hosted on the trip server) ============ */
 (function(){
-  var grid=document.getElementById('photoGrid');
+  var wall=document.getElementById('photoWall');
   var empty=document.getElementById('photoEmpty');
   var status=document.getElementById('photoStatus');
   var input=document.getElementById('photoInput');
   var refreshBtn=document.getElementById('photoRefresh');
-  if(!grid||!input) return;
+  var viewer=document.getElementById('photoViewer');
+  var stage=document.getElementById('pvStage');
+  var pvMeta=document.getElementById('pvMeta');
+  var pvCount=document.getElementById('pvCount');
+  var pvPrev=document.getElementById('pvPrev');
+  var pvNext=document.getElementById('pvNext');
+  var pvClose=document.getElementById('pvClose');
+  if(!wall||!input) return;
   var loaded=false, loading=false;
+  var items=[], cur=-1;
 
   function setStatus(t){ if(status) status.textContent=t||''; }
 
-  function tile(p){
+  function dayLabel(iso){
+    try{
+      var d=new Date(iso), now=new Date();
+      var sameDay=d.toDateString()===now.toDateString();
+      var yest=new Date(now); yest.setDate(now.getDate()-1);
+      if(sameDay) return 'Today';
+      if(d.toDateString()===yest.toDateString()) return 'Yesterday';
+      return d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});
+    }catch(e){ return ''; }
+  }
+
+  function tile(p, idx){
     var a=document.createElement('a');
-    a.className='photo-tile'; a.href=p.url; a.target='_blank'; a.rel='noopener';
+    a.className='photo-tile'; a.href=p.url;
+    a.setAttribute('aria-label', p.originalName||'Trip photo');
     if(p.kind==='image'){
       var img=document.createElement('img');
       img.src=p.url; img.alt=p.originalName||'Trip photo'; img.loading='lazy';
       a.appendChild(img);
     } else {
       var play=document.createElement('span');
-      play.className='pt-play'; play.textContent='▶ Video';
+      play.className='pt-play'; play.textContent='▶';
       a.appendChild(play);
     }
-    var meta=document.createElement('span');
-    meta.className='pt-meta';
-    var when='';
-    try{ when=new Date(p.uploadedAt).toLocaleDateString('en-CA',{month:'short',day:'numeric'}); }catch(e){}
-    meta.textContent=(p.uploadedBy||'crew')+(when?' · '+when:'');
-    meta.title=p.originalName||'';
-    a.appendChild(meta);
+    a.addEventListener('click',function(e){ e.preventDefault(); openViewer(idx); });
     return a;
   }
+
+  function renderWall(){
+    wall.innerHTML='';
+    var lastDay=null, gridEl=null;
+    items.forEach(function(p, idx){
+      var dl=dayLabel(p.uploadedAt);
+      if(dl!==lastDay){
+        lastDay=dl;
+        var h=document.createElement('div');
+        h.className='photo-day'; h.textContent=dl;
+        wall.appendChild(h);
+        gridEl=document.createElement('div');
+        gridEl.className='photo-grid';
+        wall.appendChild(gridEl);
+      }
+      gridEl.appendChild(tile(p, idx));
+    });
+  }
+
+  /* ---- full-screen viewer (iOS Photos style) ---- */
+  function show(i){
+    if(i<0||i>=items.length) return;
+    cur=i;
+    var p=items[i];
+    stage.innerHTML='';
+    if(p.kind==='image'){
+      var img=document.createElement('img');
+      img.src=p.url; img.alt=p.originalName||'';
+      stage.appendChild(img);
+    } else {
+      var v=document.createElement('video');
+      v.src=p.url; v.controls=true; v.autoplay=true; v.playsInline=true;
+      stage.appendChild(v);
+    }
+    pvCount.textContent=(i+1)+' of '+items.length;
+    pvMeta.textContent='';
+    var who=document.createTextNode(p.uploadedBy||'crew');
+    var small=document.createElement('small');
+    try{ small.textContent=new Date(p.uploadedAt).toLocaleString('en-CA',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){}
+    pvMeta.appendChild(who); pvMeta.appendChild(small);
+    if(pvPrev) pvPrev.classList.toggle('off', i<=0);
+    if(pvNext) pvNext.classList.toggle('off', i>=items.length-1);
+    if(viewer) viewer.classList.remove('chrome-off');
+    [-1,1].forEach(function(off){
+      var n=items[i+off];
+      if(n&&n.kind==='image'){ var pre=new Image(); pre.src=n.url; }
+    });
+  }
+  function openViewer(i){
+    if(!viewer) return;
+    viewer.hidden=false;
+    document.body.style.overflow='hidden';
+    show(i);
+  }
+  function closeViewer(){
+    if(!viewer) return;
+    viewer.hidden=true;
+    stage.innerHTML='';
+    document.body.style.overflow='';
+    cur=-1;
+  }
+  function step(d){ if(cur>-1) show(Math.min(items.length-1, Math.max(0, cur+d))); }
+  if(pvClose) pvClose.addEventListener('click', closeViewer);
+  if(pvPrev) pvPrev.addEventListener('click', function(){ step(-1); });
+  if(pvNext) pvNext.addEventListener('click', function(){ step(1); });
+  if(stage) stage.addEventListener('click', function(e){
+    if(e.target===stage || e.target.tagName==='IMG'){ if(viewer) viewer.classList.toggle('chrome-off'); }
+  });
+  var touchX=null;
+  if(stage){
+    stage.addEventListener('touchstart', function(e){ touchX=e.changedTouches[0].clientX; }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+      if(touchX===null) return;
+      var dx=e.changedTouches[0].clientX-touchX; touchX=null;
+      if(Math.abs(dx)>42) step(dx<0?1:-1);
+    }, {passive:true});
+  }
+  document.addEventListener('keydown', function(e){
+    if(!viewer || viewer.hidden) return;
+    if(e.key==='Escape') closeViewer();
+    if(e.key==='ArrowRight') step(1);
+    if(e.key==='ArrowLeft') step(-1);
+  });
 
   function loadWall(force){
     if(loading||(loaded&&!force)) return;
@@ -1336,9 +1459,8 @@ applyRoute();
       })
       .then(function(data){
         loaded=true; loading=false;
-        grid.innerHTML='';
-        var items=(data&&data.photos)||[];
-        items.forEach(function(p){ grid.appendChild(tile(p)); });
+        items=(data&&data.photos)||[];
+        renderWall();
         if(empty) empty.style.display=items.length?'none':'';
         if(items.length) setStatus(items.length+(items.length===1?' item':' items')+' on the wall.');
       })
