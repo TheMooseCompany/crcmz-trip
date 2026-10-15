@@ -100,7 +100,25 @@ async function main() {
 
   app.get(
     CALLBACK_PATH,
-    passport.authenticate('openidconnect', { failureRedirect: '/auth/login' }),
+    (req, res, next) => {
+      passport.authenticate('openidconnect', (err, user, info) => {
+        if (err) {
+          console.error('[crcmz-trip] OIDC callback error:', err);
+          return res.status(500).send('Auth error: ' + err.message);
+        }
+        if (!user) {
+          console.error('[crcmz-trip] OIDC callback failed:', info);
+          return res.status(401).send('Auth failed: ' + JSON.stringify(info));
+        }
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            console.error('[crcmz-trip] Login error:', loginErr);
+            return next(loginErr);
+          }
+          next();
+        });
+      })(req, res, next);
+    },
     (req, res) => {
       const target = req.session.returnTo || '/';
       delete req.session.returnTo;
