@@ -556,10 +556,6 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
 <!-- ================= CREW ================= -->
   <section id="crew"><div class="wrap">
     <div class="sec-head reveal"><div class="label">01 · Who's Coming</div><h2>Six names. One <span class="serif">arrival.</span></h2></div>
-    <div class="who-list reveal" id="crewList" role="list" aria-label="The crew — tap a name for their crew file"></div>
-    <div id="crewFile" class="reveal">Six gamertags, two flights, one beacon. <b>Tap a name</b> for its crew file.</div>
-    <p class="stage-note reveal"><b>Asamad</b> inbound from Texas · <b>InterestingSoup</b> inbound from California · <b>Killer, TheMooseCompany, Deception</b> and <b>Kaptaan</b> hold home turf in Calgary.</p>
-    <p class="stage-note reveal">Flight landing times — <b>Asamad</b> [TO FILL] · <b>InterestingSoup</b> [TO FILL]. They land here the moment the flights are booked.</p>
   </div></section>
 <!-- ================= STAY (condensed) ================= -->
   <section id="stay"><div class="wrap">
@@ -722,39 +718,6 @@ function springAnim(from,to,stiffness,damping){
  frames[frames.length-1].value=to; frames[frames.length-1].offset=1;
  return {frames:frames,duration:Math.max(60,Math.round(total*1000))};
 }
-var CREW=[
- {name:"Killer",tag:"killerx096",img:"assets/killer.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.95,orbit:64,ang:0.35},
- {name:"TheMooseCompany",tag:"TheMooseCompany",img:"assets/moose.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:1.08,orbit:82,ang:1.95},
- {name:"InterestingSoup",tag:"InterestingSoup",img:"assets/soup.png",from:"California, USA",flyer:true,status:"Inbound",detail:"Flying in from California. His orbit tightens as the countdown runs down — docking at the beacon on Oct 29.",size:1.0,orbit:0,ang:2.9},
- {name:"Asamad",tag:"Asamad89",img:"assets/samad.png",from:"Texas, USA",flyer:true,status:"Inbound",detail:"Flying in from Texas. His orbit tightens as the countdown runs down — docking at the beacon on Oct 29.",size:1.04,orbit:0,ang:5.6},
- {name:"Deception",tag:"Deception",img:"assets/decep.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.92,orbit:100,ang:3.75},
- {name:"Kaptaan",tag:"Kaptaan",img:"assets/kap.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.9,orbit:116,ang:5.15}
-];
-/* V3: the physics orbit is parked (owner's call — revisit later). The crew
-   is now the CRCMZ app's WHO'S ON pattern: avatar + gamertag + status rows,
-   tap a row for the same crew file the orbit used to show. */
-var crewListEl=document.getElementById('crewList'),crewFileEl=document.getElementById('crewFile'),crewSelRow=null;
-function crewChipStatus(c){
- if(!c.flyer)return c.status;
- var now=Date.now();
- return (now>=new Date("2026-10-29T00:00:00-06:00").getTime()&&now<new Date("2026-11-02T00:00:00-07:00").getTime())?"Landed":"Inbound";
-}
-function crewStatusLine(c){
- return c.flyer?("INBOUND \u00B7 "+c.from+" \u00B7 landing [TO FILL]"):("HOME TURF \u00B7 Calgary, AB");
-}
-function showCrewFile(c,row){
- if(crewSelRow)crewSelRow.classList.remove('sel');
- crewSelRow=row; row.classList.add('sel');
- crewFileEl.innerHTML='<b>'+c.tag+'</b><span class="chip '+(c.flyer?'inb':'home')+'">'+crewChipStatus(c)+'</span><br>'+c.from+' \u2014 '+c.detail;
-}
-CREW.forEach(function(c){
- var b=document.createElement('button');
- b.type='button'; b.className='who-row'; b.setAttribute('role','listitem');
- b.setAttribute('aria-label',c.tag+' — '+crewStatusLine(c)+'. Tap for crew file.');
- b.innerHTML='<img class="who-av" src="'+c.img+'" alt="'+c.tag+' logo" loading="lazy"><span class="who-main"><b>'+c.tag+'</b><span>'+crewStatusLine(c)+'</span></span><span class="who-chev" aria-hidden="true">\u203A</span>';
- b.addEventListener('click',function(){showCrewFile(c,b)});
- crewListEl.appendChild(b);
-});
 
 /* ================= Day row dots ================= */
 var dayRow=document.getElementById('dayRow'),dayDots=document.getElementById('dayDots');
