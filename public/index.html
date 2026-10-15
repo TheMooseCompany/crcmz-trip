@@ -360,19 +360,18 @@ body[data-view="food"] footer a,body[data-view="split"] footer a{color:var(--amb
 /* Home previews */
 .prev-grid{display:grid;gap:12px}
 @media(min-width:700px){.prev-grid{grid-template-columns:1fr 1fr}}
-.prev-card{display:block;text-decoration:none;background:var(--paper-card);border:1px solid var(--line-d);border-radius:18px;padding:20px;color:var(--ink)}
+.prev-card{display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--paper-card);border:1px solid var(--line-d);border-radius:18px;padding:13px 15px;color:var(--ink)}
+.prev-thumb{width:58px;height:58px;border-radius:13px;object-fit:cover;flex:none;background:rgba(23,20,37,.08)}
+.prev-main{flex:1;min-width:0}
 .prev-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .prev-card .label{color:var(--amber-deep)}
-.prev-arrow{color:var(--amber-deep);font-size:19px;line-height:1}
-.prev-card h3{margin:10px 0 6px;font-size:19px;font-weight:600;letter-spacing:-.01em}
-.prev-card p{color:var(--paper-mut);margin:0;font-size:14.5px}
-.prev-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.prev-tags span{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;border:1px solid rgba(23,20,37,.18);border-radius:99px;padding:4px 8px;color:var(--paper-mut)}
+.prev-arrow{color:var(--amber-deep);font-size:18px;line-height:1;flex:none}
+.prev-card h3{margin:4px 0 2px;font-size:16.5px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prev-card p{color:var(--paper-mut);margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Food on light */
-#view-food .food-cat{border-color:rgba(23,20,37,.22);background:rgba(255,253,246,.6);color:var(--ink)}
-#view-food .food-cat small{color:var(--paper-mut2)}
-#view-food .food-cat.on{background:var(--amber);border-color:transparent;color:#221A04}
-#view-food .food-cat.on small{color:#221A04}
+#view-food .food-select{border-color:rgba(23,20,37,.22);background:rgba(255,253,246,.6);color:var(--ink)}
+#view-food .food-cat-label{color:var(--amber-deep)}
+#view-food .food-select-wrap::after{color:var(--amber-deep)}
 #view-food .food-card{background:var(--paper-card);border-color:var(--line-d)}
 #view-food .food-card h3{color:var(--ink)}
 #view-food .food-card .rate{color:var(--amber-deep)}
@@ -606,10 +605,10 @@ body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgb
   <section id="previews"><div class="wrap">
     <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
     <div class="prev-grid">
-      <a class="prev-card reveal" href="#food"><span class="prev-top"><span class="label">Food Finder</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>What kind of food are you looking for?</h3><p>36 halal spots across Calgary &amp; Airdrie in 8 categories — every card opens its Google page.</p><span class="prev-tags"><span>Close to the house · 19</span><span>Shawarma &amp; Middle Eastern · 11</span><span>Pakistani &amp; Indian · 6</span></span></a>
-      <a class="prev-card reveal" href="#photos"><span class="prev-top"><span class="label">Photo Wall</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>Every shot, one wall.</h3><p>One shared album on the crew's own server — touchdown shots, tournament night, all of it.</p><span class="prev-tags"><span>Add Photos</span><span>View the Wall</span></span></a>
-      <a class="prev-card reveal" href="#split"><span class="prev-top"><span class="label">The Split</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>One pot. Settled once, at the end.</h3><p>Expense 01 is the Airbnb: $857.36 for three nights, split four ways.</p><span class="prev-tags"><span>$214.34 × 4</span><span>Moose</span><span>Soup</span><span>Asamad</span><span>Kaptaan</span></span></a>
-      <a class="prev-card reveal" href="#fifa"><span class="prev-top"><span class="label">FC 27 Tournament</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>The 2v2v2 title race.</h3><p id="fifaPrevLine">No results in yet — everyone plays everyone, and the top two meet in the final.</p><span class="prev-tags"><span>Title Race</span><span>The Gauntlet</span><span>The Final</span></span></a>
+      <a class="prev-card reveal" href="#food"><img class="prev-thumb" src="assets/prev-food.jpg" alt="" loading="lazy"><span class="prev-main"><span class="prev-top"><span class="label">Food Finder</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>What are you hungry for?</h3><p>36 halal spots · 8 categories</p></span></a>
+      <a class="prev-card reveal" href="#photos"><img class="prev-thumb" src="assets/prev-photos.jpg" alt="" loading="lazy"><span class="prev-main"><span class="prev-top"><span class="label">Photo Wall</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>Every shot, one wall.</h3><p>The crew's shared album.</p></span></a>
+      <a class="prev-card reveal" href="#split"><img class="prev-thumb" src="assets/prev-split.jpg" alt="" loading="lazy"><span class="prev-main"><span class="prev-top"><span class="label">The Split</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>One pot, settled at the end.</h3><p>Airbnb $857.36 · $214.34 × 4</p></span></a>
+      <a class="prev-card reveal" href="#fifa"><img class="prev-thumb" src="assets/fc-logo.jpg" alt="" loading="lazy"><span class="prev-main"><span class="prev-top"><span class="label">FC 27 Tournament</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>The 2v2v2 title race.</h3><p id="fifaPrevLine">No results in yet.</p></span></a>
     </div>
   </div></section>
   </div>
