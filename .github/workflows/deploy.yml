@@ -1,0 +1,13 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Coolify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify deploy
+        run: curl -fsSL "${{ secrets.COOLIFY_WEBHOOK_URL }}"
