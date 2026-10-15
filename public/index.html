@@ -163,11 +163,12 @@ details.house-details summary{cursor:pointer;font-family:"IBM Plex Mono",monospa
 details.house-details summary::-webkit-details-marker{display:none}
 details.house-details p{margin:10px 0 0}
 /* Food finder */
-.food-cats{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
-.food-cat{border:1px solid var(--line);background:rgba(16,22,58,.5);color:var(--cream);border-radius:99px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;transition:border-color .25s,background .25s,color .25s}
-.food-cat small{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);font-weight:500;margin-left:5px}
-.food-cat.on{background:var(--amber);border-color:transparent;color:#221A04}
-.food-cat.on small{color:#221A04}
+.food-cats{display:flex;align-items:center;gap:12px;margin:6px 0 18px}
+.food-cat-label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);font-weight:600;white-space:nowrap}
+.food-select-wrap{position:relative;flex:1}
+.food-select-wrap::after{content:"\25BE";position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--amber);font-size:15px}
+.food-select{appearance:none;-webkit-appearance:none;width:100%;background:rgba(16,22,58,.5);border:1px solid var(--line);border-radius:14px;color:var(--cream);font-family:inherit;font-size:15px;font-weight:600;padding:13px 44px 13px 16px;cursor:pointer}
+.food-select:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
 .food-list{display:flex;flex-direction:column;gap:10px}
 .food-card{display:block;text-decoration:none;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:16px 18px;transition:border-color .25s,transform .25s}
 .food-card:hover{border-color:var(--line-amber);transform:translateY(-1px)}
@@ -397,14 +398,16 @@ body[data-view="food"] footer a,body[data-view="split"] footer a{color:var(--amb
    is the mechanism the cinematic stage already pins with on that phone,
    so the bar (last element in the document, in flow) rides the visible
    bottom with its background painted in normal flow. */
-.tabbar{position:sticky;bottom:0;top:auto;z-index:80;display:flex;background:rgba(8,10,28,.97);border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(452px,calc(100% - 24px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 22px 48px rgba(2,3,10,.55),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -1px 0 rgba(255,255,255,.06);padding:8px}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
+.view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
    (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
    .tabbar (0-1-0) and repaint the bar translucent cream on Food and
    Split — the content bleeding through the bar in the owner's recording.
    This rule (0-2-1) keeps the bar's dark slab on every view. */
-body[data-view] .tabbar{background:rgba(8,10,28,.97)}
-.tabbar .tab{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 2px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
+body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55))}
+.tabbar .tab{flex:1;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tabbar .tab.on{color:var(--amber)}
 @media (prefers-reduced-motion: reduce){
@@ -615,7 +618,7 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
   <section id="food"><div class="wrap">
     <div class="sec-head reveal"><div class="label">06 · Food Finder</div><h2>What kind of food are <span class="serif">you looking for?</span></h2><p>36 halal spots across Calgary &amp; Airdrie, curated for this trip. Pick a craving — every card opens its Google page.</p></div>
     <p class="food-note reveal"><b>On halal status:</b> each note is the status as publicly stated by the restaurant or community lists (Halal Calgary, Zabihah), checked Oct 15, 2026. No source named a specific certifier (HMA, IFANCA or other) for any spot here — if a certifier matters to you, phone ahead. Partial flags are marked ⚠ and stay visible.</p>
-    <div class="food-cats reveal" id="foodCats" role="group" aria-label="Choose a food category"></div>
+    <div class="food-cats reveal"><span class="food-cat-label" id="foodCatLabel">Category</span><div class="food-select-wrap"><select class="food-select" id="foodCatSel" aria-labelledby="foodCatLabel"></select></div></div>
     <div class="food-list reveal" id="foodList" aria-live="polite"></div>
   </div></section>
   </div>
@@ -1230,21 +1233,18 @@ var FOOD=[
  {n:"Taj Mahal Restaurant",a:"SW Calgary · Macleod Trail S",r:"Rating not verified in sources",h:"Halal by house policy — Halal Calgary. Open since 1973; lunch buffet is the noted draw.",c:"pakind",u:"https://www.google.com/maps/search/?api=1&query=Taj+Mahal+Restaurant+Macleod+Trail+Calgary+AB"},
  {n:"Village Pita Bakery",a:"SE Calgary · 28 St SE",r:"4.6★ · 576 reviews",h:"HalalRun: all meat is halal, alcohol-free. Serving Calgary since the late 1970s. Pita pies, meat pies.",c:"me",u:"https://www.google.com/maps/search/?api=1&query=Village+Pita+Bakery+255+28+St+SE+Calgary+AB"}
 ];
-var foodCatsEl=document.getElementById('foodCats'),foodListEl=document.getElementById('foodList');
+var foodSelEl=document.getElementById('foodCatSel'),foodListEl=document.getElementById('foodList');
 function foodCount(id){return id==='close'?FOOD.filter(function(f){return f.close}).length:FOOD.filter(function(f){return f.c===id}).length}
 function foodEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function renderFood(id){
- foodCatsEl.querySelectorAll('.food-cat').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-cat')===id)});
+ if(foodSelEl)foodSelEl.value=id;
  var items=id==='close'?FOOD.filter(function(f){return f.close}):FOOD.filter(function(f){return f.c===id});
  foodListEl.innerHTML=items.map(function(f){
    return '<a class="food-card" href="'+f.u+'" target="_blank" rel="noopener"><span class="fc-top"><h3>'+foodEsc(f.n)+'</h3><span class="rate">'+foodEsc(f.r)+'</span></span><span class="meta"><span class="chip home">'+foodEsc(f.a)+'</span></span><p class="halal">'+foodEsc(f.h)+'</p><span class="go">View on Google \u2192</span></a>';
  }).join('');
 }
-foodCatsEl.innerHTML=FOOD_CATS.map(function(c){return '<button type="button" class="food-cat" data-cat="'+c.id+'">'+c.label+'<small>'+foodCount(c.id)+'</small></button>'}).join('');
-foodCatsEl.addEventListener('click',function(ev){
- var b=ev.target.closest?ev.target.closest('.food-cat'):null; if(!b)return;
- renderFood(b.getAttribute('data-cat'));
-});
+foodSelEl.innerHTML=FOOD_CATS.map(function(c){return '<option value="'+c.id+'">'+c.label+' ('+foodCount(c.id)+')</option>'}).join('');
+foodSelEl.addEventListener('change',function(){renderFood(foodSelEl.value);});
 renderFood('close');
 </script>
 
