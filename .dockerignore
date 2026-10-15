@@ -1,0 +1,13 @@
+node_modules
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+*.token
+*.key
+*.pem
+credentials*
+README.md
+npm-debug.log*
+.DS_Store

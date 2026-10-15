@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="color-scheme" content="dark"/>
+<link rel="icon" href="data:,">
+<title>CRCMZ Trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#0A0E27; --sky2:#0D1233; --deep:#060818; --panel:#10163A; --panel2:#141B45;
+  --line:rgba(245,239,224,.12); --line-amber:rgba(242,179,61,.45);
+  --amber:#F2B33D; --amber2:#FFC65C;
+  --acid:#8CFF2B; /* CRCMZ signature — stamp + micro-highlights only */
+  --cream:#F5EFE0; --muted:#A9A5C6; --muted2:#8E89B8;
+  /* V3 light palette (warm paper) — measured on #F5EFE0: ink 15.7:1,
+     paper-mut 7.3:1, paper-mut2 6.2:1, amber-deep 5.0:1 — all AA */
+  --paper:#F5EFE0; --paper-card:#FFFDF6; --ink:#171425; --paper-mut:#514B5E; --paper-mut2:#5B5568; --amber-deep:#8A5E10; --line-d:rgba(23,20,37,.13);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--sky);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;overflow-x:hidden;overflow-x:clip;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit}
+.mono{font-family:"IBM Plex Mono",monospace}
+.serif{font-family:Newsreader,serif;font-style:italic;font-weight:500}
+.label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+/* ---------- Nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 22px;background:linear-gradient(180deg,rgba(6,8,24,.82),rgba(6,8,24,0));pointer-events:none}
+nav>*{pointer-events:auto}
+.nav-brand{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.24em;font-weight:600;color:var(--cream);text-decoration:none}
+.nav-stamp{display:inline-block;color:var(--acid);border:1.5px solid var(--acid);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.08em;transform:rotate(-8deg) translateY(-2px);background:rgba(6,8,24,.7)}
+.nav-links{display:flex;gap:22px;align-items:center}
+.nav-links a{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-decoration:none;color:var(--muted);font-weight:500}
+.nav-links a:hover{color:var(--amber2)}
+.nav-cd{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;color:var(--amber2);border:1px solid var(--line-amber);padding:6px 11px;border-radius:99px;background:rgba(10,14,39,.88);white-space:nowrap}
+@media(max-width:640px){.nav-links a{display:none}.nav-links a:last-child{display:block}}
+/* ---------- Cinematic ---------- */
+#cinematic{position:relative;height:300vh;background:var(--deep)}
+.step-sentinel{position:absolute;left:0;width:8px;height:60vh;pointer-events:none;opacity:0}
+#world,#planeCA,#planeTX,#cityCA,#cityTX,#cityYYC{transition:transform .8s cubic-bezier(.3,.7,.3,1)}
+#detailLayer{transition:opacity .8s ease}
+.city-dot{transition:transform .8s cubic-bezier(.3,.7,.3,1),opacity .8s ease}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(1100px 620px at 50% 30%,#131B4A 0%,var(--sky) 52%,var(--deep) 100%)}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(4,5,16,.55) 100%)}
+.layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 20px 40px;pointer-events:none}
+.intro{justify-content:flex-start;padding-top:14vh}
+.scroll-cue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase}
+.scroll-cue i{display:block;width:1px;height:44px;background:linear-gradient(180deg,var(--amber),transparent);animation:cue 2.2s ease-in-out infinite}
+@keyframes cue{0%,100%{transform:scaleY(.55);opacity:.5;transform-origin:top}50%{transform:scaleY(1);opacity:1;transform-origin:top}}
+.readout{position:absolute;left:22px;bottom:26px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-align:left;line-height:1.9}
+.readout b{color:var(--cream);font-weight:500}
+.readout .amb{color:var(--amber2)}
+.bigword{justify-content:center}
+.bigword span{font-size:clamp(56px,13vw,168px);font-weight:700;letter-spacing:.06em;line-height:1;color:var(--cream);text-shadow:0 0 60px rgba(242,179,61,.35)}
+.bigword small{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.4em;color:var(--amber2);margin-top:14px;text-transform:uppercase}
+.hero-layer{opacity:1;pointer-events:none;justify-content:flex-start;padding-top:13vh}
+.hero-layer .label{margin-bottom:14px}
+.hero-title{position:relative;display:inline-block;font-size:clamp(52px,14.5vw,96px);line-height:.92;letter-spacing:-.015em;margin:0;font-weight:700;text-transform:uppercase;text-shadow:0 4px 34px rgba(6,8,24,.65)}
+.ht-trip{position:relative;display:inline-block}
+.stamp{position:absolute;bottom:-.30em;right:-.42em;font-family:"IBM Plex Mono",monospace;font-size:clamp(22px,6vw,38px);font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--acid);border:3px solid var(--acid);border-radius:9px;padding:.04em .28em .08em;background:rgba(6,8,24,.72);box-shadow:0 0 26px rgba(140,255,43,.30),inset 0 0 12px rgba(140,255,43,.12);opacity:0;transform:rotate(-11deg) scale(2.8);pointer-events:none;z-index:2}
+/* hero stamp entrance is spring-driven from JS (landStamp); the stampIn
+   keyframes below still drive the tournament CHAMPIONS stamp */
+@keyframes stampIn{0%{opacity:0;transform:rotate(-32deg) scale(2.8)}52%{opacity:1;transform:rotate(-8deg) scale(.87)}76%{transform:rotate(-12.5deg) scale(1.07)}100%{opacity:1;transform:rotate(-11deg) scale(1)}}
+.hero-late{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.stage[data-step="4"] .hero-late{opacity:1;transform:none}
+.hero-layer.landed .hero-late{opacity:1;transform:none}
+.hero-sub{margin:20px auto 0;color:var(--cream);font-size:clamp(15px,2.2vw,19px);font-weight:500}
+.hero-dates{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.2em;color:var(--muted);margin-top:8px;text-transform:uppercase}
+.countdown{display:flex;gap:10px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+.cd{min-width:86px;padding:16px 10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(16,22,58,.88)}
+.cd b{display:block;font-size:clamp(30px,4.6vw,44px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.cd span{display:block;margin-top:7px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+#cd-msg{margin-top:18px;color:var(--amber2);font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;min-height:1.4em}
+.hero-cta{margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;border-radius:99px;padding:13px 22px;font-weight:600;font-size:14px;border:1px solid var(--line);color:var(--cream);background:rgba(16,22,58,.5);transition:transform .25s,border-color .25s,background .25s}
+.btn.primary{background:var(--amber);border-color:transparent;color:#221A04}
+.btn:hover{transform:translateY(-2px);border-color:var(--line-amber)}
+#skip{position:absolute;right:20px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:5;background:rgba(10,14,39,.92);border:1px solid var(--line);color:var(--cream);border-radius:99px;padding:10px 18px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:opacity .4s,border-color .25s}
+#skip:hover{border-color:var(--line-amber);color:var(--amber2)}
+@media(max-width:640px){.readout{display:none}.cd{min-width:70px;padding:13px 6px 10px}}
+/* ---------- Trip-week states: NEXT UP + recap ---------- */
+.next-up{margin:14px auto 0;max-width:520px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber2);line-height:1.7}
+.next-up b{color:var(--cream);font-weight:600}
+#recapPanel{margin:26px auto 0;max-width:520px;border:1px solid var(--line-amber);border-radius:16px;background:rgba(16,22,58,.9);padding:22px 18px 20px}
+#recapPanel .rt{font-size:clamp(24px,5vw,32px);font-weight:700;letter-spacing:-.01em;margin:8px 0 4px}
+#recapPanel p{margin:0;color:var(--muted);font-size:14.5px}
+#recapChamp{color:var(--cream);font-weight:600;margin-top:8px}
+#recapPanel .hero-cta{margin-top:18px}
+/* ---------- Photo Wall ---------- */
+.photo-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.photo-note{color:var(--muted);font-size:13.5px;margin:14px 0 0}
+/* ---------- Sections ---------- */
+main{position:relative;background:linear-gradient(180deg,var(--deep),var(--sky) 240px)}
+section{padding:72px 0 8px}
+.sec-head{max-width:700px;margin-bottom:30px}
+.sec-head h2{font-size:clamp(32px,5vw,52px);line-height:1.02;letter-spacing:-.02em;margin:12px 0 12px;font-weight:600}
+.sec-head h2 .serif{color:var(--amber2)}
+.sec-head p{color:var(--muted);margin:0;font-size:16px}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .65s cubic-bezier(.22,1.28,.36,1)}
+.reveal.in{opacity:1;transform:none}
+/* Crew bubbles */
+.card{background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:18px;padding:22px}
+.card h3{margin:16px 0 4px;font-size:21px;letter-spacing:-.01em;font-weight:600}
+.card p{color:var(--muted);margin:0;font-size:14.5px}
+.card p b{color:var(--cream);font-weight:600}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.2em;padding:5px 9px;border-radius:99px;text-transform:uppercase;white-space:nowrap;display:inline-block}
+.chip.inb{color:var(--amber2);border:1px solid var(--line-amber);background:rgba(242,179,61,.09)}
+.chip.home{color:var(--cream);border:1px solid var(--line);background:rgba(245,239,224,.05)}
+.who-list{display:flex;flex-direction:column;gap:10px}
+.who-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:12px 16px;color:var(--cream);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.who-row.sel{border-color:var(--acid);box-shadow:0 0 0 1px var(--acid)}
+.who-av{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:2px solid var(--line-amber);background:#060818;flex-shrink:0}
+.who-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.who-main b{font-size:16.5px;font-weight:600;letter-spacing:-.01em}
+.who-main span{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;line-height:1.5}
+.who-chev{color:var(--amber2);font-size:22px;line-height:1;flex-shrink:0}
+#crewFile{margin-top:14px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14.5px;color:var(--muted);min-height:56px}
+#crewFile b{color:var(--cream);font-weight:600}
+#crewFile .chip{margin-left:8px;vertical-align:1px}
+.stage-note{color:var(--muted);font-size:14.5px;margin:14px 2px 0}
+.stage-note b{color:var(--cream);font-weight:600}
+/* Stay */
+.stay-photo{border-radius:20px;overflow:hidden;border:1px solid var(--line);position:relative}
+.stay-photo img{width:100%;height:clamp(180px,32vw,300px);object-fit:cover;display:block}
+.stay-compact{padding:0;overflow:hidden}
+.stay-compact .stay-body{padding:18px 22px 20px}
+.stay-compact .kv{padding:9px 0}
+details.house-details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+details.house-details summary{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);font-weight:600;list-style:none}
+details.house-details summary::-webkit-details-marker{display:none}
+details.house-details p{margin:10px 0 0}
+/* Food finder */
+.food-cats{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.food-cat{border:1px solid var(--line);background:rgba(16,22,58,.5);color:var(--cream);border-radius:99px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;transition:border-color .25s,background .25s,color .25s}
+.food-cat small{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);font-weight:500;margin-left:5px}
+.food-cat.on{background:var(--amber);border-color:transparent;color:#221A04}
+.food-cat.on small{color:#221A04}
+.food-list{display:flex;flex-direction:column;gap:10px}
+.food-card{display:block;text-decoration:none;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:16px 18px;transition:border-color .25s,transform .25s}
+.food-card:hover{border-color:var(--line-amber);transform:translateY(-1px)}
+.food-card .fc-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.food-card h3{margin:0;font-size:17.5px;font-weight:600;letter-spacing:-.01em}
+.food-card .rate{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--amber2);white-space:nowrap}
+.food-card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.food-card .halal{color:var(--muted);font-size:13px;margin:9px 0 0;line-height:1.5}
+.food-card .halal b{color:var(--cream);font-weight:600}
+.food-card .go{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-top:10px;display:block}
+.food-note{color:var(--muted);font-size:13px;margin:0 0 4px;line-height:1.6}
+.food-note b{color:var(--cream)}
+/* The Split */
+.split-line{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.split-line span:first-child{color:var(--muted)}
+.split-line span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.split-line.total{border-bottom:0;font-size:16px}
+.split-line.total span{color:var(--cream);font-weight:700}
+.split-people{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.split-person{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:rgba(245,239,224,.03)}
+.split-person img{width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:2px solid var(--line-amber);background:#060818}
+.split-person .who{flex:1;min-width:0;font-weight:600;font-size:15px}
+.split-person .amt{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--amber2);font-weight:600}
+.split-note{border:1px dashed var(--line-amber);border-radius:14px;padding:14px 16px;margin-top:18px;color:var(--muted);font-size:13.5px;line-height:1.6}
+.split-note b{color:var(--amber2)}
+.stay-photo .rating{position:absolute;top:14px;left:14px;background:rgba(6,8,24,.9);border:1px solid var(--line-amber);color:var(--amber2);font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;padding:7px 12px;border-radius:99px}
+.stay-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px}
+@media(max-width:860px){.stay-grid{grid-template-columns:1fr}}
+.stay-title{font-size:clamp(24px,3.4vw,34px);line-height:1.15;letter-spacing:-.01em;margin:0 0 6px;font-weight:600}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px 22px;margin:16px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.04em;color:var(--cream)}
+.stat-row span b{color:var(--amber2);font-weight:600}
+.kv{display:flex;justify-content:space-between;gap:16px;padding:12.5px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv span:first-child{color:var(--muted)}
+.kv span:last-child{text-align:right}
+.kv:last-child{border-bottom:0}
+.rules{list-style:none;margin:6px 0 0;padding:0}
+.rules li{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;align-items:baseline}
+.rules li:last-child{border-bottom:0}
+.rules li::before{content:"—";color:var(--amber);font-family:"IBM Plex Mono",monospace}
+.amenities{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.amenities span{font-size:12.5px;border:1px solid var(--line);border-radius:99px;padding:7px 12px;color:var(--cream);background:rgba(245,239,224,.04)}
+.host-line{color:var(--muted);font-size:14px;margin-top:16px}
+.host-line b{color:var(--cream);font-weight:600}
+/* Days: swipeable card row */
+.day-row-wrap{position:relative}
+.day-row-wrap::after{content:"";position:absolute;top:0;right:0;bottom:18px;width:44px;background:linear-gradient(90deg,transparent,var(--sky));pointer-events:none}
+.day-row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 18px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.day-row::-webkit-scrollbar{display:none}
+.day-card{flex:0 0 78%;max-width:320px;scroll-snap-align:start;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:18px;padding:22px}
+@media(min-width:760px){.day-card{flex-basis:calc(25% - 11px);max-width:none}}
+.day-card .dow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.28em;color:var(--amber2);text-transform:uppercase}
+.day-card .dnum{font-size:52px;font-weight:700;line-height:1.05;letter-spacing:-.01em}
+.day-card .dmon{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.day-card h3{margin:14px 0 6px;font-size:20px;font-weight:600;letter-spacing:-.01em}
+.day-card p{color:var(--muted);margin:0;font-size:14.5px}
+.day-dots{display:flex;gap:8px;justify-content:center;margin-top:2px}
+.day-dots button{width:9px;height:9px;border-radius:99px;border:1px solid var(--line-amber);background:transparent;padding:0;cursor:pointer;transition:background .25s,width .25s}
+.day-dots button.on{background:var(--amber);width:26px}
+/* FIFA portal */
+.label.acid{color:var(--acid)}
+.fc-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.fc-logo-chip{display:inline-flex;background:#F5F3EC;border-radius:14px;padding:8px 10px;box-shadow:0 0 22px rgba(245,239,224,.16)}
+.fc-logo-chip img{height:72px;width:auto;display:block}
+.fc-wordmark{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream)}
+.fc-badge{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;border:2px solid var(--cream);border-radius:10px;padding:9px 16px 11px;background:rgba(6,8,24,.6);line-height:1}
+.fc-badge span{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.34em;color:var(--amber2);font-weight:600}
+.fc-badge b{font-size:30px;font-weight:700;letter-spacing:.02em;color:var(--cream)}
+.fc-badge b i{font-style:normal;color:var(--acid)}
+.fc-h3{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:34px 0 6px}
+.fc-sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+/* Title race lanes */
+.race{display:flex;flex-direction:column;gap:12px}
+.lane{text-align:left;width:100%;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;cursor:pointer;color:var(--cream);transition:border-color .3s,background .3s}
+.lane.sel{border-color:var(--acid);background:rgba(140,255,43,.05)}
+.lane-head{display:flex;align-items:center;gap:10px}
+.lane-pos{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted2);letter-spacing:.1em;min-width:20px}
+.lane-chips{display:flex}
+.lane-chips img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:2px solid var(--line-amber);background:#060818}
+.lane-chips img+img{margin-left:-10px;border-color:var(--amber)}
+.fc-name{flex:1;min-width:0;background:transparent;border:none;border-bottom:1px dashed rgba(245,239,224,.25);color:var(--cream);font:inherit;font-size:16.5px;font-weight:600;letter-spacing:-.01em;padding:4px 0 6px}
+.fc-name:focus{outline:none;border-bottom-color:var(--acid)}
+.lane-pts{font-size:34px;font-weight:700;line-height:1;color:var(--amber2);font-variant-numeric:tabular-nums}
+.lane-pts small{display:block;font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.24em;color:var(--muted);text-align:right;margin-top:3px}
+.lane-track{height:12px;border-radius:99px;background:rgba(245,239,224,.07);margin-top:12px;overflow:hidden}
+.lane-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--acid));transition:width .7s cubic-bezier(.3,.8,.3,1);min-width:0}
+.lane.first .lane-fill{background:linear-gradient(90deg,var(--acid),var(--amber))}
+.lane-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lane-meta span{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:4px 8px}
+.lane-meta span b{color:var(--cream);font-weight:600}
+/* Gauntlet match cards */
+.gauntlet{display:flex;flex-direction:column;gap:12px}
+.match{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.012));border:1px solid var(--line);border-radius:16px;padding:16px;transition:border-color .3s,opacity .3s}
+.match.hl{border-color:var(--acid);box-shadow:0 0 0 1px var(--acid),0 0 22px rgba(140,255,43,.12)}
+.match.locked{opacity:.62}
+.match.final{border-color:var(--line-amber)}
+.match-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.match-title{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--amber2)}
+.match.final .match-title{color:var(--amber2)}
+.match-status{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:5px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.match-status.played{color:var(--acid);border-color:rgba(140,255,43,.5)}
+.match-side{display:flex;align-items:center;gap:10px;padding:8px 0}
+.match-side+.match-side{border-top:1px solid rgba(245,239,224,.06)}
+.m-chips{display:flex;flex-shrink:0}
+.m-chips img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:2px solid var(--line-amber);background:#060818}
+.m-chips img+img{margin-left:-9px;border-color:var(--amber)}
+.m-name{flex:1;min-width:0;font-weight:600;font-size:15px;line-height:1.25}
+.stepper{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(6,8,24,.7);color:var(--cream);font-size:20px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stepper button:active{border-color:var(--acid);color:var(--acid)}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper .val{min-width:30px;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.match-note{color:var(--muted);font-size:13.5px;margin:8px 0 0}
+/* Champion takeover */
+#fcChamp{display:none;position:relative;border:2px solid var(--acid);border-radius:18px;padding:26px 18px 22px;margin-bottom:18px;background:rgba(140,255,43,.06);box-shadow:0 0 34px rgba(140,255,43,.16);text-align:center;overflow:hidden}
+#fcChamp .cl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+#fcChampLogos{display:flex;justify-content:center;margin:14px 0 4px}
+#fcChampLogos img{width:92px;height:92px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:3px solid var(--acid);background:#060818}
+#fcChampLogos img+img{margin-left:-18px;border-color:var(--amber)}
+#fcChamp .cn{font-size:clamp(25px,7vw,36px);font-weight:700;letter-spacing:-.01em;margin-top:8px;line-height:1.1}
+.champ-stamp{display:inline-block;margin-top:14px;font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;letter-spacing:.14em;color:var(--acid);border:3px solid var(--acid);border-radius:9px;padding:.08em .4em .12em;background:rgba(6,8,24,.72);box-shadow:0 0 26px rgba(140,255,43,.3);opacity:0;transform:rotate(-11deg) scale(2.8)}
+#fcChamp.show .champ-stamp{animation:stampIn .55s cubic-bezier(.2,1.35,.4,1) .25s forwards}
+.fc-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:16px}
+.fc-note{color:var(--muted);font-size:13.5px;margin:0}
+.btn.danger{background:transparent;color:var(--cream)}
+.btn.danger:hover{border-color:var(--line-amber);color:var(--amber2)}
+footer{margin-top:100px;border-top:1px solid var(--line);padding:30px 0 44px;color:var(--muted2);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.foot-brand{display:flex;align-items:center;gap:12px}
+.foot-logo{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);display:block}
+footer a{color:var(--acid);text-decoration:none}
+footer a:hover{text-decoration:underline}
+#cityYYC .pulse{transform-box:fill-box;transform-origin:center}
+/* Progressive map detail (fades in as the zoom deepens) */
+#detailLayer{opacity:0}
+#detailLayer text{font-family:"IBM Plex Mono",monospace;fill:#C9CDF5;letter-spacing:1.5px}
+.detail-prov{fill:none;stroke:rgba(208,212,255,.28);stroke-width:1.1;stroke-dasharray:5 4}
+.detail-grat{stroke:rgba(245,239,224,.06);stroke-width:1}
+/* Cinematic drive smoothing: while the JS scroll driver is live it writes
+   transforms on scroll / rAF / a 150 ms backstop; a short linear transition
+   absorbs the steps so Low Power Mode's throttled updates still read as
+   motion instead of jumps. (The previous build drove this with CSS
+   scroll-driven animations on a named view timeline; on the user's iPhone
+   those animations ran to their end keyframes at load — the page opened on
+   the landed frame — so the cinematic is JS-driven on every browser now.) */
+body.live-drive #world,body.live-drive #planeCA,body.live-drive #planeTX,
+body.live-drive #cityCA,body.live-drive #cityTX,body.live-drive #cityYYC,
+body.live-drive .city-dot{transition:transform .12s linear}
+body.live-drive #detailLayer{transition:opacity .12s linear}
+body.live-drive #scene{transition:filter .12s linear,opacity .12s linear}
+
+/* ================= V3: app shell + two-tone =================
+   Readability rule: anything you READ goes light (Food, Split, Stay,
+   day cards, preview cards); anything you PLAY or WATCH stays dark
+   (cinematic, FIFA, Photos). Light text colours are the --paper set
+   above, each measured AA on the paper background. */
+body{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+/* Every view fills at least the screen so the sticky tab bar always has
+   room to ride the visible bottom, even on short views (Photos). */
+.view{min-height:100vh;min-height:100svh}
+.view-light{background:var(--paper);color:var(--ink)}
+.view-light .label{color:var(--amber-deep)}
+.view-light .sec-head h2{color:var(--ink)}
+.view-light .sec-head h2 .serif{color:var(--amber-deep)}
+.view-light .sec-head p{color:var(--paper-mut)}
+.view-light .card{background:var(--paper-card);border-color:var(--line-d);color:var(--ink)}
+.view-light .card p{color:var(--paper-mut)}
+.view-light .card p b{color:var(--ink)}
+body[data-view="food"] nav,body[data-view="split"] nav{background:rgba(245,239,224,.94)}
+body[data-view="food"] .nav-brand,body[data-view="split"] .nav-brand{color:var(--ink)}
+body[data-view="food"] .nav-links a,body[data-view="split"] .nav-links a{color:var(--paper-mut)}
+body[data-view="food"] footer,body[data-view="split"] footer{color:var(--paper-mut2);border-top-color:var(--line-d)}
+body[data-view="food"] footer a,body[data-view="split"] footer a{color:var(--amber-deep)}
+/* Home: light cards on the dark shell */
+#view-home .stay-compact,#view-home .day-card{background:var(--paper-card);border-color:var(--line-d);color:var(--ink)}
+#view-home .stay-compact p{color:var(--paper-mut)}
+#view-home .stay-compact .kv{border-color:var(--line-d)}
+#view-home .stay-compact .kv span:first-child{color:var(--paper-mut)}
+#view-home .stay-compact .label{color:var(--amber-deep)}
+#view-home .stay-compact .stat-row{color:var(--ink)}
+#view-home .stay-compact .stat-row span b{color:var(--amber-deep)}
+#view-home .stay-compact details.house-details{border-top-color:var(--line-d)}
+#view-home .stay-compact details summary{color:var(--amber-deep)}
+#view-home .stay-compact details p b{color:var(--ink)}
+#view-home .day-card .dow{color:var(--amber-deep)}
+#view-home .day-card .dnum{color:var(--ink)}
+#view-home .day-card .dmon{color:var(--paper-mut2)}
+#view-home .day-card h3{color:var(--ink)}
+#view-home .day-card p{color:var(--paper-mut)}
+/* Home previews */
+.prev-grid{display:grid;gap:12px}
+@media(min-width:700px){.prev-grid{grid-template-columns:1fr 1fr}}
+.prev-card{display:block;text-decoration:none;background:var(--paper-card);border:1px solid var(--line-d);border-radius:18px;padding:20px;color:var(--ink)}
+.prev-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.prev-card .label{color:var(--amber-deep)}
+.prev-arrow{color:var(--amber-deep);font-size:19px;line-height:1}
+.prev-card h3{margin:10px 0 6px;font-size:19px;font-weight:600;letter-spacing:-.01em}
+.prev-card p{color:var(--paper-mut);margin:0;font-size:14.5px}
+.prev-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.prev-tags span{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;border:1px solid rgba(23,20,37,.18);border-radius:99px;padding:4px 8px;color:var(--paper-mut)}
+/* Food on light */
+#view-food .food-cat{border-color:rgba(23,20,37,.22);background:rgba(255,253,246,.6);color:var(--ink)}
+#view-food .food-cat small{color:var(--paper-mut2)}
+#view-food .food-cat.on{background:var(--amber);border-color:transparent;color:#221A04}
+#view-food .food-cat.on small{color:#221A04}
+#view-food .food-card{background:var(--paper-card);border-color:var(--line-d)}
+#view-food .food-card h3{color:var(--ink)}
+#view-food .food-card .rate{color:var(--amber-deep)}
+#view-food .food-card .halal{color:var(--paper-mut)}
+#view-food .food-card .halal b{color:var(--ink)}
+#view-food .food-card .go{color:var(--amber-deep)}
+#view-food .chip.home{color:var(--paper-mut);border-color:rgba(23,20,37,.2);background:rgba(23,20,37,.04)}
+#view-food .food-note{color:var(--paper-mut)}
+#view-food .food-note b{color:var(--ink)}
+/* Split on light */
+#view-split .split-line{border-color:var(--line-d)}
+#view-split .split-line span:first-child{color:var(--paper-mut)}
+#view-split .split-line.total span{color:var(--ink)}
+#view-split .split-person{border-color:var(--line-d);background:rgba(23,20,37,.03)}
+#view-split .split-person .who{color:var(--ink)}
+#view-split .split-person .amt{color:var(--amber-deep)}
+#view-split .split-note{border-color:rgba(138,94,16,.55);color:var(--paper-mut)}
+#view-split .split-note b{color:var(--amber-deep)}
+/* Bottom tab bar — CRCMZ app pattern, our colours.
+   Sticky, NOT fixed: in the owner's iPhone webview shell, position:fixed
+   with bottom:0 anchors to the wrong box — the bar floated mid-screen,
+   drifted with scroll and its background never painted. position:sticky
+   is the mechanism the cinematic stage already pins with on that phone,
+   so the bar (last element in the document, in flow) rides the visible
+   bottom with its background painted in normal flow. */
+.tabbar{position:sticky;bottom:0;top:auto;z-index:80;display:flex;background:rgba(8,10,28,.97);border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+/* The tab bar is a <nav>, so the light-view top-nav overrides above
+   (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
+   .tabbar (0-1-0) and repaint the bar translucent cream on Food and
+   Split — the content bleeding through the bar in the owner's recording.
+   This rule (0-2-1) keeps the bar's dark slab on every view. */
+body[data-view] .tabbar{background:rgba(8,10,28,.97)}
+.tabbar .tab{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 2px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tabbar .tab.on{color:var(--amber)}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#top">CRCMZ&nbsp;TRIP <span class="nav-stamp">2.0</span></a>
+  <div class="nav-links">
+    <a href="#crew">Crew</a><a href="#stay">Stay</a><a href="#days">Days</a><a href="#fifa">FC 27</a>
+    <span class="nav-cd" id="navCd">T-MINUS --D --H --M</span>
+  </div>
+</nav>
+
+<!-- ================= CINEMATIC ================= -->
+<div id="cinematic">
+  <div class="stage" id="stage">
+    <svg id="scene" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice" aria-label="Minimal map of North America with two flights converging on Calgary" role="img">
+      <g id="stars"></g>
+      <g id="world">
+        <!-- graticule -->
+        <g stroke="rgba(245,239,224,0.05)" stroke-width="1">
+          <path d="M0,155 H1000 M0,310 H1000 M0,465 H1000"/>
+          <path d="M250,0 V620 M500,0 V620 M750,0 V620"/>
+        </g>
+        <!-- North America, minimalist silhouette -->
+        <path id="land" fill="#33419A" stroke="rgba(208,212,255,0.85)" stroke-width="2" stroke-linejoin="round" d="M38,168 L66,104 L128,66 L214,74 L286,52 L398,44 L486,52 L520,96 L556,120 L596,84 L706,68 L812,84 L896,128 L884,178 L852,214 L838,262 L862,308 L872,352 L848,398 L822,362 L788,382 L724,368 L664,388 L612,420 L624,462 L656,508 L690,556 L664,562 L624,512 L576,462 L528,436 L486,448 L452,420 L398,428 L352,398 L306,392 L268,352 L244,296 L232,238 L252,198 L206,182 L140,196 L84,192 Z"/>
+        <!-- Great Lakes hint -->
+        <g fill="#0D1233">
+          <ellipse cx="716" cy="212" rx="17" ry="8" transform="rotate(-18 716 212)"/>
+          <ellipse cx="748" cy="228" rx="13" ry="7" transform="rotate(-24 748 228)"/>
+          <ellipse cx="688" cy="230" rx="11" ry="6" transform="rotate(-10 688 230)"/>
+        </g>
+        <!-- routes: faint full arcs -->
+        <path id="arcCA" fill="none" stroke="rgba(242,179,61,0.16)" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round"/>
+        <path id="arcTX" fill="none" stroke="rgba(242,179,61,0.16)" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round"/>
+        <!-- routes: dotted progress dots (JS) -->
+        <g id="dotsCA" fill="#F2B33D"></g>
+        <g id="dotsTX" fill="#FFC65C"></g>
+        <!-- progressive detail: province/state outlines + peer cities, fades in as zoom deepens -->
+        <g id="detailLayer">
+          <g class="detail-grat">
+            <path d="M0,77 H1000 M0,232 H1000 M0,387 H1000 M0,542 H1000"/>
+            <path d="M125,0 V620 M375,0 V620 M625,0 V620 M875,0 V620"/>
+          </g>
+          <g class="detail-prov">
+            <path d="M205,110 L285,120 L285,215 L215,225 Z"/>
+            <path d="M285,120 L345,120 L345,215 L285,215 Z"/>
+            <path d="M345,125 L415,125 L415,215 L345,215 Z"/>
+            <path d="M600,150 L800,160 L820,240 L640,250 Z"/>
+            <path d="M150,215 H860"/>
+            <path d="M215,300 L285,320 L275,410 L225,395 Z"/>
+            <path d="M520,360 L640,360 L660,430 L560,470 L515,420 Z"/>
+            <path d="M395,300 L480,295 L490,370 L400,375 Z"/>
+          </g>
+          <g class="city-dot" style="--tx:232px;--ty:172px" transform="translate(232,172)"><circle r="3.2" fill="#F5EFE0"/><text x="9" y="4" font-size="11">VANCOUVER</text></g>
+          <g class="city-dot" style="--tx:228px;--ty:202px" transform="translate(228,202)"><circle r="2.6" fill="#F5EFE0"/><text x="9" y="4" font-size="11">SEATTLE</text></g>
+          <g class="city-dot" style="--tx:330px;--ty:148px" transform="translate(330,148)"><circle r="3.2" fill="#F5EFE0"/><text x="9" y="4" font-size="11">EDMONTON</text></g>
+          <g class="city-dot" style="--tx:522px;--ty:178px" transform="translate(522,178)"><circle r="3" fill="#F5EFE0"/><text x="9" y="4" font-size="11">WINNIPEG</text></g>
+          <g class="city-dot" style="--tx:762px;--ty:228px" transform="translate(762,228)"><circle r="3.2" fill="#F5EFE0"/><text x="9" y="4" font-size="11">TORONTO</text></g>
+          <g class="city-dot" style="--tx:838px;--ty:205px" transform="translate(838,205)"><circle r="2.6" fill="#F5EFE0"/><text x="9" y="4" font-size="11">MONTREAL</text></g>
+          <g class="city-dot" style="--tx:688px;--ty:252px" transform="translate(688,252)"><circle r="3" fill="#F5EFE0"/><text x="9" y="4" font-size="11">CHICAGO</text></g>
+          <g class="city-dot" style="--tx:618px;--ty:208px" transform="translate(618,208)"><circle r="2.6" fill="#F5EFE0"/><text x="9" y="4" font-size="11">MINNEAPOLIS</text></g>
+          <g class="city-dot" style="--tx:428px;--ty:332px" transform="translate(428,332)"><circle r="3" fill="#F5EFE0"/><text x="9" y="4" font-size="11">DENVER</text></g>
+          <g class="city-dot" style="--tx:246px;--ty:388px" transform="translate(246,388)"><circle r="3" fill="#F5EFE0"/><text x="9" y="4" font-size="11">LOS ANGELES</text></g>
+          <g class="city-dot" style="--tx:322px;--ty:392px" transform="translate(322,392)"><circle r="2.6" fill="#F5EFE0"/><text x="9" y="4" font-size="11">PHOENIX</text></g>
+          <g class="city-dot" style="--tx:556px;--ty:408px" transform="translate(556,408)"><circle r="3" fill="#F5EFE0"/><text x="9" y="4" font-size="11">DALLAS</text></g>
+        </g>
+        <!-- city points -->
+        <g id="cityCA" class="city-g" style="--tx:272px;--ty:368px">
+          <circle r="3" fill="none" stroke="#F5EFE0" stroke-width="1.4"/>
+          <text y="-20" text-anchor="middle" fill="#A9A5C6" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2">CALIFORNIA</text>
+        </g>
+        <g id="cityTX" class="city-g" style="--tx:572px;--ty:392px">
+          <circle r="3" fill="none" stroke="#F5EFE0" stroke-width="1.4"/>
+          <text y="30" text-anchor="middle" fill="#A9A5C6" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2">TEXAS</text>
+        </g>
+        <!-- Calgary -->
+        <g id="cityYYC" class="city-g" style="--tx:300px;--ty:185px">
+          <circle class="pulse" r="8" fill="none" stroke="#F2B33D" stroke-width="1.6" opacity="0"/>
+          <circle class="pulse p2" r="8" fill="none" stroke="#F2B33D" stroke-width="1.2" opacity="0"/>
+          <circle r="5.5" fill="#FFC65C" stroke="#0A0E27" stroke-width="1.5"/>
+          <text y="-14" text-anchor="middle" fill="#F5EFE0" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="600" letter-spacing="3">YYC · CALGARY</text>
+        </g>
+        <!-- planes -->
+        <g id="planeCA" opacity="0"><path d="M0,-11 L3.2,1.5 L12.5,7 L12.5,10.2 L3.2,8.2 L3.2,13.5 L0,15.5 L-3.2,13.5 L-3.2,8.2 L-12.5,10.2 L-12.5,7 L-3.2,1.5 Z" fill="#F2B33D" stroke="#0A0E27" stroke-width="1"/></g>
+        <g id="planeTX" opacity="0"><path d="M0,-11 L3.2,1.5 L12.5,7 L12.5,10.2 L3.2,8.2 L3.2,13.5 L0,15.5 L-3.2,13.5 L-3.2,8.2 L-12.5,10.2 L-12.5,7 L-3.2,1.5 Z" fill="#FFC65C" stroke="#0A0E27" stroke-width="1"/></g>
+      </g>
+    </svg>
+    <div class="stage-vignette"></div>
+
+    <div class="layer bigword" id="bigWord" style="opacity:0">
+      <span>CALGARY</span>
+      <small>51.05° N · 114.07° W</small>
+    </div>
+
+    <div class="layer hero-layer" id="heroLayer">
+      <div class="label">Night Flight · CRCMZ Boyz</div>
+      <h1 class="hero-title" aria-label="CRCMZ Trip 2.0">CRCMZ<br><span class="ht-trip">TRIP<span class="stamp" id="stamp20" aria-hidden="true">2.0</span></span></h1>
+      <div class="hero-late">
+        <p class="hero-sub">CRCMZ BOYZ · October Trip to Calgary</p>
+        <p class="hero-dates">Thu Oct 29 – Sun Nov 1, 2026 · Calgary / Airdrie</p>
+        <div class="countdown" id="cdGrid" role="timer" aria-label="Countdown to October 29, 2026">
+          <div class="cd"><b id="cd-d">--</b><span>Days</span></div>
+          <div class="cd"><b id="cd-h">--</b><span>Hours</span></div>
+          <div class="cd"><b id="cd-m">--</b><span>Minutes</span></div>
+          <div class="cd"><b id="cd-s">--</b><span>Seconds</span></div>
+        </div>
+        <p id="cd-msg"></p>
+        <p class="next-up mono" id="nextUp" hidden></p>
+        <div id="recapPanel" hidden>
+          <div class="label acid">The Recap</div>
+          <div class="rt">Weekend complete.</div>
+          <p>CRCMZ Trip 2.0 · Oct 29 – Nov 1, 2026 · Calgary / Airdrie — the trip is in the books.</p>
+          <p id="recapChamp"></p>
+          <div class="hero-cta">
+            <a class="btn primary" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">View the Wall</a>
+            <a class="btn" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">Add Photos</a>
+          </div>
+        </div>
+        <div class="hero-cta">
+          <a class="btn primary" href="#crew">Who's coming</a>
+          <a class="btn" href="#days">The four days</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="readout" id="readout">
+      <div>ROUTE <b>CA → YYC</b> · <b>TX → YYC</b></div>
+      <div>ZOOM <b class="amb" id="zoomVal">×1.0</b> · CAM <b id="camVal">NORTH AMERICA</b></div>
+    </div>
+    <div class="scroll-cue" id="scrollCue"><span>Scroll to fly</span><i></i></div>
+    <button id="skip" type="button">Skip to the hub →</button>
+  </div>
+  <div class="step-sentinel" data-step="0" style="top:0"></div>
+  <div class="step-sentinel" data-step="1" style="top:60vh"></div>
+  <div class="step-sentinel" data-step="2" style="top:120vh"></div>
+  <div class="step-sentinel" data-step="3" style="top:180vh"></div>
+  <div class="step-sentinel" data-step="4" style="top:240vh"></div>
+</div>
+
+<main id="top">
+  <div class="view" id="view-home">
+<!-- ================= CREW ================= -->
+  <section id="crew"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">01 · Who's Coming</div><h2>Six names. One <span class="serif">arrival.</span></h2></div>
+    <div class="who-list reveal" id="crewList" role="list" aria-label="The crew — tap a name for their crew file"></div>
+    <div id="crewFile" class="reveal">Six gamertags, two flights, one beacon. <b>Tap a name</b> for its crew file.</div>
+    <p class="stage-note reveal"><b>Asamad</b> inbound from Texas · <b>InterestingSoup</b> inbound from California · <b>Killer, TheMooseCompany, Deception</b> and <b>Kaptaan</b> hold home turf in Calgary.</p>
+    <p class="stage-note reveal">Flight landing times — <b>Asamad</b> [TO FILL] · <b>InterestingSoup</b> [TO FILL]. They land here the moment the flights are booked.</p>
+  </div></section>
+<!-- ================= STAY (condensed) ================= -->
+  <section id="stay"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">02 · The Stay</div><h2>Basecamp: <span class="serif">Bayside,</span> Airdrie.</h2></div>
+    <div class="card stay-compact reveal">
+      <div class="stay-photo">
+        <img src="assets/stay.jpg" alt="The Airbnb in Bayside, Airdrie — living space of the 4-bedroom house the crew is staying in" loading="lazy">
+        <span class="rating">★ 4.92 · Guest Favorite</span>
+      </div>
+      <div class="stay-body">
+        <p style="margin:0">Bayside, Airdrie — waterfront house on the canals · <b>18 min to YYC</b> · 30 min to downtown Calgary</p>
+        <div class="stat-row"><span><b>Sleeps</b> 11</span><span><b>Bedrooms</b> 4</span><span><b>Beds</b> 6</span><span><b>Baths</b> 3.5</span></div>
+        <div class="kv"><span>Check-in</span><span>4:00–11:00 PM · self check-in, smart lock</span></div>
+        <div class="kv"><span>Check-out</span><span>Before 11:00 AM</span></div>
+        <div class="label" style="margin:16px 0 2px">The rules that bite</div>
+        <ul class="rules">
+          <li>Quiet hours 10:00 PM – 7:00 AM, noise monitored — warnings escalate, and repeat violations can end the stay</li>
+          <li>No parties or events</li>
+          <li>No smoking or vaping — $250 fine</li>
+          <li>No pets</li>
+          <li>Late checkout is billed: $50 for the first hour, then $35 per 30 minutes</li>
+        </ul>
+        <details class="house-details">
+          <summary>House details</summary>
+          <p>Pool table · theatre seats · canal views · fast Wi-Fi + dedicated office · free parking (garage + driveway) · in-home laundry · full kitchen · air conditioning. Hosted by <b>Susan · Premier Stays · Superhost</b>. Exact address lands in the group chat after booking.</p>
+          <p style="margin-top:12px"><a class="btn primary" href="https://www.airbnb.com/rooms/1619643402121865110" target="_blank" rel="noopener">View on Airbnb →</a></p>
+        </details>
+      </div>
+    </div>
+  </div></section>
+<!-- ================= DAYS ================= -->
+  <section id="days"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">03 · The Four Days</div><h2>One anchor a day. <span class="serif">Everything else</span> is hangout.</h2><p>Swipe through the weekend. One anchor per day, the rest is hangout.</p></div>
+    <div class="day-row-wrap reveal">
+      <div class="day-row" id="dayRow">
+        <article class="day-card"><div class="dow">Thu</div><div class="dnum">29</div><div class="dmon">Oct 2026</div><h3>Touchdown Day</h3><p>Arrivals and first night in. Check-in 4–11 PM.</p></article>
+        <article class="day-card"><div class="dow">Fri</div><div class="dnum">30</div><div class="dmon">Oct 2026</div><h3>Chill Day</h3><p>Chill at the Airbnb, order food and Zoot.</p></article>
+        <article class="day-card"><div class="dow">Sat · Halloween</div><div class="dnum">31</div><div class="dmon">Oct 2026</div><h3>Street Fighter</h3><p>The one fixed plan: the Street Fighter tournament. Everything else is general activities — Halloween, cards, hangout. House quiet hours from 10 PM.</p></article>
+        <article class="day-card"><div class="dow">Sun</div><div class="dnum">1</div><div class="dmon">Nov 2026</div><h3>Send-off</h3><p>Brunch, then departures. Checkout before 11 AM.</p></article>
+      </div>
+    </div>
+    <div class="day-dots reveal" id="dayDots" aria-hidden="true"></div>
+  </div></section>
+  <!-- ================= PREVIEWS (Home) ================= -->
+  <section id="previews"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
+    <div class="prev-grid">
+      <a class="prev-card reveal" href="#food"><span class="prev-top"><span class="label">Food Finder</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>What kind of food are you looking for?</h3><p>36 halal spots across Calgary &amp; Airdrie in 8 categories — every card opens its Google page.</p><span class="prev-tags"><span>Close to the house · 19</span><span>Shawarma &amp; Middle Eastern · 11</span><span>Pakistani &amp; Indian · 6</span></span></a>
+      <a class="prev-card reveal" href="#photos"><span class="prev-top"><span class="label">Photo Wall</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>Every shot, one wall.</h3><p>One shared Google Photos album for the whole crew — touchdown shots, tournament night, all of it.</p><span class="prev-tags"><span>Add Photos</span><span>View the Wall</span></span></a>
+      <a class="prev-card reveal" href="#split"><span class="prev-top"><span class="label">The Split</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>One pot. Settled once, at the end.</h3><p>Expense 01 is the Airbnb: $857.36 for three nights, split four ways.</p><span class="prev-tags"><span>$214.34 × 4</span><span>Moose</span><span>Soup</span><span>Asamad</span><span>Kaptaan</span></span></a>
+      <a class="prev-card reveal" href="#fifa"><span class="prev-top"><span class="label">FC 27 Tournament</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>The 2v2v2 title race.</h3><p id="fifaPrevLine">No results in yet — everyone plays everyone, and the top two meet in the final.</p><span class="prev-tags"><span>Title Race</span><span>The Gauntlet</span><span>The Final</span></span></a>
+    </div>
+  </div></section>
+  </div>
+  <div class="view view-light" id="view-food" hidden>
+<!-- ================= FOOD FINDER ================= -->
+  <section id="food"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">06 · Food Finder</div><h2>What kind of food are <span class="serif">you looking for?</span></h2><p>36 halal spots across Calgary &amp; Airdrie, curated for this trip. Pick a craving — every card opens its Google page.</p></div>
+    <p class="food-note reveal"><b>On halal status:</b> each note is the status as publicly stated by the restaurant or community lists (Halal Calgary, Zabihah), checked Oct 15, 2026. No source named a specific certifier (HMA, IFANCA or other) for any spot here — if a certifier matters to you, phone ahead. Partial flags are marked ⚠ and stay visible.</p>
+    <div class="food-cats reveal" id="foodCats" role="group" aria-label="Choose a food category"></div>
+    <div class="food-list reveal" id="foodList" aria-live="polite"></div>
+  </div></section>
+  </div>
+  <div class="view" id="view-photos" hidden>
+<!-- ================= PHOTO WALL ================= -->
+  <section id="photos"><div class="wrap">
+    <div class="sec-head reveal"><div class="label acid">05 · Photo Wall</div><h2>Every shot, <span class="serif">one wall.</span></h2><p>The trip album lives in Google Photos — this page is the front door. Shoot all weekend, put it on the wall, and everyone's got the full set.</p></div>
+    <div class="card reveal">
+      <h3 style="margin-top:0">CRCMZ Trip 2.0 — the shared album</h3>
+      <p>One album for the whole crew: touchdown shots, tournament night, all of it.</p>
+      <div class="photo-cta">
+        <a class="btn primary" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">Add Photos</a>
+        <a class="btn" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">View the Wall</a>
+      </div>
+      <p class="photo-note">Photos open in Google Photos — add yours there, then come right back here.</p>
+    </div>
+  </div></section>
+  </div>
+  <div class="view view-light" id="view-split" hidden>
+<!-- ================= THE SPLIT ================= -->
+  <section id="split"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">07 · The Split</div><h2>One pot. <span class="serif">Settled once,</span> at the end.</h2><p>Every shared cost over the weekend — meals, groceries, activities — goes into the trip pot with its receipt. Nobody chases e-transfers mid-trip; the page settles who-pays-whom when it's over.</p></div>
+    <div class="card reveal">
+      <div class="label" style="margin-bottom:6px">Expense 01 · The Airbnb</div>
+      <h3 style="margin-top:0">Bayside, Airdrie — 3 nights, Thu Oct 29 – Sun Nov 1</h3>
+      <div class="split-line"><span>3 nights × $302.67</span><span>$908.00</span></div>
+      <div class="split-line"><span>Long-stay discount</span><span>−$135.60</span></div>
+      <div class="split-line"><span>Taxes</span><span>$84.96</span></div>
+      <div class="split-line total"><span>Total (CAD)</span><span>$857.36</span></div>
+      <p style="font-size:14px;margin:14px 0 0">Split 4 ways — the four covering the house:</p>
+      <div class="split-people">
+        <div class="split-person"><img src="assets/moose.png" alt="TheMooseCompany logo" loading="lazy"><span class="who">TheMooseCompany</span><span class="amt">$214.34</span></div>
+        <div class="split-person"><img src="assets/soup.png" alt="InterestingSoup logo" loading="lazy"><span class="who">InterestingSoup</span><span class="amt">$214.34</span></div>
+        <div class="split-person"><img src="assets/samad.png" alt="Asamad logo" loading="lazy"><span class="who">Asamad</span><span class="amt">$214.34</span></div>
+        <div class="split-person"><img src="assets/kap.png" alt="Kaptaan logo" loading="lazy"><span class="who">Kaptaan</span><span class="amt">$214.34</span></div>
+      </div>
+      <div class="split-note"><b>Coming at trip.crcmz.me:</b> adding expenses and uploading receipt photos switch on when this page moves to its Cloudflare home at trip.crcmz.me. Until then, snap your receipts and keep them in the Photo Wall album — they get logged when the pot goes live.</div>
+    </div>
+  </div></section>
+  </div>
+  <div class="view" id="view-fifa" hidden>
+<!-- ================= FC 27 TOURNAMENT ================= -->
+  <section id="fifa"><div class="wrap">
+    <div class="sec-head reveal"><div class="label acid">04 · FC 27 Tournament</div><h2>The 2v2v2 <span class="serif">title race.</span></h2><p>Three teams of two. Everyone plays everyone, the top two meet again in the final. Tap a lane to spotlight a team's matches.</p></div>
+    <div class="fc-head reveal"><span class="fc-logo-chip"><img src="assets/fc-logo.jpg" alt="EA Sports FC logo" loading="lazy"></span><span class="fc-wordmark">FC 27 · 2v2v2 Tournament</span></div>
+    <div id="fcChamp"><div class="cl">Tournament Winners</div><div id="fcChampLogos"></div><div class="cn" id="fcChampName"></div><span class="champ-stamp">CHAMPIONS</span></div>
+    <h3 class="fc-h3 reveal">Title race</h3>
+    <p class="fc-sub reveal">Live standings — lanes fill and reorder as results land. Tap a lane to highlight its matches.</p>
+    <div class="race reveal" id="fcRace"></div>
+    <h3 class="fc-h3 reveal">The gauntlet</h3>
+    <p class="fc-sub reveal">Thumb the scores in with the steppers. The final unlocks once all three group matches are played.</p>
+    <div class="gauntlet reveal" id="fcGauntlet"></div>
+    <div class="fc-foot reveal">
+      <p class="fc-note">Scores live on this phone. Screenshot the race for the chat.</p>
+      <button class="btn danger" id="fcReset" type="button">Reset tournament</button>
+    </div>
+  </div></section>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <span class="foot-brand"><img class="foot-logo" src="assets/crcmz.png" alt="CRCMZ logo" loading="lazy"><span>CRCMZ TRIP 2.0 · Oct 29 – Nov 1, 2026 · Airdrie / Calgary</span></span>
+  <span><a href="https://crcmz.me" target="_blank" rel="noopener">crcmz.me</a> · Designed and built by AI.</span>
+</div></footer>
+<nav class="tabbar" aria-label="Trip sections">
+  <button type="button" class="tab on" data-view="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+  <button type="button" class="tab" data-view="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M2.5 19.5h19"/><path d="M12 8V6.5"/><circle cx="12" cy="5" r="1"/></svg><span>Food</span></button>
+  <button type="button" class="tab" data-view="photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg><span>Photos</span></button>
+  <button type="button" class="tab" data-view="split"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><circle cx="12" cy="6" r="1.7"/><circle cx="12" cy="18" r="1.7"/></svg><span>Split</span></button>
+  <button type="button" class="tab" data-view="fifa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"/></svg><span>FIFA</span></button>
+</nav>
+
+
+<script>
+/* ================= Crew zero-g orbit ================= */
+var REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* Spring integrator: turns a value range into WAAPI keyframes using real
+   stiffness/damping parameters (underdamped = overshoot + settle) instead
+   of fixed easing curves. Springs are interruptible by construction — a
+   new animate() call or a new target replaces the running one instantly. */
+function springAnim(from,to,stiffness,damping){
+ var x=from,v=0,dt=1/120,t=0,guard=0,frames=[{offset:0,value:from}];
+ while(guard++<900){
+   v+=(-stiffness*(x-to)-damping*v)*dt; x+=v*dt; t+=dt;
+   frames.push({offset:t,value:x});
+   if(Math.abs(x-to)<0.0015*Math.max(1,Math.abs(to-from))&&Math.abs(v)<0.02)break;
+ }
+ var total=t||dt,i;
+ for(i=0;i<frames.length;i++)frames[i].offset=Math.min(1,frames[i].offset/total);
+ frames[frames.length-1].value=to; frames[frames.length-1].offset=1;
+ return {frames:frames,duration:Math.max(60,Math.round(total*1000))};
+}
+var CREW=[
+ {name:"Killer",tag:"killerx096",img:"assets/killer.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.95,orbit:64,ang:0.35},
+ {name:"TheMooseCompany",tag:"TheMooseCompany",img:"assets/moose.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:1.08,orbit:82,ang:1.95},
+ {name:"InterestingSoup",tag:"InterestingSoup",img:"assets/soup.png",from:"California, USA",flyer:true,status:"Inbound",detail:"Flying in from California. His orbit tightens as the countdown runs down — docking at the beacon on Oct 29.",size:1.0,orbit:0,ang:2.9},
+ {name:"Asamad",tag:"Asamad89",img:"assets/samad.png",from:"Texas, USA",flyer:true,status:"Inbound",detail:"Flying in from Texas. His orbit tightens as the countdown runs down — docking at the beacon on Oct 29.",size:1.04,orbit:0,ang:5.6},
+ {name:"Deception",tag:"Deception",img:"assets/decep.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.92,orbit:100,ang:3.75},
+ {name:"Kaptaan",tag:"Kaptaan",img:"assets/kap.png",from:"Calgary, AB",flyer:false,status:"Home Turf",detail:"Calgary local. Already here — holding a low, tight orbit around the beacon.",size:0.9,orbit:116,ang:5.15}
+];
+/* V3: the physics orbit is parked (owner's call — revisit later). The crew
+   is now the CRCMZ app's WHO'S ON pattern: avatar + gamertag + status rows,
+   tap a row for the same crew file the orbit used to show. */
+var crewListEl=document.getElementById('crewList'),crewFileEl=document.getElementById('crewFile'),crewSelRow=null;
+function crewChipStatus(c){
+ if(!c.flyer)return c.status;
+ var now=Date.now();
+ return (now>=new Date("2026-10-29T00:00:00-06:00").getTime()&&now<new Date("2026-11-02T00:00:00-07:00").getTime())?"Landed":"Inbound";
+}
+function crewStatusLine(c){
+ return c.flyer?("INBOUND \u00B7 "+c.from+" \u00B7 landing [TO FILL]"):("HOME TURF \u00B7 Calgary, AB");
+}
+function showCrewFile(c,row){
+ if(crewSelRow)crewSelRow.classList.remove('sel');
+ crewSelRow=row; row.classList.add('sel');
+ crewFileEl.innerHTML='<b>'+c.tag+'</b><span class="chip '+(c.flyer?'inb':'home')+'">'+crewChipStatus(c)+'</span><br>'+c.from+' \u2014 '+c.detail;
+}
+CREW.forEach(function(c){
+ var b=document.createElement('button');
+ b.type='button'; b.className='who-row'; b.setAttribute('role','listitem');
+ b.setAttribute('aria-label',c.tag+' — '+crewStatusLine(c)+'. Tap for crew file.');
+ b.innerHTML='<img class="who-av" src="'+c.img+'" alt="'+c.tag+' logo" loading="lazy"><span class="who-main"><b>'+c.tag+'</b><span>'+crewStatusLine(c)+'</span></span><span class="who-chev" aria-hidden="true">\u203A</span>';
+ b.addEventListener('click',function(){showCrewFile(c,b)});
+ crewListEl.appendChild(b);
+});
+
+/* ================= Day row dots ================= */
+var dayRow=document.getElementById('dayRow'),dayDots=document.getElementById('dayDots');
+var dayCards=dayRow.children;
+dayDots.innerHTML=Array.prototype.map.call(dayCards,function(_,i){return '<button type="button" data-i="'+i+'" aria-label="Go to day '+(i+1)+'"></button>'}).join('');
+var dotBtns=dayDots.querySelectorAll('button');
+function syncDots(){
+ var idx=0,best=1e9;
+ for(var i=0;i<dayCards.length;i++){var d=Math.abs(dayCards[i].offsetLeft-dayRow.offsetLeft-dayRow.scrollLeft);if(d<best){best=d;idx=i}}
+ dotBtns.forEach(function(b,j){b.classList.toggle('on',j===idx)});
+}
+dayRow.addEventListener('scroll',function(){requestAnimationFrame(syncDots)},{passive:true});
+dotBtns.forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i');dayRow.scrollTo({left:dayCards[i].offsetLeft-dayRow.offsetLeft-2,behavior:'smooth'})})});
+syncDots();
+
+/* ================= Countdown ================= */
+var TARGET=new Date("2026-10-29T00:00:00-06:00").getTime();
+var END=new Date("2026-11-02T00:00:00-07:00").getTime();
+function pad(n){return String(n).padStart(2,'0')}
+/* ================= Trip-week states =================
+   Oct 29 – Nov 1: the hero answers "what's happening now / next" from the
+   day cards + the Edmonton clock. After Nov 1 the countdown zone converts
+   to the recap panel. Before Oct 29 nothing changes. */
+var nextUpEl=document.getElementById('nextUp'),recapEl=document.getElementById('recapPanel'),recapChampEl=document.getElementById('recapChamp'),cdGrid=document.getElementById('cdGrid');
+function edmParts(){
+ var parts={},fmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Edmonton',month:'numeric',day:'numeric',hour:'numeric',hour12:false});
+ fmt.formatToParts(new Date()).forEach(function(p){parts[p.type]=p.value});
+ return {mo:+parts.month,d:+parts.day,h:(+parts.hour)%24};
+}
+function nextUpText(){
+ var p=edmParts();
+ if(p.mo===10&&p.d===29)return p.h<16?'<b>Next up</b> · Check-in opens 4 PM — Bayside, Airdrie. Arrivals day.':'<b>Now</b> · First night in. <b>Next</b> · Fri — chill day at the Airbnb.';
+ if(p.mo===10&&p.d===30)return '<b>Now</b> · Chill day — Airbnb, food and Zoot. <b>Next</b> · Sat — the Street Fighter tournament.';
+ if(p.mo===10&&p.d===31)return p.h<22?'<b>Now</b> · Street Fighter — the one fixed plan. <b>Next</b> · Quiet hours from 10 PM.':'<b>Now</b> · Quiet hours. <b>Next</b> · Sun send-off — checkout before 11 AM.';
+ if(p.mo===11&&p.d===1)return p.h<11?'<b>Now</b> · Send-off — brunch, then departures. Checkout before 11 AM.':'<b>Now</b> · Departures. The weekend wraps today.';
+ return '';
+}
+function updateRecapChamp(){
+ if(typeof fc==='undefined'||typeof fcFinalists!=='function')return;
+ var fin=fcFinalists(),champ=-1;
+ if(fin&&fc.final&&fc.final[0]!==null&&fc.final[1]!==null&&fc.final[0]!==undefined&&fc.final[1]!==undefined&&fc.final[0]!==fc.final[1])champ=fc.final[0]>fc.final[1]?fin[0]:fin[1];
+ recapChampEl.textContent=champ>=0?('FC 27 Champions — '+fcName(champ)+'. The gauntlet is settled.'):'FC 27 — no champion was saved on this device.';
+}
+function tick(){
+ var now=Date.now(),diff=TARGET-now;
+ var dEl=document.getElementById('cd-d'),hEl=document.getElementById('cd-h'),mEl=document.getElementById('cd-m'),sEl=document.getElementById('cd-s'),msg=document.getElementById('cd-msg'),nav=document.getElementById('navCd');
+ if(diff<=0){
+   dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent="00";
+   if(now<END){
+     msg.textContent="The boys are in Calgary.";
+     nav.textContent="● IN CALGARY";
+     var nu=nextUpText();
+     if(nu&&nextUpEl.innerHTML!==nu){nextUpEl.innerHTML=nu;nextUpEl.hidden=false}
+   }else{
+     nav.textContent="WEEKEND COMPLETE";
+     msg.style.display='none'; cdGrid.style.display='none'; nextUpEl.hidden=true;
+     recapEl.hidden=false; updateRecapChamp();
+   }
+   return;
+ }
+ var d=Math.floor(diff/86400000),h=Math.floor(diff/3600000)%24,m=Math.floor(diff/60000)%60,s=Math.floor(diff/1000)%60;
+ dEl.textContent=pad(d);hEl.textContent=pad(h);mEl.textContent=pad(m);sEl.textContent=pad(s);
+ nav.textContent="T-MINUS "+d+"D "+pad(h)+"H "+pad(m)+"M";
+}
+tick(); setInterval(tick,1000);
+
+/* ================= Reveal (entrance) =================
+   V3 fix — content visibility must never be hostage to a Web Animations
+   spring. The previous build ran each entrance as a WAAPI animation
+   with fill:'forwards'; on the owner's iPhone those animations froze
+   in their first frames and the fill state pinned every .reveal at
+   roughly 10% opacity forever — Food / Split / FIFA / Photos all
+   rendered as ghosts. The entrance is now a plain CSS transition
+   (see .reveal in the stylesheet), and .in is added by three
+   independent triggers — the IntersectionObserver, a rect check on
+   scroll / resize / view switch, and a polling backstop — the same
+   belt-and-braces pattern the cinematic driver uses on this phone.
+   Worst case on any engine: content appears with no entrance motion.
+   It can no longer stay invisible. */
+function revealCheck(){
+ document.querySelectorAll('.reveal:not(.in)').forEach(function(el){
+   if(!el.getClientRects().length)return;
+   var r=el.getBoundingClientRect();
+   if(r.top<window.innerHeight*0.94&&r.bottom>0)el.classList.add('in');
+ });
+}
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+window.addEventListener('scroll',function(){requestAnimationFrame(revealCheck)},{passive:true});
+window.addEventListener('resize',revealCheck);
+setInterval(revealCheck,600);
+revealCheck();
+
+/* ================= Cinematic =================
+   One driver on every browser: the frame is a pure function of scroll
+   progress through the 300vh cinematic (see renderProgress below),
+   written on scroll/rAF with a 150 ms backstop for Low Power Mode.
+   CSS scroll-driven animations previously drove this on supporting
+   browsers; on the user's iPhone they ran to their end keyframes at
+   load, so the page opened on the landed frame. They are gone. */
+var P={YYC:{x:300,y:185},CA:{x:272,y:368},TX:{x:572,y:392},CAc:{x:208,y:252},TXc:{x:378,y:262}};
+var world=document.getElementById('world');
+var bigWord=document.getElementById('bigWord'),heroLayer=document.getElementById('heroLayer');
+var skipBtn=document.getElementById('skip'),scrollCue=document.getElementById('scrollCue'),readout=document.getElementById('readout');
+var zoomVal=document.getElementById('zoomVal'),camVal=document.getElementById('camVal');
+var stage=document.getElementById('stage');
+var detailLayer=document.getElementById('detailLayer');
+
+/* stars (deterministic) */
+(function(){
+ var g=document.getElementById('stars'),html='',seed=42;
+ function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+ for(var i=0;i<110;i++){var x=(rnd()*1000).toFixed(0),y=(rnd()*620).toFixed(0),r=(rnd()*1.3+.4).toFixed(2),o=(rnd()*.5+.15).toFixed(2);html+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#F5EFE0" opacity="'+o+'"/>'}
+ g.innerHTML=html;
+})();
+
+/* route geometry: quadratic beziers */
+function qPt(a,c,b,t){var u=1-t;return {x:u*u*a.x+2*u*t*c.x+t*t*b.x, y:u*u*a.y+2*u*t*c.y+t*t*b.y}}
+function qAng(a,c,b,t){var dx=2*(1-t)*(c.x-a.x)+2*t*(b.x-c.x), dy=2*(1-t)*(c.y-a.y)+2*t*(b.y-c.y);return Math.atan2(dy,dx)*180/Math.PI+90}
+function qPath(a,c,b){return "M"+a.x+","+a.y+" Q"+c.x+","+c.y+" "+b.x+","+b.y}
+document.getElementById('arcCA').setAttribute('d',qPath(P.CA,P.CAc,P.YYC));
+document.getElementById('arcTX').setAttribute('d',qPath(P.TX,P.TXc,P.YYC));
+document.getElementById('cityCA').setAttribute('transform','translate('+P.CA.x+','+P.CA.y+')');
+document.getElementById('cityTX').setAttribute('transform','translate('+P.TX.x+','+P.TX.y+')');
+document.getElementById('cityYYC').setAttribute('transform','translate('+P.YYC.x+','+P.YYC.y+')');
+var pulses=document.querySelectorAll('#cityYYC .pulse');
+function buildDots(id,a,c,b,n){
+ var g=document.getElementById(id),html='';
+ for(var i=0;i<n;i++){var pt=qPt(a,c,b,i/(n-1));html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+pt.y.toFixed(1)+'" r="2.3" opacity="0"/>'}
+ g.innerHTML=html; return g.querySelectorAll('circle');
+}
+var dotsCA=buildDots('dotsCA',P.CA,P.CAc,P.YYC,42);
+var dotsTX=buildDots('dotsTX',P.TX,P.TXc,P.YYC,42);
+var planeCA=document.getElementById('planeCA'),planeTX=document.getElementById('planeTX');
+var cityDots=detailLayer.querySelectorAll('.city-dot');
+var stylePulse=document.createElement('style');
+stylePulse.textContent='@keyframes pulseRing{0%{transform:scale(.4);opacity:.85}100%{transform:scale(3.2);opacity:0}}';
+document.head.appendChild(stylePulse);
+
+/* the 2.0 stamp slams in when the site opens — a real spring
+   (stiffness 320, damping 17: underdamped, so it overshoots and settles
+   like the physical stamp it imitates). Interruptible: re-calling
+   landStamp replaces the running animation. */
+function landStamp(){
+ var st=document.getElementById('stamp20'); if(!st||st.dataset.sprung)return; st.dataset.sprung='1';
+ st.classList.add('land');
+ if(REDUCED||!st.animate){st.style.opacity='1';st.style.transform='rotate(-11deg) scale(1)';return}
+ var sc=springAnim(2.8,1,320,17),ro=springAnim(-32,-11,320,17);
+ var n=Math.max(sc.frames.length,ro.frames.length),kf=[];
+ for(var i=0;i<n;i++){
+   var sv=sc.frames[Math.min(i,sc.frames.length-1)].value,rv=ro.frames[Math.min(i,ro.frames.length-1)].value;
+   kf.push({offset:n>1?i/(n-1):1,transform:'rotate('+rv.toFixed(2)+'deg) scale('+sv.toFixed(3)+')',opacity:Math.min(1,i/Math.max(1,n*0.25)).toFixed(2)});
+ }
+ try{st.animate(kf,{duration:Math.max(sc.duration,ro.duration),delay:450,easing:'linear',fill:'both'})}
+ catch(e){st.style.opacity='1';st.style.transform='rotate(-11deg) scale(1)'}
+}
+if(document.readyState!=='loading')setTimeout(landStamp,60);else document.addEventListener('DOMContentLoaded',function(){setTimeout(landStamp,60)});
+
+var view={cx:500,cy:310};
+var sceneEl=document.getElementById('scene');
+function fitScene(){
+ var a=window.innerWidth/Math.max(1,window.innerHeight);
+ if(a<0.85){
+   var vbW=580, vbH=Math.round(vbW/a);
+   sceneEl.setAttribute('viewBox',(400-vbW/2)+' '+(300-vbH/2)+' '+vbW+' '+vbH);
+   view.cx=400; view.cy=300;
+ }else{
+   sceneEl.setAttribute('viewBox','0 0 1000 620'); view.cx=500; view.cy=310;
+ }
+ sceneEl.setAttribute('preserveAspectRatio','xMidYMid slice');
+}
+fitScene();
+
+var cine=document.getElementById('cinematic');
+
+function setPulses(on){
+ pulses.forEach(function(c,idx){
+   c.setAttribute('opacity',on?.8:0);
+   c.style.animation=on?('pulseRing 2.4s ease-out '+(idx*1.2)+'s infinite'):'none';
+ });
+}
+skipBtn.addEventListener('click',function(){
+ var top=cine.offsetTop+cine.offsetHeight-window.innerHeight;
+ window.scrollTo({top:top,behavior:REDUCED?'auto':'smooth'});
+});
+
+/* Always open on the opening frame: a restored scroll position (browser or
+   in-app webview) otherwise reopens the page on the landed end state, which
+   reads as "the animation already finished". A section hash still wins. */
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+if(!location.hash)window.scrollTo(0,0);
+
+/* ================= Cinematic driver (all browsers) =================
+   The frame is a pure function of scroll progress through the 300vh
+   cinematic, interpolated between the five keyframe states below and
+   written on scroll events + rAF, with a 150 ms interval backstop so the
+   frame converges to the true scroll position even when iOS Low Power
+   Mode starves frame callbacks. City labels, planes and route dots are
+   counter-scaled as the world zooms, so nothing balloons at ×7.2. */
+var STEPS=[
+ {s:1.25,fx:400,fy:300,t:0,detail:0},
+ {s:2.4,fx:370,fy:265,t:.35,detail:0},
+ {s:3.9,fx:340,fy:230,t:.65,detail:.35},
+ {s:5.6,fx:315,fy:200,t:.9,detail:.8},
+ {s:7.2,fx:300,fy:185,t:1,detail:1}
+];
+function cineProgress(){
+ var total=cine.offsetHeight-window.innerHeight;
+ if(total<=0)return 1;
+ var p=-cine.getBoundingClientRect().top/total;
+ return p<0?0:p>1?1:p;
+}
+var curP=-1,pulsesOn=null;
+function renderProgress(p){
+ if(Math.abs(p-curP)<0.0004)return; curP=p;
+ var seg=Math.min(3,Math.floor(p*4)),fr=p*4-seg;
+ var A=STEPS[seg],B=STEPS[seg+1];
+ var st={
+   s:Math.exp(Math.log(A.s)+(Math.log(B.s)-Math.log(A.s))*fr),
+   fx:A.fx+(B.fx-A.fx)*fr, fy:A.fy+(B.fy-A.fy)*fr,
+   t:A.t+(B.t-A.t)*fr, detail:A.detail+(B.detail-A.detail)*fr
+ };
+ var i=Math.round(p*4),desk=window.innerWidth>=761;
+ var s=st.s,fx=st.fx,fy=st.fy;
+ if(p===0&&desk){s=1.9;fx=385;fy=295}
+ stage.dataset.step=String(i);
+ world.style.transform='translate('+view.cx+'px,'+view.cy+'px) scale('+s.toFixed(3)+') translate('+(-fx)+'px,'+(-fy)+'px)';
+ var inv=1/Math.sqrt(s),invF=1/s;
+ document.getElementById('cityCA').style.transform='translate(272px,368px) scale('+inv.toFixed(3)+')';
+ document.getElementById('cityTX').style.transform='translate(572px,392px) scale('+inv.toFixed(3)+')';
+ document.getElementById('cityYYC').style.transform='translate(300px,185px) scale('+inv.toFixed(3)+')';
+ cityDots.forEach(function(g){
+   var tx=g.style.getPropertyValue('--tx'),ty=g.style.getPropertyValue('--ty');
+   g.style.transform='translate('+tx+','+ty+') scale('+invF.toFixed(3)+')';
+ });
+ detailLayer.style.opacity=st.detail;
+ function fly(plane,dots,a,c,b,off){
+   var t=Math.max(0,Math.min(1,st.t*1.04-off));
+   var pt=qPt(a,c,b,t),ang=qAng(a,c,b,Math.min(t,.999));
+   plane.style.transform='translate('+pt.x.toFixed(1)+'px,'+pt.y.toFixed(1)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(1.2/Math.sqrt(s)).toFixed(3)+')';
+   plane.setAttribute('opacity',st.t>=1?0:1);
+   var dotO=.95*(1-.45*(i===4?1:0));
+   for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}
+ }
+ fly(planeCA,dotsCA,P.CA,P.CAc,P.YYC,0);
+ fly(planeTX,dotsTX,P.TX,P.TXc,P.YYC,.03);
+ var wantPulses=i>=3;
+ if(wantPulses!==pulsesOn){pulsesOn=wantPulses;setPulses(wantPulses)}
+ var bw=(p>0.42&&p<0.85)?Math.min(1,Math.min((p-0.42)/0.08,(0.85-p)/0.06)):0;
+ bigWord.style.opacity=bw.toFixed(2);
+ bigWord.style.transform='scale('+(0.93+0.07*bw).toFixed(3)+')';
+ heroLayer.classList.toggle('landed',i===4);
+ heroLayer.style.pointerEvents=i===4?'auto':'none';
+ scrollCue.style.opacity=p<0.03?1:0;
+ readout.style.opacity=i===4?0:1;
+ skipBtn.style.opacity=i===4?0:1;
+ skipBtn.style.pointerEvents=i===4?'none':'auto';
+ /* Landing backdrop (owner's screenshot fix): across the last stretch of
+    the dive (p .80→1) the scene layer itself blurs and dims, so the
+    zoomed YYC label, marker pulse, dotted routes and graticule soften
+    into a clean field behind the hero content. The filter sits on the
+    scene layer — deliberately NOT backdrop-filter over the content,
+    whose compositing caused trouble in earlier rounds. Sharp during the
+    dive; scrolling back up reverses the blur with p. */
+ var land=Math.max(0,Math.min(1,(p-0.8)/0.2));
+ var landE=land*land*(3-2*land);
+ sceneEl.style.filter=landE>0.001?('blur('+(landE*9).toFixed(1)+'px) brightness('+(1-0.16*landE).toFixed(2)+')'):'';
+ sceneEl.style.opacity=(1-0.55*landE).toFixed(2);
+ zoomVal.textContent='×'+s.toFixed(1);
+ camVal.textContent=i<1?'NORTH AMERICA':i<2?'UNITED STATES':i<4?'ALBERTA · INBOUND':'YYC · CALGARY';
+}
+if(REDUCED){
+ cine.style.height='100vh';
+ document.querySelectorAll('.step-sentinel').forEach(function(s){s.style.display='none'});
+ heroLayer.classList.add('landed'); heroLayer.style.pointerEvents='auto';
+ skipBtn.style.display='none'; scrollCue.style.display='none'; landStamp();
+ renderProgress(1);
+}else{
+ document.body.classList.add('live-drive');
+ /* Spring chase on the shipped driver: the rendered progress springs
+    toward the true scroll progress (stiffness 240, damping 31 —
+    critically damped, so no overshoot past the landing) integrated in
+    ≤8 ms substeps. Scroll stays the master: a new scroll position
+    retargets the spring instantly, while the 150 ms Low Power backstop's
+    coarse steps land as glides instead of jumps. Interruptible by
+    construction — the frame is still a pure function of progress. */
+ var sprP={x:cineProgress(),v:0},sprT=performance.now();
+ function driveCine(){
+   var target=cineProgress(),now=performance.now();
+   var dt=Math.min(100,now-sprT); sprT=now;
+   while(dt>0){var step=Math.min(8,dt),h=step/1000;
+     sprP.v+=(-240*(sprP.x-target)-31*sprP.v)*h; sprP.x+=sprP.v*h; dt-=step;}
+   if(Math.abs(target-sprP.x)<0.0004&&Math.abs(sprP.v)<0.004){sprP.x=target;sprP.v=0}
+   renderProgress(sprP.x);
+ }
+ var driveQueued=false;
+ function queueDrive(){ if(driveQueued)return; driveQueued=true; requestAnimationFrame(function(){driveQueued=false;driveCine()}); }
+ window.addEventListener('scroll',queueDrive,{passive:true});
+ window.addEventListener('resize',function(){fitScene();curP=-1;sprP.x=cineProgress();sprP.v=0;sprT=performance.now();renderProgress(sprP.x)});
+ setInterval(driveCine,150);
+ renderProgress(sprP.x);
+}
+
+
+/* ================= FC 27 tournament: title race + gauntlet ================= */
+var FC_KEY='crcmz-fc27-v2',FC_OLD_KEY='crcmz-fc27-v1';
+var FC_TEAMS=[
+ {def:'Asamad + Kaptaan',players:[['Asamad','assets/samad.png'],['Kaptaan','assets/kap.png']]},
+ {def:'Moiz + Moose',players:[['Moiz · InterestingSoup','assets/soup.png'],['Moose · TheMooseCompany','assets/moose.png']]},
+ {def:'Killer + Deception',players:[['Killer','assets/killer.png'],['Deception','assets/decep.png']]}
+];
+var FC_FIX=[[0,1],[1,2],[0,2]]; /* Match 1, 2, 3 */
+var fc={names:FC_TEAMS.map(function(t){return t.def}),scores:[null,null,null],final:null};
+try{
+ var saved=JSON.parse(localStorage.getItem(FC_KEY)||'null');
+ if(saved&&saved.names&&saved.names.length===3&&saved.scores&&saved.scores.length===3)fc={names:saved.names,scores:saved.scores,final:saved.final||null};
+ else{
+   var old=JSON.parse(localStorage.getItem(FC_OLD_KEY)||'null');
+   if(old&&old.scores&&old.scores.length===3)fc={names:(old.names&&old.names.length===3)?old.names:fc.names,scores:old.scores,final:null};
+ }
+}catch(e){}
+var selTeam=-1;
+function fcSave(){ try{localStorage.setItem(FC_KEY,JSON.stringify(fc));}catch(e){} }
+function fcName(i){var n=(fc.names[i]||'').trim();return n?n:FC_TEAMS[i].def}
+function esc(s){return String(s).replace(/</g,'&lt;')}
+function chips(i,cls){
+ return '<span class="'+cls+'">'+FC_TEAMS[i].players.map(function(p){return '<img src="'+p[1]+'" alt="" loading="lazy">'}).join('')+'</span>';
+}
+function fcStandings(){
+ var rows=FC_TEAMS.map(function(_,i){return {i:i,P:0,W:0,D:0,L:0,GF:0,GA:0,Pts:0}});
+ FC_FIX.forEach(function(f,ix){
+   var sc=fc.scores[ix]; if(!sc||sc[0]===null||sc[1]===null||sc[0]===undefined||sc[1]===undefined)return;
+   var A=rows[f[0]],B=rows[f[1]];
+   A.P++;B.P++;A.GF+=sc[0];A.GA+=sc[1];B.GF+=sc[1];B.GA+=sc[0];
+   if(sc[0]>sc[1]){A.W++;B.L++;A.Pts+=3}else if(sc[0]<sc[1]){B.W++;A.L++;B.Pts+=3}else{A.D++;B.D++;A.Pts++;B.Pts++}
+ });
+ return rows.slice().sort(function(x,y){return (y.Pts-x.Pts)||((y.GF-y.GA)-(x.GF-x.GA))||(y.GF-x.GF)||fcName(x.i).localeCompare(fcName(y.i))});
+}
+function fcPlayedCount(){var n=0;fc.scores.forEach(function(sc){if(sc&&sc[0]!==null&&sc[1]!==null&&sc[0]!==undefined&&sc[1]!==undefined)n++});return n}
+function fcFinalists(){ if(fcPlayedCount()<3)return null; var s=fcStandings(); return [s[0].i,s[1].i]; }
+var fcRace=document.getElementById('fcRace'),fcGaunt=document.getElementById('fcGauntlet');
+function renderRace(){
+ var sorted=fcStandings();
+ fcRace.innerHTML=sorted.map(function(r,pos){
+   var pct=Math.round(r.Pts/6*100);
+   return '<div class="lane'+(pos===0&&r.P>0?' first':'')+(selTeam===r.i?' sel':'')+'" data-team="'+r.i+'" role="button" tabindex="0" aria-label="Highlight '+esc(fcName(r.i))+' matches">'
+   +'<div class="lane-head"><span class="lane-pos">'+(pos+1)+'</span>'+chips(r.i,'lane-chips')
+   +'<input class="fc-name" data-name="'+r.i+'" type="text" maxlength="28" value="'+esc(fcName(r.i))+'" aria-label="Team name">'
+   +'<span class="lane-pts">'+r.Pts+'<small>PTS</small></span></div>'
+   +'<div class="lane-track"><div class="lane-fill" style="width:'+pct+'%"></div></div>'
+   +'<div class="lane-meta"><span>P <b>'+r.P+'</b></span><span>W <b>'+r.W+'</b></span><span>D <b>'+r.D+'</b></span><span>L <b>'+r.L+'</b></span><span>GD <b>'+((r.GF-r.GA)>0?'+':'')+(r.GF-r.GA)+'</b></span><span>GF <b>'+r.GF+'</b></span></div></div>';
+ }).join('');
+ fcRace.querySelectorAll('.fc-name').forEach(function(inp){
+   inp.addEventListener('input',function(){ fc.names[+inp.getAttribute('data-name')]=inp.value; fcSave(); renderGauntlet(); renderChamp(false); });
+   inp.addEventListener('click',function(ev){ev.stopPropagation()});
+ });
+}
+function stepperHTML(match,side,score,disabled){
+ var v=(score&&score[side]!==null&&score[side]!==undefined)?score[side]:'–';
+ return '<span class="stepper"><button type="button" data-m="'+match+'" data-side="'+side+'" data-dir="-1" '+(disabled?'disabled':'')+' aria-label="Minus">−</button><span class="val">'+v+'</span><button type="button" data-m="'+match+'" data-side="'+side+'" data-dir="1" '+(disabled?'disabled':'')+' aria-label="Plus">+</button></span>';
+}
+function matchCard(match,title,teams,score,locked,isFinal){
+ var played=score&&score[0]!==null&&score[1]!==null&&score[0]!==undefined&&score[1]!==undefined;
+ var hl=selTeam>=0&&teams&&(teams[0]===selTeam||teams[1]===selTeam);
+ var status=locked?'Locked':(played?'Played':'Up next');
+ var sides='';
+ if(teams){
+   sides=teams.map(function(t,side){
+     return '<div class="match-side">'+chips(t,'m-chips')+'<span class="m-name">'+esc(fcName(t))+'</span>'+stepperHTML(match,side,score,locked)+'</div>';
+   }).join('');
+ }else{
+   sides='<p class="match-note">Top two after the group stage.</p>';
+ }
+ var note='';
+ if(isFinal&&locked)note='<p class="match-note">Locked — finish all three group matches to open the final.</p>';
+ if(isFinal&&!locked&&played&&score[0]===score[1])note='<p class="match-note">Drawn final — replay it to crown a champion.</p>';
+ if(isFinal&&!locked&&teams)note='<p class="match-note">'+esc(fcName(teams[0]))+' vs '+esc(fcName(teams[1]))+' — winner takes the weekend.</p>';
+ return '<div class="match'+(isFinal?' final':'')+(locked?' locked':'')+(hl?' hl':'')+'"><div class="match-top"><span class="match-title">'+title+'</span><span class="match-status'+(played?' played':'')+'">'+status+'</span></div>'+sides+note+'</div>';
+}
+function renderGauntlet(){
+ var fin=fcFinalists();
+ var html=FC_FIX.map(function(f,i){ return matchCard(i,'Match '+(i+1),f,fc.scores[i],false,false); }).join('');
+ html+=matchCard(3,'The Final',fin,fc.final,!fin,true);
+ fcGaunt.innerHTML=html;
+}
+function renderChamp(allowScroll){
+ var box=document.getElementById('fcChamp'),fin=fcFinalists();
+ var champ=-1;
+ if(fin&&fc.final&&fc.final[0]!==null&&fc.final[1]!==null&&fc.final[0]!==undefined&&fc.final[1]!==undefined&&fc.final[0]!==fc.final[1]){
+   champ=fc.final[0]>fc.final[1]?fin[0]:fin[1];
+ }
+ if(champ<0){ box.style.display='none'; box.classList.remove('show'); return; }
+ document.getElementById('fcChampLogos').innerHTML=FC_TEAMS[champ].players.map(function(p){return '<img src="'+p[1]+'" alt="'+esc(p[0])+' logo" loading="lazy">'}).join('');
+ document.getElementById('fcChampName').textContent=fcName(champ);
+ box.style.display='block';
+ box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+ if(allowScroll)box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+/* FLIP reorder: lanes spring (stiffness 180, damping 24) from their old
+   position to their new one when results reshuffle the race, instead of
+   teleporting. A new result mid-flight retargets instantly. */
+function flipRace(mutate){
+ if(REDUCED){mutate();return}
+ var before={};
+ fcRace.querySelectorAll('.lane').forEach(function(l){before[l.getAttribute('data-team')]=l.getBoundingClientRect().top});
+ mutate();
+ fcRace.querySelectorAll('.lane').forEach(function(l){
+   var key=l.getAttribute('data-team'); if(!(key in before)||!l.animate)return;
+   var dy=before[key]-l.getBoundingClientRect().top;
+   if(Math.abs(dy)<2)return;
+   var sp=springAnim(dy,0,180,24);
+   var kf=sp.frames.map(function(f){return {offset:f.offset,transform:'translateY('+f.value.toFixed(1)+'px)'};});
+   try{l.animate(kf,{duration:sp.duration,easing:'linear'})}catch(e){}
+ });
+}
+function updateFifaPreview(){
+ var el=document.getElementById('fifaPrevLine'); if(!el)return;
+ var fin=fcFinalists(),champ=-1;
+ if(fin&&fc.final&&fc.final[0]!==null&&fc.final[1]!==null&&fc.final[0]!==undefined&&fc.final[1]!==undefined&&fc.final[0]!==fc.final[1])champ=fc.final[0]>fc.final[1]?fin[0]:fin[1];
+ if(champ>=0){el.textContent='Champions: '+fcName(champ)+' — the gauntlet is settled.';return;}
+ var played=fcPlayedCount();
+ if(played>0){var st=fcStandings();el.textContent='Leading: '+fcName(st[0].i)+' — '+st[0].Pts+' pts after '+played+' of 3 group matches.';}
+}
+function fcRenderAll(){ renderRace(); renderGauntlet(); renderChamp(false); updateFifaPreview(); }
+fcGaunt.addEventListener('click',function(ev){
+ var b=ev.target.closest?ev.target.closest('button[data-m]'):null; if(!b||b.disabled)return;
+ var m=+b.getAttribute('data-m'),side=+b.getAttribute('data-side'),dir=+b.getAttribute('data-dir');
+ var cur=(m===3)?fc.final:fc.scores[m];
+ if(!cur)cur=[0,0];
+ var v=cur[side]; if(v===null||v===undefined)v=0;
+ v=Math.max(0,Math.min(99,v+dir));
+ if(dir<0&&cur[side]===0&&m!==3){ /* stepping below 0 on a group score clears that side back to unplayed */
+ }
+ cur[side]=v;
+ if(m===3)fc.final=cur; else fc.scores[m]=cur;
+ /* if a group result changes after the final was seeded, the final resets */
+ if(m!==3&&fc.final){ var fin=fcFinalists(); if(!fin)fc.final=null; }
+ fcSave(); flipRace(renderRace); renderGauntlet(); renderChamp(false);
+});
+fcRace.addEventListener('click',function(ev){
+ if(ev.target.classList&&ev.target.classList.contains('fc-name'))return;
+ var lane=ev.target.closest?ev.target.closest('.lane'):null; if(!lane)return;
+ var t=+lane.getAttribute('data-team');
+ selTeam=(selTeam===t)?-1:t;
+ renderRace(); renderGauntlet();
+});
+fcRace.addEventListener('keydown',function(ev){
+ if(ev.key!=='Enter'&&ev.key!==' ')return;
+ var lane=ev.target.closest?ev.target.closest('.lane'):null; if(!lane||ev.target.classList.contains('fc-name'))return;
+ ev.preventDefault(); lane.click();
+});
+document.getElementById('fcReset').addEventListener('click',function(){
+ fc={names:FC_TEAMS.map(function(t){return t.def}),scores:[null,null,null],final:null};
+ selTeam=-1; fcSave(); fcRenderAll();
+});
+fcRenderAll();
+</script>
+<script>
+/* ================= Food Finder =================
+   Curated halal list for Calgary & Airdrie, from the Oct 15 2026 research
+   pass. Halal notes are the status as publicly stated by the restaurant or
+   the cited community list — no source named an HMA/IFANCA certifier for
+   any entry, so none is claimed here. Ratings are the Google ratings as
+   reported by the named source on that date. */
+var FOOD_CATS=[
+ {id:'close',label:'Close to the house'},
+ {id:'me',label:'Shawarma & Middle Eastern'},
+ {id:'afghan',label:'Afghan & Kabob'},
+ {id:'pakind',label:'Pakistani & Indian'},
+ {id:'turkper',label:'Turkish & Persian'},
+ {id:'fast',label:'Burgers, Chicken & Pizza'},
+ {id:'noodles',label:'Noodles & Pho'},
+ {id:'dessert',label:'Desserts & Sweets'}
+];
+var FOOD=[
+ {n:"Pita Basket Airdrie",a:"Airdrie SE",r:"4.7★ · 3,221 reviews",h:"Listed as a halal shawarma & pita shop — Halal Calgary.",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Pita+Basket+30+Market+Blvd+SE+Airdrie+AB"},
+ {n:"Tahini's Airdrie – Yankee Valley",a:"Airdrie SW",r:"4.5★ · 663 reviews",h:"Fully halal — Halal Calgary; its TripAdvisor listing says it proudly serves halal meat.",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Tahini%27s+800+Yankee+Valley+Blvd+SW+Airdrie+AB"},
+ {n:"Shawarma Palace – Airdrie",a:"Airdrie SE",r:"4.4★ · 513 reviews",h:"Restaurant-stated halal — listed as a halal restaurant on MenuPix.",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Shawarma+Palace+960+Yankee+Valley+Blvd+SE+Airdrie+AB"},
+ {n:"Osmow's Shawarma – Airdrie",a:"Airdrie SE",r:"4.5★ · 234 reviews",h:"\u26A0 Partial — the chain states its chicken is halal; the claim covers chicken only, so ask staff about other meats (Halal Calgary).",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Osmow%27s+Shawarma+1400+Market+St+Airdrie+AB"},
+ {n:"Villa Madina — CrossIron Mills",a:"Rocky View · minutes from Bayside",r:"Rating not verified in sources",h:"Zabihah-listed: fully halal, hand-slaughtered, halal-certified meat (staff verbal assurance; certifier not named).",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Villa+Madina+CrossIron+Mills+Rocky+View+AB"},
+ {n:"Kabob City",a:"NE Calgary · Cityscape",r:"4.8★ · 700 reviews",h:"Stated halal-certified — Halal Calgary (certifying body not named). Afghan kabob, shawarma, rice platters.",c:"afghan",close:1,u:"https://www.google.com/maps/search/?api=1&query=Kabob+City+10474+Cityscape+Dr+NE+Calgary+AB"},
+ {n:"Kabob Garden – Afghan Kitchen & Banquet Hall",a:"NE Calgary · Falconridge",r:"4.7★ · 2,536 reviews",h:"Fully halal — Halal Calgary. Banquet hall, family platters — group-friendly.",c:"afghan",close:1,u:"https://www.google.com/maps/search/?api=1&query=Kabob+Garden+1075+Falconridge+Dr+NE+Calgary+AB"},
+ {n:"Hitchki – The Grand Indian Buffet",a:"NE Calgary · Cornerstone",r:"4.7★ · 9,321 reviews",h:"Fully halal buffet — Halal Calgary (~150 dishes). The mixed-tastes group pick.",c:"pakind",close:1,u:"https://www.google.com/maps/search/?api=1&query=Hitchki+1155+Cornerstone+Blvd+NE+Calgary+AB"},
+ {n:"Hyderabad Biryani House Calgary",a:"NE Calgary · Sunridge",r:"4.8★ · 1,347 reviews",h:"Halal meat throughout; no certifying body listed — Halal Calgary.",c:"pakind",close:1,u:"https://www.google.com/maps/search/?api=1&query=Hyderabad+Biryani+House+3221+Sunridge+Way+NE+Calgary+AB"},
+ {n:"Apna Karachi Kitchen",a:"NE Calgary · Westwinds",r:"4.6★ · 923 reviews",h:"Self-described halal Pakistani-Indian cuisine (nihari, BBQ platter).",c:"pakind",close:1,u:"https://www.google.com/maps/search/?api=1&query=Apna+Karachi+Kitchen+76+Westwinds+Cres+NE+Calgary+AB"},
+ {n:"Marhaba Restaurant",a:"NE Calgary · Westwinds",r:"4.6★ · 607 reviews",h:"Restaurant states 100% halal. Lamb mandi, kabsa, biryani — family/group sit-down.",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Marhaba+Restaurant+55+Westwinds+Cres+NE+Calgary+AB"},
+ {n:"Anatolia Turkish Foods Restaurant",a:"NE Calgary · 52 St NE",r:"4.3★ · ~1,600 reviews",h:"Its own site lists the cuisine as Turkish / Halal; no certifier named. Friends & family platters.",c:"turkper",close:1,u:"https://www.google.com/maps/search/?api=1&query=Anatolia+Turkish+Restaurant+1440+52+St+NE+Calgary+AB"},
+ {n:"Peshawari Kabab Hut",a:"NE Calgary · Westwinds",r:"4.2★ · 351 reviews",h:"All meat halal; no certifying body named — Halal Calgary. Chapli kabab, charsi karahi.",c:"pakind",close:1,u:"https://www.google.com/maps/search/?api=1&query=Peshawari+Kabab+Hut+55+Westwinds+Cres+NE+Calgary+AB"},
+ {n:"Karahi Boys",a:"NE Calgary · Falsbridge",r:"4.2★ · ~946 reviews across sources",h:"Google listing categories: Pakistani + Halal Restaurant.",c:"pakind",close:1,u:"https://www.google.com/maps/search/?api=1&query=Karahi+Boys+5455+Falsbridge+Dr+NE+Calgary+AB"},
+ {n:"Cedars Deli",a:"NE Calgary · Edmonton Trail",r:"4.8★ · 131 reviews",h:"Fully halal per Zabihah — halal certificate on file (certifier not named). Family business since 1985.",c:"me",close:1,u:"https://www.google.com/maps/search/?api=1&query=Cedars+Deli+3103+Edmonton+Trail+NE+Calgary+AB"},
+ {n:"House of Kabob",a:"NE Calgary · Edmonton Trail",r:"4.2★ · 700 reviews",h:"Google listing categories: Persian/Iranian + Halal Restaurant. Koobideh, ghormeh sabzi.",c:"turkper",close:1,u:"https://www.google.com/maps/search/?api=1&query=House+of+Kabob+1115+Edmonton+Trail+NE+Calgary+AB"},
+ {n:"Tasse Bakery & Sweets",a:"NE Calgary · 5 Ave NE",r:"4.7★ · 1,345 reviews",h:"Listed under Arabic desserts on Halal Calgary; no certifier named. Baklava & Arabic sweets.",c:"dessert",close:1,u:"https://www.google.com/maps/search/?api=1&query=Tasse+Bakery+3220+5+Ave+NE+Calgary+AB"},
+ {n:"Mary Brown's Chicken — Cityscape",a:"NE Calgary · Cityscape",r:"Rating not verified in sources",h:"\u26A0 Location-specific — DoorDash lists this location as Halal, but the chain certifies franchise by franchise; ask to see the certificate at this store (Halal Calgary).",c:"fast",close:1,u:"https://www.google.com/maps/search/?api=1&query=Mary+Brown%27s+Chicken+Cityscape+Dr+NE+Calgary+AB"},
+ {n:"Canadian Pizza Unlimited — Westwinds",a:"NE Calgary · Westwinds",r:"Rating not verified (Google) in sources",h:"HalalRun: all meat halal, confirmed by ownership for the reviewed SE location — confirm at this NE counter.",c:"fast",close:1,u:"https://www.google.com/maps/search/?api=1&query=Canadian+Pizza+Unlimited+4818+Westwinds+Dr+NE+Calgary+AB"},
+ {n:"Persian Plate",a:"NW Calgary · Sage Valley",r:"4.7★ · 1,062 reviews",h:"Fully halal — Halal Calgary. Kebabs over saffron rice.",c:"turkper",u:"https://www.google.com/maps/search/?api=1&query=Persian+Plate+340+Sage+Valley+Common+NW+Calgary+AB"},
+ {n:"Halal Pizza and Wings by Pizza 73",a:"NW Calgary · Country Hills",r:"Rating not verified in sources",h:"Explicitly branded \u201CHalal Pizza and Wings by Pizza 73\u201D in its Uber Eats listing.",c:"fast",u:"https://www.google.com/maps/search/?api=1&query=Pizza+73+Halal+8888+Country+Hills+Blvd+NW+Calgary+AB"},
+ {n:"D Spot Dessert Cafe",a:"NW Calgary · Sage Hill (also NE)",r:"Rating not verified (Google) in sources",h:"Uber Eats lists the NE location's cuisine as Desserts / Halal; Sage Hill reviewers also note it is halal. No certifier named.",c:"dessert",u:"https://www.google.com/maps/search/?api=1&query=D+Spot+Dessert+Cafe+75+Sage+Hill+Plaza+NW+Calgary+AB"},
+ {n:"Jerusalem Shawarma",a:"Downtown + citywide",r:"4.6★ · 4,332 reviews (downtown)",h:"Chain states \u201C100% Halal Certified\u201D on its own site (certifier not named). Calgary favourite since 2012.",c:"me",u:"https://www.google.com/maps/search/?api=1&query=Jerusalem+Shawarma+Calgary+AB"},
+ {n:"Mazza Afghan Cuisine",a:"Downtown · 8 Ave SE",r:"Rating not verified in sources",h:"Google listing categories: Afghan + Halal Restaurant. Large sit-down room, BBQ platters — group-friendly.",c:"afghan",u:"https://www.google.com/maps/search/?api=1&query=Mazza+Afghan+Cuisine+237+8+Ave+SE+Calgary+AB"},
+ {n:"Bahar Kabab",a:"Beltline · 12 Ave SW",r:"4.7★ · 245 reviews",h:"Halal throughout; no certifying body listed — Halal Calgary. Small husband-and-wife-run room.",c:"afghan",u:"https://www.google.com/maps/search/?api=1&query=Bahar+Kabab+1040+12+Ave+SW+Calgary+AB"},
+ {n:"Nothing Fancy",a:"Downtown SW · 10 St SW",r:"Rating not verified in sources",h:"Fully halal per Zabihah — halal certificate displayed on premises (certifier not named). Hand-pulled beef noodles.",c:"noodles",u:"https://www.google.com/maps/search/?api=1&query=Nothing+Fancy+683+10+St+SW+Calgary+AB"},
+ {n:"Pho Daddy",a:"Beltline · 4 St SW",r:"Rating not verified in sources",h:"Self-described \u201CAll items are Halal.\u201D Premium & coconut satay broths.",c:"noodles",u:"https://www.google.com/maps/search/?api=1&query=Pho+Daddy+1304+4+St+SW+Calgary+AB"},
+ {n:"Cluck N Cleaver",a:"Beltline · 14 St SW (also Walden SE)",r:"Rating not verified in sources",h:"Beltline Google listing includes Halal Restaurant; the Walden location is described as halal-certified (certifier not named).",c:"fast",u:"https://www.google.com/maps/search/?api=1&query=Cluck+N+Cleaver+1511+14+St+SW+Calgary+AB"},
+ {n:"Holy Shakes",a:"Beltline · 5 St SW",r:"4.6★ · 208 reviews",h:"Described as serving only halal food — Halal Calgary; no certifier named. Burgers, wings, shakes.",c:"fast",u:"https://www.google.com/maps/search/?api=1&query=Holy+Shakes+1535+5+St+SW+Calgary+AB"},
+ {n:"Taste of Yemen",a:"SW Calgary · 17 Ave SW",r:"4.7★ · 4,314 reviews",h:"Muslim-owned, halal meat throughout, no outside certification — Halal Calgary. Mandi sharing plates — destination pick.",c:"me",u:"https://www.google.com/maps/search/?api=1&query=Taste+of+Yemen+1033+17+Ave+SW+Calgary+AB"},
+ {n:"Bereket Kebab House",a:"SW Calgary · 37 St SW",r:"4.7★ · 2,816 reviews",h:"Halal meat used throughout; no certifying body named — Halal Calgary. Large Turkish grill room.",c:"turkper",u:"https://www.google.com/maps/search/?api=1&query=Bereket+Kebab+House+1637+37+St+SW+Calgary+AB"},
+ {n:"Turkish Kebab House SW",a:"SW Calgary · Macleod Trail",r:"4.7★ · 1,970 reviews",h:"Muslim-owned, all meat from halal suppliers; no third-party certificate — Halal Calgary.",c:"turkper",u:"https://www.google.com/maps/search/?api=1&query=Turkish+Kebab+House+9697+Macleod+Trail+SW+Calgary+AB"},
+ {n:"The Food Chemist",a:"SW Calgary · 58 Ave SW",r:"Rating not verified in sources",h:"Google listing categories: Halal Restaurant + Fast Food. Burgers, wings, mac & cheese.",c:"fast",u:"https://www.google.com/maps/search/?api=1&query=The+Food+Chemist+156+58+Ave+SW+Calgary+AB"},
+ {n:"My Donair (Westbrook)",a:"SW Calgary · 37 St SW",r:"4.6★ · 218 reviews",h:"Halal donair shop — Halal Calgary. Run by the same couple for close to 40 years.",c:"me",u:"https://www.google.com/maps/search/?api=1&query=My+Donair+1200+37+St+SW+Calgary+AB"},
+ {n:"Taj Mahal Restaurant",a:"SW Calgary · Macleod Trail S",r:"Rating not verified in sources",h:"Halal by house policy — Halal Calgary. Open since 1973; lunch buffet is the noted draw.",c:"pakind",u:"https://www.google.com/maps/search/?api=1&query=Taj+Mahal+Restaurant+Macleod+Trail+Calgary+AB"},
+ {n:"Village Pita Bakery",a:"SE Calgary · 28 St SE",r:"4.6★ · 576 reviews",h:"HalalRun: all meat is halal, alcohol-free. Serving Calgary since the late 1970s. Pita pies, meat pies.",c:"me",u:"https://www.google.com/maps/search/?api=1&query=Village+Pita+Bakery+255+28+St+SE+Calgary+AB"}
+];
+var foodCatsEl=document.getElementById('foodCats'),foodListEl=document.getElementById('foodList');
+function foodCount(id){return id==='close'?FOOD.filter(function(f){return f.close}).length:FOOD.filter(function(f){return f.c===id}).length}
+function foodEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function renderFood(id){
+ foodCatsEl.querySelectorAll('.food-cat').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-cat')===id)});
+ var items=id==='close'?FOOD.filter(function(f){return f.close}):FOOD.filter(function(f){return f.c===id});
+ foodListEl.innerHTML=items.map(function(f){
+   return '<a class="food-card" href="'+f.u+'" target="_blank" rel="noopener"><span class="fc-top"><h3>'+foodEsc(f.n)+'</h3><span class="rate">'+foodEsc(f.r)+'</span></span><span class="meta"><span class="chip home">'+foodEsc(f.a)+'</span></span><p class="halal">'+foodEsc(f.h)+'</p><span class="go">View on Google \u2192</span></a>';
+ }).join('');
+}
+foodCatsEl.innerHTML=FOOD_CATS.map(function(c){return '<button type="button" class="food-cat" data-cat="'+c.id+'">'+c.label+'<small>'+foodCount(c.id)+'</small></button>'}).join('');
+foodCatsEl.addEventListener('click',function(ev){
+ var b=ev.target.closest?ev.target.closest('.food-cat'):null; if(!b)return;
+ renderFood(b.getAttribute('data-cat'));
+});
+renderFood('close');
+</script>
+
+<script>
+/* ================= V3 tab views =================
+   Single-document app shell: five views, hash-deep-linkable.
+   #food / #photos / #split / #fifa open that view at the top;
+   section hashes (#crew, #stay, #days) land on Home, scrolled there. */
+var V3_VIEWS=['home','food','photos','split','fifa'];
+var cineEl=document.getElementById('cinematic');
+function showView(name){
+ V3_VIEWS.forEach(function(v){var el=document.getElementById('view-'+v); if(el)el.hidden=(v!==name);});
+ document.querySelectorAll('.tabbar .tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-view')===name);});
+ document.body.setAttribute('data-view',name);
+ cineEl.style.display=(name==='home')?'':'none';
+ if(name==='home')window.dispatchEvent(new Event('scroll'));
+ if(window.revealCheck){requestAnimationFrame(revealCheck);setTimeout(revealCheck,140);}
+}
+function applyRoute(){
+ var h=(location.hash||'').replace(/^#/,'');
+ if(V3_VIEWS.indexOf(h)>=0){showView(h);window.scrollTo(0,0);return;}
+ showView('home');
+ if(h&&h!=='top'){var el=document.getElementById(h); if(el)setTimeout(function(){el.scrollIntoView({block:'start'})},80);}
+ else window.scrollTo(0,0);
+}
+document.querySelectorAll('.tabbar .tab').forEach(function(t){
+ t.addEventListener('click',function(){
+   var v=t.getAttribute('data-view');
+   if((location.hash||'')==='#'+v)applyRoute(); else location.hash=v;
+ });
+});
+window.addEventListener('hashchange',applyRoute);
+applyRoute();
+</script>
+</body>
+</html>
