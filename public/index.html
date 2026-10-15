@@ -96,6 +96,13 @@ nav>*{pointer-events:auto}
 /* ---------- Photo Wall ---------- */
 .photo-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 .photo-note{color:var(--muted);font-size:13.5px;margin:14px 0 0}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:18px}
+.photo-tile{position:relative;display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.04);aspect-ratio:1}
+.photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-tile .pt-meta{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 6px;font-size:10.5px;color:#fff;background:linear-gradient(transparent,rgba(4,5,16,.85));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-tile .pt-play{position:absolute;top:6px;right:6px;background:rgba(4,5,16,.75);color:#fff;font-size:10px;padding:3px 8px;border-radius:99px}
+.photo-empty{color:var(--muted);font-size:14px;margin:18px 0 0}
+.photo-status{min-height:20px}
 /* ---------- Sections ---------- */
 main{position:relative;background:linear-gradient(180deg,var(--deep),var(--sky) 240px)}
 section{padding:72px 0 8px}
@@ -500,8 +507,8 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
           <p>CRCMZ Trip 2.0 · Oct 29 – Nov 1, 2026 · Calgary / Airdrie — the trip is in the books.</p>
           <p id="recapChamp"></p>
           <div class="hero-cta">
-            <a class="btn primary" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">View the Wall</a>
-            <a class="btn" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">Add Photos</a>
+            <a class="btn primary" href="#photos">View the Wall</a>
+            <a class="btn" href="#photos">Add Photos</a>
           </div>
         </div>
         <div class="hero-cta">
@@ -582,7 +589,7 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
     <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
     <div class="prev-grid">
       <a class="prev-card reveal" href="#food"><span class="prev-top"><span class="label">Food Finder</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>What kind of food are you looking for?</h3><p>36 halal spots across Calgary &amp; Airdrie in 8 categories — every card opens its Google page.</p><span class="prev-tags"><span>Close to the house · 19</span><span>Shawarma &amp; Middle Eastern · 11</span><span>Pakistani &amp; Indian · 6</span></span></a>
-      <a class="prev-card reveal" href="#photos"><span class="prev-top"><span class="label">Photo Wall</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>Every shot, one wall.</h3><p>One shared Google Photos album for the whole crew — touchdown shots, tournament night, all of it.</p><span class="prev-tags"><span>Add Photos</span><span>View the Wall</span></span></a>
+      <a class="prev-card reveal" href="#photos"><span class="prev-top"><span class="label">Photo Wall</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>Every shot, one wall.</h3><p>One shared album on the crew's own server — touchdown shots, tournament night, all of it.</p><span class="prev-tags"><span>Add Photos</span><span>View the Wall</span></span></a>
       <a class="prev-card reveal" href="#split"><span class="prev-top"><span class="label">The Split</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>One pot. Settled once, at the end.</h3><p>Expense 01 is the Airbnb: $857.36 for three nights, split four ways.</p><span class="prev-tags"><span>$214.34 × 4</span><span>Moose</span><span>Soup</span><span>Asamad</span><span>Kaptaan</span></span></a>
       <a class="prev-card reveal" href="#fifa"><span class="prev-top"><span class="label">FC 27 Tournament</span><span class="prev-arrow" aria-hidden="true">→</span></span><h3>The 2v2v2 title race.</h3><p id="fifaPrevLine">No results in yet — everyone plays everyone, and the top two meet in the final.</p><span class="prev-tags"><span>Title Race</span><span>The Gauntlet</span><span>The Final</span></span></a>
     </div>
@@ -600,15 +607,18 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
   <div class="view" id="view-photos" hidden>
 <!-- ================= PHOTO WALL ================= -->
   <section id="photos"><div class="wrap">
-    <div class="sec-head reveal"><div class="label acid">05 · Photo Wall</div><h2>Every shot, <span class="serif">one wall.</span></h2><p>The trip album lives in Google Photos — this page is the front door. Shoot all weekend, put it on the wall, and everyone's got the full set.</p></div>
+    <div class="sec-head reveal"><div class="label acid">05 · Photo Wall</div><h2>Every shot, <span class="serif">one wall.</span></h2><p>The trip album lives right here, on the crew's own server. Shoot all weekend, put it on the wall, and everyone's got the full set.</p></div>
     <div class="card reveal">
       <h3 style="margin-top:0">CRCMZ Trip 2.0 — the shared album</h3>
-      <p>One album for the whole crew: touchdown shots, tournament night, all of it.</p>
+      <p>One album for the whole crew: touchdown shots, tournament night, all of it. Add photos and videos straight from your phone — they stay on the server, behind the crew login.</p>
       <div class="photo-cta">
-        <a class="btn primary" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">Add Photos</a>
-        <a class="btn" href="https://photos.app.goo.gl/wQutd1ZoUsBM58a77" target="_blank" rel="noopener">View the Wall</a>
+        <label class="btn primary" for="photoInput" style="cursor:pointer">Add Photos</label>
+        <button class="btn" type="button" id="photoRefresh">Refresh the Wall</button>
+        <input type="file" id="photoInput" accept="image/*,video/*,.heic,.heif" multiple hidden>
       </div>
-      <p class="photo-note">Photos open in Google Photos — add yours there, then come right back here.</p>
+      <p class="photo-note photo-status" id="photoStatus" aria-live="polite"></p>
+      <div class="photo-grid" id="photoGrid"></div>
+      <p class="photo-empty" id="photoEmpty">Nothing on the wall yet. First shot of the weekend goes here.</p>
     </div>
   </div></section>
   </div>
@@ -630,7 +640,7 @@ body[data-view] .tabbar{background:rgba(8,10,28,.97)}
         <div class="split-person"><img src="assets/samad.png" alt="Asamad logo" loading="lazy"><span class="who">Asamad</span><span class="amt">$214.34</span></div>
         <div class="split-person"><img src="assets/kap.png" alt="Kaptaan logo" loading="lazy"><span class="who">Kaptaan</span><span class="amt">$214.34</span></div>
       </div>
-      <div class="split-note"><b>Coming at trip.crcmz.me:</b> adding expenses and uploading receipt photos switch on when this page moves to its Cloudflare home at trip.crcmz.me. Until then, snap your receipts and keep them in the Photo Wall album — they get logged when the pot goes live.</div>
+      <div class="split-note"><b>Coming soon:</b> adding expenses and uploading receipt photos right here in the Split. Until then, snap your receipts and put them on the Photo Wall — they get logged when the pot goes live.</div>
     </div>
   </div></section>
   </div>
@@ -1279,6 +1289,96 @@ document.querySelectorAll('.tabbar .tab').forEach(function(t){
 });
 window.addEventListener('hashchange',applyRoute);
 applyRoute();
+</script>
+<script>
+/* ============ PHOTO WALL (self-hosted on the trip server) ============ */
+(function(){
+  var grid=document.getElementById('photoGrid');
+  var empty=document.getElementById('photoEmpty');
+  var status=document.getElementById('photoStatus');
+  var input=document.getElementById('photoInput');
+  var refreshBtn=document.getElementById('photoRefresh');
+  if(!grid||!input) return;
+  var loaded=false, loading=false;
+
+  function setStatus(t){ if(status) status.textContent=t||''; }
+
+  function tile(p){
+    var a=document.createElement('a');
+    a.className='photo-tile'; a.href=p.url; a.target='_blank'; a.rel='noopener';
+    if(p.kind==='image'){
+      var img=document.createElement('img');
+      img.src=p.url; img.alt=p.originalName||'Trip photo'; img.loading='lazy';
+      a.appendChild(img);
+    } else {
+      var play=document.createElement('span');
+      play.className='pt-play'; play.textContent='▶ Video';
+      a.appendChild(play);
+    }
+    var meta=document.createElement('span');
+    meta.className='pt-meta';
+    var when='';
+    try{ when=new Date(p.uploadedAt).toLocaleDateString('en-CA',{month:'short',day:'numeric'}); }catch(e){}
+    meta.textContent=(p.uploadedBy||'crew')+(when?' · '+when:'');
+    meta.title=p.originalName||'';
+    a.appendChild(meta);
+    return a;
+  }
+
+  function loadWall(force){
+    if(loading||(loaded&&!force)) return;
+    loading=true;
+    fetch('/api/photos',{headers:{'Accept':'application/json'}})
+      .then(function(r){
+        if(r.status===401){ window.location.href='/auth/login'; throw new Error('auth'); }
+        if(!r.ok) throw new Error('load');
+        return r.json();
+      })
+      .then(function(data){
+        loaded=true; loading=false;
+        grid.innerHTML='';
+        var items=(data&&data.photos)||[];
+        items.forEach(function(p){ grid.appendChild(tile(p)); });
+        if(empty) empty.style.display=items.length?'none':'';
+        if(items.length) setStatus(items.length+(items.length===1?' item':' items')+' on the wall.');
+      })
+      .catch(function(err){
+        loading=false;
+        if(err&&err.message==='auth') return;
+        setStatus('The wall could not load just now. Pull Refresh the Wall to try again.');
+      });
+  }
+
+  input.addEventListener('change',function(){
+    var files=input.files;
+    if(!files||!files.length) return;
+    var fd=new FormData();
+    for(var i=0;i<files.length;i++) fd.append('photos',files[i]);
+    setStatus('Uploading '+files.length+(files.length===1?' file':' files')+'…');
+    fetch('/api/photos',{method:'POST',body:fd})
+      .then(function(r){
+        if(r.status===401){ window.location.href='/auth/login'; throw new Error('auth'); }
+        return r.json().then(function(j){ if(!r.ok) throw new Error((j&&j.error)||'Upload failed.'); return j; });
+      })
+      .then(function(){ setStatus('Added to the wall.'); input.value=''; loadWall(true); })
+      .catch(function(err){
+        if(err&&err.message==='auth') return;
+        setStatus(err.message||'Upload failed. Try again.');
+        input.value='';
+      });
+  });
+
+  if(refreshBtn) refreshBtn.addEventListener('click',function(){ loadWall(true); });
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('[data-view="photos"],a[href="#photos"]'):null;
+    if(t) setTimeout(function(){ loadWall(false); },60);
+  });
+  window.addEventListener('hashchange',function(){
+    if((location.hash||'').indexOf('photos')>-1) loadWall(false);
+  });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ loadWall(false); });
+  else loadWall(false);
+})();
 </script>
 </body>
 </html>

@@ -6,9 +6,10 @@ the Split, and the FC 27 tournament.
 
 The page itself is a single static HTML file (`public/index.html` +
 `public/assets`). A thin Express server (`server.js`) serves it and gates
-every route behind a **Zitadel OIDC login** (Authorization Code flow,
-`passport-openidconnect`). There is no database; sessions are signed cookies
-(in-memory session store — run a single instance).
+every route behind a **Zitadel OIDC login** (Authorization Code flow with
+PKCE via `openid-client` — a public client, no client secret). There is no
+database; sessions are signed cookies (in-memory session store — run a
+single instance).
 
 ## Run locally
 
@@ -33,16 +34,18 @@ names the missing ones.
 | Variable | What it is |
 | --- | --- |
 | `ZITADEL_ISSUER` | Zitadel instance URL, e.g. `https://auth.crcmz.me` |
-| `ZITADEL_CLIENT_ID` | Client ID of the OIDC app registered in Zitadel |
-| `ZITADEL_CLIENT_SECRET` | That application's client secret |
+| `ZITADEL_CLIENT_ID` | Client ID of the OIDC app registered in Zitadel (public client, PKCE) |
 | `SESSION_SECRET` | Long random string for the session cookie (`openssl rand -hex 32`) |
 | `BASE_URL` | `https://trip.crcmz.me` |
 | `PORT` | Optional — defaults to `3000` |
+| `UPLOADS_DIR` | Optional — photo storage dir, defaults to `/app/data/uploads` in the container |
+| `MAX_FILE_MB` | Optional — max size per uploaded file, defaults to `50` |
 
 ### Zitadel setup (one-time)
 
-Register a Web application in Zitadel with the Authorization Code flow and
-this exact redirect URI:
+Register a Web application in Zitadel as a **public client** using the
+Authorization Code flow with **PKCE (S256)** — no client secret — and this
+exact redirect URI:
 
 ```
 https://trip.crcmz.me/auth/callback
@@ -50,3 +53,20 @@ https://trip.crcmz.me/auth/callback
 
 Every visitor must sign in with a Zitadel account before any page or asset
 is served; only `/healthz` and the `/auth/*` endpoints are public.
+
+## Photo Wall (self-hosted uploads)
+
+The Photos tab is a working album on this server — no Google Photos:
+
+- `POST /api/photos` — multipart upload, form field `photos` (up to 20 files,
+  images and videos, 50 MB each by default).
+- `GET /api/photos` — JSON list of what's on the wall (newest first).
+- `GET /uploads/<name>` — serves one uploaded file.
+
+All three sit behind the same Zitadel login. Files are stored under
+`UPLOADS_DIR` (default `/app/data/uploads` in the container) with an
+`index.json` beside them recording who uploaded what, when.
+
+**Coolify:** mount a persistent volume at `/app/data` (or set `UPLOADS_DIR`
+to wherever the volume is mounted). Without a volume, uploaded photos are
+wiped on every redeploy.
