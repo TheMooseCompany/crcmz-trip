@@ -260,7 +260,7 @@ async function main() {
     // Show custom sign-in page unless ?proceed=1 (OIDC fallback).
     if (!req.query.proceed) {
       const hasPasskey = !!SERVICE_TOKEN;
-      return res.type('html').send(`<!doctype html>
+      return res.set('Cache-Control', 'no-cache').type('html').send(`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -996,6 +996,7 @@ async function passkeyLogin(){
       name: item.originalName,
     })));
 
+    res.set('Cache-Control', 'no-cache');
     res.type('html').send(`<!doctype html>
 <html lang="en">
 <head>
@@ -1411,6 +1412,7 @@ document.addEventListener('keydown', function(e) {
       .replace('<!--ADMIN_SCRIPT-->', () => parts.script);
   }
   app.get(['/', '/index.html'], requireAuth, (req, res) => {
+    res.set('Cache-Control', 'no-cache');
     res.type('html').send(renderPage(req.session.user));
   });
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: false }));
