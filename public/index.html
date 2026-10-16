@@ -697,8 +697,10 @@ body.reduced .days-layout{display:block}
 .tp-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));width:0;transition:width .8s var(--ease)}
 .tp-tick{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;border:2px solid var(--muted2);background:var(--sky2);transform:translate(-50%,-50%)}
 .tp-tick.on{border-color:var(--amber);background:var(--amber)}
+.tp-bar.tp-countdown .tp-tick{display:none}
 .tp-days{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
 .tp-days span.on{color:var(--amber2);font-weight:600}
+.tp-days.tp-hidden{display:none}
 .tp-scale{display:flex;justify-content:space-between;margin:0 0 6px;font-family:"Space Grotesk",sans-serif;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-weight:600;line-height:1.2}
 /* --- list reveals: CSS scroll-driven where supported, IO elsewhere --- */
 @supports (animation-timeline: view()){
@@ -1169,9 +1171,9 @@ img{max-width:100%}
     </div>
     <div class="tp-card reveal">
       <div class="tp-top"><span class="label">Trip Progress</span><span class="tp-phase mono" id="tpPhase">T-MINUS 13 DAYS</span></div>
-      <div class="tp-bar"><i id="tpFill" style="width: 54.9%;"></i><span class="tp-tick" data-tick="0" style="left:12.5%"></span><span class="tp-tick" data-tick="1" style="left:37.5%"></span><span class="tp-tick" data-tick="2" style="left:62.5%"></span><span class="tp-tick" data-tick="3" style="left:87.5%"></span></div>
-      <div class="tp-scale" aria-label="Progress measured from October 1 to October 29"><span>OCT 1</span><span>OCT 29</span></div>
-      <div class="tp-days"><span data-ticklab="0">Thu 29</span><span data-ticklab="1">Fri 30</span><span data-ticklab="2">Sat 31</span><span data-ticklab="3">Sun 1</span></div>
+      <div class="tp-bar tp-countdown" id="tpBar"><i id="tpFill" style="width: 54.9%;"></i><span class="tp-tick" data-tick="0" style="left:12.5%"></span><span class="tp-tick" data-tick="1" style="left:37.5%"></span><span class="tp-tick" data-tick="2" style="left:62.5%"></span><span class="tp-tick" data-tick="3" style="left:87.5%"></span></div>
+      <div class="tp-scale" id="tpScale" aria-label="Progress measured from October 1 to October 29"><span>OCT 1</span><span>OCT 29</span></div>
+      <div class="tp-days tp-hidden" id="tpDays"><span data-ticklab="0">Thu 29</span><span data-ticklab="1">Fri 30</span><span data-ticklab="2">Sat 31</span><span data-ticklab="3">Sun 1</span></div>
     </div>
   </div></section>
 <!-- ================= NEXT UP ================= -->
@@ -3345,12 +3347,14 @@ renderBuds();
    and day data, so Admin edits move the readout with the countdown. */
 (function(){
  var phase=document.getElementById('tpPhase'),fill=document.getElementById('tpFill');
+ var tpBar=document.getElementById('tpBar'),tpScale=document.getElementById('tpScale'),tpDays=document.getElementById('tpDays');
  if(!phase||!fill)return;
  var lastTxt='';
  function tpUpdate(){
    if(typeof TARGET==='undefined'||typeof END==='undefined')return;
    var now=Date.now(),txt='',pct=0,active=-1;
-   if(now<TARGET){
+   var isCountdown=now<TARGET;
+   if(isCountdown){
      var days=Math.ceil((TARGET-now)/86400000);
      txt='T-MINUS '+days+' DAY'+(days===1?'':'S');
      pct=Math.max(2,Math.min(96,(1-(TARGET-now)/(28*86400000))*100));
@@ -3365,6 +3369,22 @@ renderBuds();
    }
    if(txt!==lastTxt){phase.textContent=txt;lastTxt=txt;}
    fill.style.width=pct.toFixed(1)+'%';
+   if(tpBar)tpBar.classList.toggle('tp-countdown',isCountdown);
+   if(tpDays)tpDays.classList.toggle('tp-hidden',isCountdown);
+   if(tpScale&&CONTENT.days&&CONTENT.days.length){
+     if(isCountdown){
+       tpScale.children[0].textContent='OCT 1';
+       tpScale.children[1].textContent='OCT 29';
+       tpScale.setAttribute('aria-label','Progress measured from October 1 to October 29');
+     }else{
+       var fd=CONTENT.days[0],ld=CONTENT.days[CONTENT.days.length-1];
+       var fl=(fd.dow||'').split(' ')[0].substring(0,3).toUpperCase()+' '+(fd.dnum||'');
+       var ll=(ld.dow||'').split(' ')[0].substring(0,3).toUpperCase()+' '+(ld.dnum||'');
+       tpScale.children[0].textContent=fl;
+       tpScale.children[1].textContent=ll;
+       tpScale.setAttribute('aria-label','Trip progress from '+fl+' to '+ll);
+     }
+   }
    document.querySelectorAll('[data-tick]').forEach(function(t){
      t.classList.toggle('on',+t.getAttribute('data-tick')<=active);
    });
