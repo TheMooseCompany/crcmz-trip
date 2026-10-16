@@ -788,9 +788,11 @@ async function passkeyLogin(){
     + '<meta property="og:title" content="CRCMZ BOYZ — Calgary Trip">'
     + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
     + '<meta property="og:image" content="https://trip.crcmz.me/og-image.jpg">'
+    + '<meta property="og:image:type" content="image/jpeg">'
     + '<meta property="og:image:width" content="1200">'
     + '<meta property="og:image:height" content="630">'
     + '<meta name="twitter:card" content="summary_large_image">'
+    + '<meta name="twitter:image" content="https://trip.crcmz.me/og-image.jpg">'
     + '</head><body>CRCMZ BOYZ — Calgary Trip</body></html>';
   app.get('/og-image.jpg', (req, res) => {
     res.set('Cache-Control', 'public, max-age=86400');
@@ -808,6 +810,9 @@ async function passkeyLogin(){
     if (req.method === 'GET'
       && !p.startsWith('/api') && !p.startsWith('/auth') && !p.startsWith('/uploads')
       && PREVIEW_BOTS.test(req.get('user-agent') || '')) {
+      // Never let a crawler or intermediary cache this doc: a cached copy
+      // would freeze any future preview fix out of the next scrape.
+      res.set('Cache-Control', 'no-cache');
       return res.type('html').send(PREVIEW_HTML);
     }
     next();
