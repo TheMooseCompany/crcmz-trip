@@ -1575,6 +1575,7 @@ document.addEventListener('keydown', function(e) {
       return res.status(400).json({ error: 'text too long (max 4000 chars)' });
     const aiBase = (process.env.AI_BASE_URL || 'http://192.168.4.38:1234/v1').replace(/\/$/, '');
     const aiModel = process.env.AI_MODEL || 'Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-8bit';
+    const aiKey = process.env.OLLAMA_API_KEY || '';
     const userMsg = `Extract flight information from this booking/itinerary text. Return ONLY a valid JSON object — no explanation, no markdown fences.
 
 Fields (use empty string for unknown, true/false for hasWifi):
@@ -1585,9 +1586,11 @@ duration (e.g. "1h 29m"), aircraft, cabin, hasWifi, terminal, gate, notes
 Text:
 ${text.trim()}`;
     try {
+      const aiHeaders = { 'Content-Type': 'application/json' };
+      if (aiKey) aiHeaders['Authorization'] = `Bearer ${aiKey}`;
       const r = await fetch(`${aiBase}/chat/completions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: aiHeaders,
         body: JSON.stringify({ model: aiModel, messages: [{ role: 'user', content: userMsg }], temperature: 0, max_tokens: 512 }),
         signal: AbortSignal.timeout(90000),
       });
