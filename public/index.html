@@ -669,6 +669,72 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 #view-buds::before{background:radial-gradient(600px 380px at 84% 12%,rgba(242,179,61,.10),transparent 65%),radial-gradient(620px 420px at 12% 78%,rgba(165,180,255,.10),transparent 65%)}
 #view-admin::before{background:radial-gradient(560px 340px at 12% 6%,rgba(242,179,61,.13),transparent 65%),radial-gradient(600px 400px at 90% 50%,rgba(165,180,255,.10),transparent 65%)}
 @keyframes ambDrift{from{transform:translate3d(-1.2%,0,0) scale(1)}to{transform:translate3d(1.6%,-1.4%,0) scale(1.05)}}
+/* --- Days: boarding-pass stack (sticky pile, Concept 01) ---
+   Each pass sticks at an incremental top offset so a covered pass
+   leaves its top strip (route row + date stub head) showing as a
+   sliver. The stack driver (below) recedes covered passes; entrances
+   ride the site .rv reveal on the pass's inner wrapper, because the
+   scroll-driven rvIn animation owns transform on its element and
+   would fight the driver's scale. Reduced motion: a plain list. */
+.bp-stack{display:flex;flex-direction:column;gap:16px;--peek:72px}
+.bp-pass{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--peek));z-index:calc(2 + var(--i,0));
+  min-height:300px;border-radius:18px;overflow:hidden;color:var(--ink);
+  background:linear-gradient(165deg,#FFFDF6,#EFE6CF);
+  box-shadow:0 18px 34px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.8);
+  transform-origin:50% 0;will-change:transform,filter}
+.bp-in{display:flex;position:relative}
+.bp-stub{flex:0 0 74px;padding:15px 0 13px;text-align:center;border-right:2px dashed rgba(23,20,37,.28);
+  display:flex;flex-direction:column;align-items:center;gap:1px}
+.bp-stub .dow{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.18em}
+.bp-stub .dnum{font-size:38px;line-height:1;font-weight:700;letter-spacing:-.01em}
+.bp-stub .dmon{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--paper-mut);letter-spacing:.16em;font-weight:600;text-transform:uppercase}
+.bp-stub .yr{margin-top:auto;font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--paper-mut);letter-spacing:.2em}
+.bp-body{flex:1;padding:14px 16px 13px;min-width:0;position:relative;display:flex;flex-direction:column}
+.bp-route{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px}
+.bp-codes{font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+.bp-codes span{color:var(--paper-mut);font-weight:500;padding:0 3px}
+.bp-status{font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;letter-spacing:.14em;padding:4px 8px;border-radius:99px;background:var(--sky);color:var(--cream);white-space:nowrap}
+.bp-status b{color:var(--amber2);font-weight:600}
+.bp-pass h2{font-size:25px;line-height:.98;font-weight:700;letter-spacing:-.01em;text-transform:uppercase;margin:2px 0 6px}
+.bp-pass h2 .serif{color:#3D4DB0;text-transform:none}
+.bp-plan{font-size:13.5px;line-height:1.5;color:var(--paper-mut);font-weight:500;margin:0}
+.bp-plan + .bp-plan{margin-top:6px}
+.bp-movie-links{display:flex;gap:8px;margin:11px 0 3px}
+.bp-movie-links .movie-btn{flex:1;justify-content:center;margin:0;padding:9px 10px;min-height:0;font-size:13px;line-height:1.3;border-radius:12px;white-space:nowrap}
+.bp-data{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:10px;border-top:1px solid rgba(23,20,37,.16);padding-top:9px;margin-bottom:12px}
+.bp-data.wide1{grid-template-columns:1.45fr .85fr 1fr}
+.bp-data.wide3{grid-template-columns:.85fr .6fr 1.5fr}
+.bp-data div{min-width:0}
+.bp-data div + div{border-left:1px solid rgba(23,20,37,.12);padding-left:10px}
+.bp-data .k{font-size:8.5px;font-weight:700;letter-spacing:.16em;color:var(--paper-mut);text-transform:uppercase}
+.bp-data .v{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap}
+.bp-barcode{height:19px;margin-top:auto;border-radius:3px;opacity:.85;
+  background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px,var(--ink) 10px 13px,transparent 13px 15px,var(--ink) 15px 16px,transparent 16px 21px)}
+.bp-foot{display:flex;justify-content:space-between;margin-top:5px}
+.bp-foot span{font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.2em;color:var(--paper-mut);font-weight:600}
+.bp-pass.gold{background:linear-gradient(160deg,#FFC95E,#EFA92E);color:#191104}
+.bp-pass.gold .bp-stub{border-right-color:rgba(25,17,4,.3)}
+.bp-pass.gold .bp-stub .dmon,.bp-pass.gold .bp-stub .yr,.bp-pass.gold .bp-plan{color:rgba(25,17,4,.66)}
+.bp-pass.gold h2 .serif{color:#7A4A00}
+.bp-pass.gold .bp-codes span{color:rgba(25,17,4,.55)}
+.bp-pass.gold .bp-data{border-top-color:rgba(25,17,4,.25)}
+.bp-pass.gold .bp-data div + div{border-left-color:rgba(25,17,4,.18)}
+.bp-pass.gold .bp-data .k{color:rgba(25,17,4,.55)}
+.bp-pass.gold .bp-barcode{background:repeating-linear-gradient(90deg,#191104 0 2px,transparent 2px 5px,#191104 5px 6px,transparent 6px 10px,#191104 10px 13px,transparent 13px 15px,#191104 15px 16px,transparent 16px 21px)}
+.bp-pass.gold .bp-foot span{color:rgba(25,17,4,.55)}
+.bp-stamp{position:absolute;top:13px;right:13px;transform:rotate(6deg);z-index:2;
+  border:2px solid rgba(25,17,4,.75);color:rgba(25,17,4,.85);border-radius:6px;
+  font-size:10px;font-weight:700;letter-spacing:.18em;padding:4px 8px;text-transform:uppercase}
+.bp-sheen{position:absolute;top:-12%;bottom:-12%;left:0;width:42%;pointer-events:none;opacity:0;z-index:1;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.38) 50%,transparent);
+  transform:translateX(-140%) skewX(-16deg)}
+.bp-stack.bp-live .bp-pass.gold.sheen-on .bp-sheen{opacity:1;animation:bpSheen 3.4s var(--ease) infinite}
+@keyframes bpSheen{0%{transform:translateX(-140%) skewX(-16deg)}55%,100%{transform:translateX(330%) skewX(-16deg)}}
+@media (prefers-reduced-motion: reduce){
+  .bp-pass{position:static}
+  .bp-stack.bp-live .bp-pass.gold.sheen-on .bp-sheen{animation:none;opacity:0}
+}
+body.reduced .bp-pass{position:static}
 /* --- Days: sticky-visual step story --- */
 .days-layout{display:block}
 .days-visual{margin:0 0 14px}
@@ -1401,16 +1467,8 @@ flash of Home. The router clears the tag when it takes over. */
   
 <!-- ================= DAYS ================= -->
   <section id="days"><div class="wrap">
-    <div class="sec-head reveal"><div class="label">02 · The Four Days</div><h2>One anchor a day. <span class="serif">Everything else</span> is hangout.</h2></div>
-    <div class="days-layout">
-      <div class="days-visual reveal" id="daysVisual"><div class="dv-head label">The Route · Four Days</div><div class="dv-nodes"><i class="dv-prog" style="height: 0%;"></i><button type="button" class="dv-node on" data-day="0"><span class="dv-dot"></span><span class="dv-node-main"><span class="dv-lab">Thu 29</span><span class="dv-node-sub">Moiz lands.</span></span></button><button type="button" class="dv-node" data-day="1"><span class="dv-dot"></span><span class="dv-node-main"><span class="dv-lab">Fri 30</span><span class="dv-node-sub">Samad lands.</span></span></button><button type="button" class="dv-node" data-day="2"><span class="dv-dot"></span><span class="dv-node-main"><span class="dv-lab">Sat 31</span><span class="dv-node-sub">Movie night.</span></span></button><button type="button" class="dv-node" data-day="3"><span class="dv-dot"></span><span class="dv-node-main"><span class="dv-lab">Sun 1</span><span class="dv-node-sub">Send-off</span></span></button></div></div>
-      <div>
-        <div class="day-row-wrap reveal">
-          <div class="day-row" id="dayRow" data-lenis-prevent=""><article class="day-card active"><div class="dow">Thu</div><div class="dnum">29</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Touchdown</span><h3>Moiz lands.</h3><ul class="day-list"><li>InterestingSoup (Moiz) lands in Calgary. Landing time: [TO FILL]</li><li>Check-in 4:00–11:00 PM, smart lock. Settle in, pool table, first food run.</li></ul></article><article class="day-card"><div class="dow">Fri</div><div class="dnum">30</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Day 2</span><h3>Samad lands.</h3><ul class="day-list"><li>Asamad lands in Calgary. Landing time: [TO FILL]</li><li>Chill at the Airbnb, order food and Zoot.</li><li>Full crew in by tonight.</li></ul></article><article class="day-card"><div class="dow">Sat · Halloween</div><div class="dnum">31</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Main Event</span><h3>Movie night.</h3><ul class="day-list"><li>Street Fighter (2026) — on the big screen.</li></ul><div class="movie-links"><a class="btn movie-btn" href="https://www.cineplex.com/movie/street-fighter-2026" target="_blank" rel="noopener"><span class="chain-chip"><img src="assets/cineplex.png" alt="" width="16" height="16" onerror="this.parentNode.style.display='none'"></span><span><b>Cineplex</b> — Street Fighter</span></a><a class="btn movie-btn" href="https://www.landmarkcinemas.com/film-info/street-fighter/" target="_blank" rel="noopener"><span class="chain-chip"><img src="assets/landmark.png" alt="" width="16" height="16" onerror="this.parentNode.style.display='none'"></span><span><b>Landmark</b> — Street Fighter</span></a></div><ul class="day-list tight"><li>Calgary crew meetup: the wider crew is invited to the house for dinner and a hang sesh.</li><li>Quiet hours from 10:00 PM — house rule.</li></ul></article><article class="day-card"><div class="dow">Sun</div><div class="dnum">1</div><div class="dmon">Nov 2026</div><h3>Send-off</h3><ul class="day-list"><li>Brunch, then departures. Checkout before 11 AM.</li></ul></article></div>
-        </div>
-        <div class="day-dots reveal" id="dayDots" aria-hidden="true"><button type="button" data-i="0" aria-label="Go to day 1" class="on"></button><button type="button" data-i="1" aria-label="Go to day 2"></button><button type="button" data-i="2" aria-label="Go to day 3"></button><button type="button" data-i="3" aria-label="Go to day 4"></button></div>
-      </div>
-    </div>
+    <div class="sec-head reveal"><div class="label">02 · The Four Days</div><h2>Every day, a <span class="serif">boarding pass</span>.</h2></div>
+    <div class="bp-stack" id="passStack"></div>
   </div></section>
   </div>
   <div class="view amb-paused" id="view-poll" hidden="">
@@ -1716,31 +1774,82 @@ function renderHeroText(){
  var r2=document.getElementById('recapLine2');
  if(r2)r2.textContent=CONTENT.days.map(function(d){return (d.dow||'').split(' ')[0]+' — '+(d.title||'')}).join(' · ');
 }
-/* ---------- Days ---------- */
+/* ---------- Days: boarding passes (Concept 01) ----------
+   Each day renders as a boarding pass in the sticky stack. Copy comes
+   from CONTENT.days (admin edits keep working); the ticket chrome
+   (route codes, status pill, data row) is presentation metadata keyed
+   by day index, matching the content the owner approved. Landing-time
+   placeholders are filled at render with the confirmed flight facts —
+   the same strings the FLIGHT-CARD-PATCH enforces as a backstop. */
+var PASS_META=[
+ {route:'YVR \u2192 YYC',pill:'LANDS <b>1:59 PM</b>',foot:'SMART LOCK ENTRY',
+  data:[['Flight','AC 212'],['Terminal','M'],['Check-in','4:00\u201311:00 PM']]},
+ {route:'IAH \u2192 YYC',pill:'LANDS <b>11:30 AM</b>',foot:'DAY-TWO PASS',
+  data:[['Flight','WS 1541'],['From','Houston'],['Crew','Complete']]},
+ {route:'HOUSE \u2192 CINEMA',foot:'ADMIT THE CREW',
+  dataCls:'wide1',
+  data:[['Feature','Street Fighter'],['After','Meetup'],['Quiet hrs','10 PM']]},
+ {route:'YYC \u2192 IAH',pill:'DEPARTS <b>6:00 PM</b>',foot:'RETURN PASS',
+  dataCls:'wide1',
+  data:[['Checkout','By 11:00 AM'],['Flight','WS 1540'],['To','Houston']]}
+];
+function passFill(b,title){
+ if(b.indexOf('[TO FILL]')<0)return b;
+ if(title.indexOf('Samad lands')===0)return 'Asamad lands in Calgary. Landing time: 11:30 AM, Flight WS 1541.';
+ if(title.indexOf('Moiz lands')===0)return 'InterestingSoup (Moiz) lands in Calgary. Landing time: 1:59 PM, Flight AC 212.';
+ return b.replace('[TO FILL]','\u2026');
+}
+function passTitle(t){
+ t=String(t||'');
+ var hy=t.indexOf('-');
+ if(hy>0&&hy<t.length-1)return cEsc(t.slice(0,hy+1))+'<span class="serif">'+cEsc(t.slice(hy+1))+'</span>';
+ var w=t.split(' ');
+ if(w.length<2)return cEsc(t);
+ return cEsc(w.slice(0,-1).join(' '))+' <span class="serif">'+cEsc(w[w.length-1])+'</span>';
+}
 function renderDays(){
- var row=document.getElementById('dayRow'); if(!row)return;
- row.innerHTML=CONTENT.days.map(function(d){
-   var chip=d.chip?'<span class="chip day-chip">'+cEsc(d.chip)+'</span>':'';
-   var bullets=d.bullets||[];
-   var body='';
+ var stack=document.getElementById('passStack'); if(!stack)return;
+ stack.innerHTML=CONTENT.days.map(function(d,i){
+   var meta=PASS_META[i]||{};
+   var gold=/main event/i.test(d.chip||'');
+   var title=String(d.title||'');
+   var bullets=(d.bullets||[]).map(function(b){return passFill(String(b),title)});
+   var plan='';
    if(d.cinema&&d.cinema.length){
-     if(bullets.length)body+='<ul class="day-list"><li>'+cEsc(bullets[0])+'</li></ul>';
-     body+='<div class="movie-links">'+d.cinema.map(function(m){
+     if(bullets.length)plan+='<p class="bp-plan">'+cEsc(bullets[0])+'</p>';
+     plan+='<div class="bp-movie-links">'+d.cinema.map(function(m){
        var low=(m.label||'').toLowerCase();
        var logo=low.indexOf('cineplex')>=0?'assets/cineplex.png':(low.indexOf('landmark')>=0?'assets/landmark.png':'');
-       var parts=(m.label||'').split(' — ');
-       var label=parts.length>1?('<b>'+cEsc(parts[0])+'</b> — '+cEsc(parts.slice(1).join(' — '))):cEsc(m.label);
-       return '<a class="btn movie-btn" href="'+cEsc(m.url)+'" target="_blank" rel="noopener">'+(logo?'<span class="chain-chip"><img src="'+logo+'" alt="" width="16" height="16" onerror="this.parentNode.style.display=\'none\'"></span>':'')+'<span>'+label+'</span></a>';
+       var parts=(m.label||'').split(' \u2014 ');
+       var label=parts.length>1?('<b>'+cEsc(parts[0])+'</b>'):cEsc(m.label);
+       return '<a class="btn movie-btn" href="'+cEsc(m.url)+'" target="_blank" rel="noopener" aria-label="'+cEsc(m.label)+'">'+(logo?'<span class="chain-chip"><img src="'+logo+'" alt="" width="16" height="16" onerror="this.parentNode.style.display=\'none\'"></span>':'')+'<span>'+label+'</span></a>';
      }).join('')+'</div>';
      var rest=bullets.slice(1);
-     if(rest.length)body+='<ul class="day-list tight">'+rest.map(function(b){return '<li>'+cEsc(b)+'</li>'}).join('')+'</ul>';
+     if(rest.length)plan+='<p class="bp-plan">'+rest.map(function(b){return cEsc(b)}).join(' ')+'</p>';
    }else if(bullets.length){
-     body='<ul class="day-list">'+bullets.map(function(b){return '<li>'+cEsc(b)+'</li>'}).join('')+'</ul>';
+     plan='<p class="bp-plan">'+bullets.map(function(b){return cEsc(b)}).join(' ')+'</p>';
    }
-   return '<article class="day-card"><div class="dow">'+cEsc(d.dow)+'</div><div class="dnum">'+cEsc(d.dnum)+'</div><div class="dmon">'+cEsc(d.dmon)+'</div>'+chip+'<h3>'+cEsc(d.title)+'</h3>'+body+'</article>';
+   var dow=(d.dow||'').split(' ')[0];
+   var mon=(d.dmon||'').split(' ')[0];
+   var yr=(d.dmon||'').split(' ')[1]||'';
+   return '<article class="bp-pass'+(gold?' gold':'')+'" style="--i:'+i+'">'
+   +(gold?'<div class="bp-stamp">'+cEsc(d.chip)+'</div><i class="bp-sheen" aria-hidden="true"></i>':'')
+   +'<div class="bp-in rv">'
+   +'<div class="bp-stub"><div class="dow">'+cEsc(dow)+'</div><div class="dnum">'+cEsc(d.dnum)+'</div><div class="dmon">'+cEsc(mon)+'</div><div class="yr">'+cEsc(yr)+'</div></div>'
+   +'<div class="bp-body">'
+   +'<div class="bp-route"><div class="bp-codes">'+(meta.route?cEsc(meta.route).replace(' \u2192 ',' <span>\u2192</span> '):'')+'</div>'
+   +(meta.pill?'<div class="bp-status">'+meta.pill+'</div>':'')
+   +'</div>'
+   +'<h2>'+passTitle(title)+'</h2>'
+   +plan
+   +(meta.data?'<div class="bp-data'+(meta.dataCls?' '+meta.dataCls:'')+'">'+meta.data.map(function(kv){return '<div><div class="k">'+cEsc(kv[0])+'</div><div class="v">'+cEsc(kv[1])+'</div></div>'}).join('')+'</div>':'')
+   +'<div class="bp-barcode"></div>'
+   +'<div class="bp-foot"><span>CRCMZ BOYZ</span><span>'+cEsc(meta.foot||'')+'</span></div>'
+   +'</div></div></article>';
  }).join('');
  if(typeof syncDots==='function')syncDots();
  if(typeof window.__daysStory==='function')window.__daysStory();
+ if(typeof window.__bpRefresh==='function')window.__bpRefresh();
 }
 /* ---------- Stay ---------- */
 function money(v){v=String(v||'').trim(); if(!v)return ''; return v.charAt(0)==='$'?v:('$'+v)}
@@ -1810,19 +1919,26 @@ function springAnim(from,to,stiffness,damping){
  return {frames:frames,duration:Math.max(60,Math.round(total*1000))};
 }
 
-/* ================= Day row dots ================= */
+/* ================= Day row dots =================
+   The swipe row was replaced by the boarding-pass stack; the row and
+   dots no longer exist, so this block is inert — kept guarded so the
+   renderDays syncDots() call stays safe. */
 var dayRow=document.getElementById('dayRow'),dayDots=document.getElementById('dayDots');
-var dayCards=dayRow.children;
-dayDots.innerHTML=Array.prototype.map.call(dayCards,function(_,i){return '<button type="button" data-i="'+i+'" aria-label="Go to day '+(i+1)+'"></button>'}).join('');
-var dotBtns=dayDots.querySelectorAll('button');
+var dayCards=dayRow?dayRow.children:[];
+var dotBtns=[];
 function syncDots(){
+ if(!dayRow||!dayDots)return;
  var idx=0,best=1e9;
  for(var i=0;i<dayCards.length;i++){var d=Math.abs(dayCards[i].offsetLeft-dayRow.offsetLeft-dayRow.scrollLeft);if(d<best){best=d;idx=i}}
  dotBtns.forEach(function(b,j){b.classList.toggle('on',j===idx)});
 }
-dayRow.addEventListener('scroll',function(){requestAnimationFrame(syncDots)},{passive:true});
-dotBtns.forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i');dayRow.scrollTo({left:dayCards[i].offsetLeft-dayRow.offsetLeft-2,behavior:'smooth'})})});
-syncDots();
+if(dayRow&&dayDots){
+ dayDots.innerHTML=Array.prototype.map.call(dayCards,function(_,i){return '<button type="button" data-i="'+i+'" aria-label="Go to day '+(i+1)+'"></button>'}).join('');
+ dotBtns=dayDots.querySelectorAll('button');
+ dayRow.addEventListener('scroll',function(){requestAnimationFrame(syncDots)},{passive:true});
+ dotBtns.forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i');dayRow.scrollTo({left:dayCards[i].offsetLeft-dayRow.offsetLeft-2,behavior:'smooth'})})});
+ syncDots();
+}
 
 /* ================= Countdown ================= */
 var TARGET=new Date(CONTENT.trip.targetISO).getTime();
@@ -3577,57 +3693,60 @@ renderBuds();
  },{passive:true});
 })();
 
-/* ================= V5 · Days step story =================
-   Pudding/Scrollama pattern, hand-rolled: a sticky route visual stays
-   pinned while the four day cards scroll as steps (desktop); on
-   phones the visual is a slim sticky strip whose nodes mirror the
-   swipe row. Reduced motion / no story = today's swipe row, visual
-   hidden. Card content is rendered by renderDays as always; this
-   layer only tracks which step is active. */
+/* ================= Boarding-pass stack driver =================
+   The passes pile up with position:sticky (normal flow, 1:1 scroll);
+   this driver only recedes a pass as the next one covers it — scale
+   toward ~.95 plus a brightness dim, rotation relaxing to square —
+   and runs the gold pass's sheen while it is the uncovered top card.
+   Same pattern family as the cinematic driver: transform/filter only,
+   rAF while the section is near the viewport and Home is the active
+   view, and nothing at all under reduced motion. */
 (function(){
- var visual=document.getElementById('daysVisual');
- var row=document.getElementById('dayRow');
- if(!visual||!row)return;
- var activeDay=-1,ioDays=null;
- function setActive(i){
-   if(i===activeDay||i<0)return; activeDay=i;
-   visual.querySelectorAll('.dv-node').forEach(function(n,j){
-     n.classList.toggle('on',j===i);
-     n.classList.toggle('done',j<i);
+ var stack=document.getElementById('passStack');
+ if(!stack||REDUCED)return;
+ var ROTS=[-0.7,0.55,-0.45,0.6];
+ var passes=[],raf=0,lastY=-1,inView=false;
+ var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){
+     inView=e.isIntersecting;
+     stack.classList.toggle('bp-live',inView);
+     if(inView)kick();
    });
-   var prog=visual.querySelector('.dv-prog');
-   if(prog){
-     var frac=CONTENT.days.length>1?(i/(CONTENT.days.length-1))*100:100;
-     if(window.innerWidth>760)prog.style.height=frac+'%'; else prog.style.width=frac+'%';
+ },{rootMargin:'160px 0px 160px 0px'});
+ io.observe(stack);
+ function homeOn(){ var v=document.getElementById('view-home'); return v&&!v.hidden; }
+ function frame(){
+   raf=0;
+   if(!inView||!homeOn())return;
+   for(var i=0;i<passes.length-1;i++){
+     var a=passes[i],b=passes[i+1];
+     var ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+     if(!ar.height)continue;
+     var cov=(ar.bottom-br.top)/ar.height;
+     cov=cov<0?0:(cov>1?1:cov);
+     if(Math.abs(cov-(a.__cov||0))>0.002){
+       a.__cov=cov;
+       var rot=(a.__rot||0)*(1-cov);
+       a.style.transform='rotate('+rot.toFixed(3)+'deg) scale('+(1-0.05*cov).toFixed(4)+')';
+       a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')';
+     }
    }
-   row.querySelectorAll('.day-card').forEach(function(c,j){c.classList.toggle('active',j===i);});
+   var g=stack.querySelector('.bp-pass.gold');
+   if(g){
+     var gcov=g.__cov||0,gr=g.getBoundingClientRect();
+     g.classList.toggle('sheen-on',gcov<0.03&&gr.bottom>80&&gr.top<window.innerHeight);
+   }
+   if(window.scrollY!==lastY){ lastY=window.scrollY; raf=requestAnimationFrame(frame); }
  }
- window.__daysStory=function(){
-   visual.innerHTML='<div class="dv-head label">The Route · Four Days</div><div class="dv-nodes"><i class="dv-prog"></i>'+CONTENT.days.map(function(d,i){
-     return '<button type="button" class="dv-node" data-day="'+i+'"><span class="dv-dot"></span><span class="dv-node-main"><span class="dv-lab">'+cEsc((d.dow||'').split(' ')[0])+' '+cEsc(d.dnum||'')+'</span><span class="dv-node-sub">'+cEsc(d.title||'')+'</span></span></button>';
-   }).join('')+'</div>';
-   visual.querySelectorAll('.dv-node').forEach(function(n){
-     n.addEventListener('click',function(){
-       var i=+n.getAttribute('data-day'),cards=row.querySelectorAll('.day-card');
-       if(!cards[i])return;
-       cards[i].scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
-       setActive(i);
-     });
-   });
-   if(ioDays){ioDays.disconnect();ioDays=null;}
-   if(!REDUCED&&'IntersectionObserver' in window){
-     ioDays=new IntersectionObserver(function(es){
-       es.forEach(function(e){
-         if(e.isIntersecting)setActive(Array.prototype.indexOf.call(row.querySelectorAll('.day-card'),e.target));
-       });
-     },{rootMargin:'-38% 0px -52% 0px'});
-     row.querySelectorAll('.day-card').forEach(function(c){ioDays.observe(c);});
-   }
-   var cur=activeDay; activeDay=-1;
-   setActive(Math.max(0,Math.min(CONTENT.days.length-1,cur<0?0:cur)));
+ function kick(){ if(!raf)raf=requestAnimationFrame(frame); }
+ window.addEventListener('scroll',kick,{passive:true});
+ window.addEventListener('resize',kick);
+ window.__bpRefresh=function(){
+   passes=Array.prototype.slice.call(stack.querySelectorAll('.bp-pass'));
+   passes.forEach(function(p,i){ p.__rot=ROTS[i%ROTS.length]; p.__cov=-1; });
+   kick();
  };
- window.__daysStory();
- window.addEventListener('resize',function(){ if(window.__daysStory)window.__daysStory(); });
+ window.__bpRefresh();
 })();
 
 /* ================= V5 · trip progress readout =================
@@ -4253,22 +4372,23 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   var STYLE='margin-top:12px;padding:9px 12px;border-radius:12px;border:1px solid rgba(138,94,16,.35);background:rgba(242,179,61,.13);font-size:13px;line-height:1.45';
   function chip(card, text){
     if(card.querySelector('[data-flight-patch]')) return;
+    var body=card.querySelector('.bp-body'); if(!body) return;
     var d=document.createElement('div');
     d.setAttribute('data-flight-patch','1'); d.setAttribute('style',STYLE); d.textContent=text;
-    card.appendChild(d);
+    body.appendChild(d);
   }
   function patch(){
-    document.querySelectorAll('.day-card').forEach(function(card){
-      var h=card.querySelector('h3'); if(!h) return;
+    document.querySelectorAll('.bp-pass').forEach(function(card){
+      var h=card.querySelector('h2'); if(!h) return;
       var t=h.textContent||'';
       if(t.indexOf('Samad lands')===0){
-        card.querySelectorAll('.day-list li').forEach(function(li){
-          if(li.textContent.indexOf('[TO FILL]')>-1) li.textContent='Asamad lands in Calgary. Landing time: 11:30 AM, Flight WS 1541.';
+        card.querySelectorAll('.bp-plan').forEach(function(p){
+          if(p.textContent.indexOf('[TO FILL]')>-1) p.innerHTML=p.innerHTML.split('[TO FILL]').join('11:30 AM, Flight WS 1541.');
         });
-        chip(card,'\u2708 WS 1541 \u00B7 Houston \u2192 Calgary \u00B7 Fri Oct 30 \u00B7 Lands 11:30 AM');
+        if(card.textContent.indexOf('WS 1541')===-1) chip(card,'\u2708 WS 1541 \u00B7 Houston \u2192 Calgary \u00B7 Fri Oct 30 \u00B7 Lands 11:30 AM');
       }
       if(t.indexOf('Send-off')===0){
-        chip(card,'\u2708 Samad flies home \u00B7 WS 1540 \u00B7 Calgary \u2192 Houston \u00B7 Sun Nov 1 \u00B7 Departs 6:00 PM');
+        if(card.textContent.indexOf('WS 1540')===-1) chip(card,'\u2708 Samad flies home \u00B7 WS 1540 \u00B7 Calgary \u2192 Houston \u00B7 Sun Nov 1 \u00B7 Departs 6:00 PM');
       }
     });
   }
@@ -4276,4 +4396,5 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
 </script>
+
 </body></html>
