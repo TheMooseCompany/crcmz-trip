@@ -98,6 +98,8 @@ async function main() {
     })
   );
 
+  app.use(express.json({ limit: '1mb' }));
+
   app.get('/healthz', (req, res) => res.status(200).type('text/plain').send('ok'));
 
   app.get('/auth/login', (req, res) => {
@@ -163,6 +165,7 @@ async function main() {
   app.get('/api/photos', requireAuth, (req, res) => {
     const index = readIndex();
     const items = Object.values(index)
+      .filter((m) => !m.hidden)
       .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
       .map((m) => ({
         name: m.name,
@@ -211,6 +214,165 @@ async function main() {
     const filePath = path.join(UPLOADS_DIR, name);
     if (!fs.existsSync(filePath)) return res.status(404).type('text/plain').send('Not found');
     res.sendFile(filePath);
+  });
+
+  // ---------- Split ledger (auth required) ----------
+  // Expenses + settlements live in one JSON document on the same data
+  // volume as the photo uploads (LEDGER_PATH, default <app>/data/ledger.json).
+  // All money is integer CAD cents; USD entries keep their original amount
+  // and the rate they were logged at. Balances are computed by the client
+  // from this raw ledger, so the numbers are always auditable.
+  const LEDGER_PATH = process.env.LEDGER_PATH || path.join(__dirname, 'data', 'ledger.json');
+  const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi'];
+
+  function readLedger() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+      if (parsed && Array.isArray(parsed.expenses) && Array.isArray(parsed.settlements)) return parsed;
+    } catch { /* fall through to an empty ledger */ }
+    return { expenses: [], settlements: [] };
+  }
+  function writeLedger(ledger) {
+    fs.mkdirSync(path.dirname(LEDGER_PATH), { recursive: true });
+    const tmp = `${LEDGER_PATH}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(ledger, null, 2));
+    fs.renameSync(tmp, LEDGER_PATH);
+  }
+  const isCents = (n) => Number.isInteger(n) && n > 0;
+  function validShares(shares, total) {
+    if (!shares || typeof shares !== 'object' || Array.isArray(shares)) return false;
+    const keys = Object.keys(shares);
+    if (keys.length === 0) return false;
+    let sum = 0;
+    for (const k of keys) {
+      if (!PEOPLE.includes(k) || !isCents(shares[k])) return false;
+      sum += shares[k];
+    }
+    return sum === total;
+  }
+  function validExpense(e) {
+    if (!e || typeof e !== 'object') return false;
+    if (!PEOPLE.includes(e.payer)) return false;
+    if (!isCents(e.amountCentsCAD)) return false;
+    if (!validShares(e.shares, e.amountCentsCAD)) return false;
+    if (e.currency !== 'CAD' && e.currency !== 'USD') return false;
+    if (e.currency === 'USD') {
+      if (!isCents(e.origCents)) return false;
+      if (typeof e.fxRate !== 'number' || !(e.fxRate > 0)) return false;
+    }
+    if (typeof e.desc !== 'string' || e.desc.length > 200) return false;
+    if (e.splitMode !== 'equal' && e.splitMode !== 'exact' && e.splitMode !== 'percent') return false;
+    if (e.receipt != null && typeof e.receipt !== 'string') return false;
+    return true;
+  }
+
+  app.get('/api/expenses', requireAuth, (req, res) => {
+    res.json(readLedger());
+  });
+
+  app.post('/api/expenses', requireAuth, (req, res) => {
+    const e = req.body || {};
+    if (!validExpense(e)) return res.status(400).json({ error: 'Invalid expense.' });
+    const ledger = readLedger();
+    const record = {
+      id: crypto.randomUUID(),
+      payer: e.payer,
+      desc: e.desc,
+      amountCentsCAD: e.amountCentsCAD,
+      currency: e.currency,
+      origCents: e.currency === 'USD' ? e.origCents : e.amountCentsCAD,
+      fxRate: e.currency === 'USD' ? e.fxRate : null,
+      splitMode: e.splitMode,
+      shares: e.shares,
+      receipt: e.receipt || null,
+      addedBy: displayName(req.session.user),
+      addedAt: new Date().toISOString(),
+    };
+    ledger.expenses.push(record);
+    writeLedger(ledger);
+    res.status(201).json({ ok: true, expense: record });
+  });
+
+  app.delete('/api/expenses/:id', requireAuth, (req, res) => {
+    const ledger = readLedger();
+    const before = ledger.expenses.length;
+    ledger.expenses = ledger.expenses.filter((x) => x.id !== req.params.id);
+    if (ledger.expenses.length === before) return res.status(404).json({ error: 'No such expense.' });
+    writeLedger(ledger);
+    res.json({ ok: true });
+  });
+
+  app.post('/api/settlements', requireAuth, (req, res) => {
+    const s = req.body || {};
+    if (!PEOPLE.includes(s.from) || !PEOPLE.includes(s.to) || s.from === s.to || !isCents(s.amountCentsCAD)) {
+      return res.status(400).json({ error: 'Invalid settlement.' });
+    }
+    const ledger = readLedger();
+    const record = {
+      id: crypto.randomUUID(),
+      from: s.from,
+      to: s.to,
+      amountCentsCAD: s.amountCentsCAD,
+      addedBy: displayName(req.session.user),
+      addedAt: new Date().toISOString(),
+    };
+    ledger.settlements.push(record);
+    writeLedger(ledger);
+    res.status(201).json({ ok: true, settlement: record });
+  });
+
+  // Receipt uploads: images only, registered in the photo index as hidden
+  // so /uploads serves them but they stay off the Photo Wall.
+  const receiptUpload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+      filename: (req, file, cb) => {
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const rand = crypto.randomBytes(4).toString('hex');
+        const ext = path.extname(file.originalname || '').toLowerCase();
+        cb(null, `receipt-${stamp}-${rand}${ext}`);
+      },
+    }),
+    limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+    fileFilter: (req, file, cb) => {
+      const ext = path.extname(file.originalname || '').toLowerCase();
+      if (IMAGE_EXT.has(ext)) return cb(null, true);
+      cb(new Error(`Unsupported file type: ${ext || '(none)'} — images only.`));
+    },
+  });
+
+  app.post('/api/receipts', requireAuth, (req, res) => {
+    receiptUpload.single('receipt')(req, res, (err) => {
+      if (err) return res.status(400).json({ error: err.message || 'Upload failed.' });
+      if (!req.file) return res.status(400).json({ error: 'No file received.' });
+      const index = readIndex();
+      index[req.file.filename] = {
+        name: req.file.filename,
+        originalName: req.file.originalname,
+        uploadedBy: displayName(req.session.user),
+        uploadedAt: new Date().toISOString(),
+        size: req.file.size,
+        hidden: true,
+      };
+      writeIndex(index);
+      res.status(201).json({ ok: true, name: req.file.filename, url: `/uploads/${encodeURIComponent(req.file.filename)}` });
+    });
+  });
+
+  // USD -> CAD rate from Frankfurter (ECB data), cached 12h, stale-tolerant.
+  let fxCache = { rate: 1.419, at: 0, ok: false };
+  app.get('/api/fx', requireAuth, async (req, res) => {
+    const now = Date.now();
+    if (fxCache.ok && now - fxCache.at < 12 * 3600 * 1000) {
+      return res.json({ usdCad: fxCache.rate, stale: false });
+    }
+    try {
+      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=CAD');
+      const j = await r.json();
+      const rate = j && j.rates && j.rates.CAD;
+      if (typeof rate === 'number' && rate > 0) fxCache = { rate, at: now, ok: true };
+    } catch { /* keep the last known rate */ }
+    res.json({ usdCad: fxCache.rate, stale: !fxCache.ok });
   });
 
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
