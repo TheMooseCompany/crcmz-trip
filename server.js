@@ -545,6 +545,35 @@ async function main() {
     next();
   });
 
+  // ---------- Immich asset proxy (serves thumbnails/originals with API key server-side) ----------
+  app.get('/album/asset/:id/thumbnail', requireAuth, async (req, res) => {
+    if (!IMMICH_URL || !IMMICH_API_KEY) return res.status(404).end();
+    try {
+      const r = await fetch(`${IMMICH_URL}/api/assets/${req.params.id}/thumbnail?size=preview`, {
+        headers: { 'x-api-key': IMMICH_API_KEY },
+      });
+      if (!r.ok) return res.status(r.status).end();
+      res.set('content-type', r.headers.get('content-type') || 'image/jpeg');
+      res.set('cache-control', 'public, max-age=86400');
+      const buf = await r.arrayBuffer();
+      res.send(Buffer.from(buf));
+    } catch { res.status(500).end(); }
+  });
+
+  app.get('/album/asset/:id/original', requireAuth, async (req, res) => {
+    if (!IMMICH_URL || !IMMICH_API_KEY) return res.status(404).end();
+    try {
+      const r = await fetch(`${IMMICH_URL}/api/assets/${req.params.id}/original`, {
+        headers: { 'x-api-key': IMMICH_API_KEY },
+      });
+      if (!r.ok) return res.status(r.status).end();
+      res.set('content-type', r.headers.get('content-type') || 'application/octet-stream');
+      res.set('cache-control', 'public, max-age=86400');
+      const buf = await r.arrayBuffer();
+      res.send(Buffer.from(buf));
+    } catch { res.status(500).end(); }
+  });
+
   // ---------- Album gallery ----------
   // Fetches assets from Immich when configured; falls back to local index.json.
   app.get('/album', requireAuth, async (req, res) => {
@@ -553,21 +582,33 @@ async function main() {
 
     if (IMMICH_URL && IMMICH_API_KEY && IMMICH_ALBUM_ID) {
       try {
-        const r = await fetch(`${IMMICH_URL}/api/albums/${encodeURIComponent(IMMICH_ALBUM_ID)}?withoutAssets=false`, {
-          headers: { 'x-api-key': IMMICH_API_KEY },
-        });
-        if (r.ok) {
+        // Immich v1.100+ no longer inlines assets in GET /api/albums/:id;
+        // use POST /api/search/metadata with albumId instead.
+        let page = 1, done = false;
+        while (!done) {
+          const r = await fetch(`${IMMICH_URL}/api/search/metadata`, {
+            method: 'POST',
+            headers: { 'x-api-key': IMMICH_API_KEY, 'content-type': 'application/json' },
+            body: JSON.stringify({ albumId: IMMICH_ALBUM_ID, size: 100, page }),
+          });
+          if (!r.ok) break;
           const j = await r.json();
-          const assets = Array.isArray(j.assets) ? j.assets : [];
-          items = assets.map((a) => ({
+          const batch = j.assets?.items || j.items || [];
+          batch.forEach((a) => items.push({
             id: a.id,
-            url: `${IMMICH_URL}/api/assets/${a.id}/original`,
-            thumb: `${IMMICH_URL}/api/assets/${a.id}/thumbnail?size=preview`,
+            url: `/album/asset/${a.id}/original`,
+            thumb: `/album/asset/${a.id}/thumbnail`,
             originalName: a.originalFileName || a.id,
-            uploadedBy: (a.owner && (a.owner.name || a.owner.email)) || 'Unknown',
+            uploadedBy: a.exifInfo?.description || 'crew',
             uploadedAt: a.fileCreatedAt || a.createdAt || '',
             kind: (a.type || '').toLowerCase() === 'video' ? 'video' : 'image',
-          })).sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
+          }));
+          const total = j.assets?.total ?? j.total ?? 0;
+          done = items.length >= total || batch.length === 0;
+          page++;
+        }
+        if (items.length > 0) {
+          items.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
           source = 'immich';
         }
       } catch (e) {
