@@ -423,15 +423,43 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
 #view-home .day-card .dmon{color:var(--paper-mut2)}
 #view-home .day-card h3{color:var(--ink)}
 #view-home .day-card p{color:var(--paper-mut)}
-/* Home previews */
-.prev-grid{display:grid;gap:12px}
-@media(min-width:700px){.prev-grid{grid-template-columns:1fr 1fr}}
-.prev-card{display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--paper-card);border:1px solid var(--line-d);border-radius:22px;padding:14px 16px;color:var(--ink);transition:transform .3s var(--ease),opacity .3s var(--ease)}
-.prev-thumb{width:58px;height:58px;border-radius:13px;object-fit:cover;flex:none;background:rgba(23,20,37,.08)}
-.prev-main{flex:1;min-width:0}
-.prev-arrow{color:var(--amber-deep);font-size:18px;line-height:1;flex:none}
-.prev-card h3{margin:0 0 2px;font-size:16.5px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prev-card p{color:var(--paper-mut);margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Home previews — the Launcher (nav redesign, R2 Tinted Doors).
+   Navigation tiles, not glance cards: each destination wears one tint
+   from the palette family (chip + faint wash share it), name in the
+   title role, one live line, a tinted arrow circle bottom-right.
+   The live lines keep their original ids + updaters (foodPrevLine,
+   photoPrevLine, splitPrevLine, fifaPrevLine, pollPrevLine,
+   packPrevLine); badges are fed by those same updaters. */
+.nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.nav-tile{position:relative;display:block;width:100%;box-sizing:border-box;text-align:left;text-decoration:none;color:var(--cream);cursor:pointer;
+  --tintbg:rgba(165,180,255,.15);--tintline:rgba(165,180,255,.38);--tintc:var(--peri);--wash:rgba(165,180,255,.10);
+  border-radius:22px;padding:15px 14px;min-height:140px;font-family:inherit;
+  background:linear-gradient(160deg,var(--wash),rgba(14,18,42,.92) 64%);
+  border:1px solid var(--line);box-shadow:0 14px 30px rgba(2,3,10,.4),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .3s var(--ease),opacity .3s var(--ease)}
+.nav-ic{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:var(--tintbg);border:1px solid var(--tintline)}
+.nav-ic svg{width:27px;height:27px;stroke:var(--tintc);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-name{display:block;font-size:17.5px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.nav-line{display:block;color:rgba(245,239,224,.62);margin-top:3px;font-size:12.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:30px}
+.nav-line.wrap{white-space:normal;overflow:visible;padding-right:34px}
+.nav-arrow{position:absolute;right:12px;bottom:12px;width:24px;height:24px;border-radius:50%;border:1px solid var(--tintline);color:var(--tintc);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;background:rgba(10,14,42,.35)}
+.nav-badge{position:absolute;top:11px;right:11px;font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.04em;color:#131735;background:var(--amber);border-radius:999px;padding:4px 8px;box-shadow:0 5px 12px rgba(242,179,61,.35)}
+.nav-badge-peri{background:var(--peri);box-shadow:0 5px 12px rgba(165,180,255,.3)}
+.nav-livedot{position:absolute;top:14px;right:13px;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3.5px rgba(242,179,61,.22),0 0 9px rgba(242,179,61,.85)}
+.nav-tile-wide{grid-column:1/-1;min-height:96px;display:flex;align-items:center;gap:14px;padding:14px 16px}
+.nav-tile-wide .nav-ic{margin-bottom:0;width:56px;height:56px;flex:none}
+.nav-tile-wide .nav-name{font-size:18.5px}
+.nav-bar{flex:1;height:5px;border-radius:3px;background:rgba(245,239,224,.14);overflow:hidden;margin-left:6px}
+.nav-bar i{display:block;height:100%;width:0;background:var(--amber);border-radius:3px;transition:width .4s var(--ease)}
+.nav-tile-wide .nav-arrow{bottom:14px}
+.nt-amber{--tintbg:rgba(242,179,61,.16);--tintline:rgba(242,179,61,.5);--tintc:var(--amber);--wash:rgba(242,179,61,.12)}
+.nt-amber2{--tintbg:rgba(242,179,61,.09);--tintline:rgba(242,179,61,.34);--tintc:#F5C56B;--wash:rgba(242,179,61,.055)}
+.nt-peri{--tintbg:rgba(165,180,255,.16);--tintline:rgba(165,180,255,.42);--tintc:var(--peri);--wash:rgba(165,180,255,.11)}
+.nt-peri2{--tintbg:rgba(126,143,232,.16);--tintline:rgba(126,143,232,.48);--tintc:#93A5F5;--wash:rgba(126,143,232,.11)}
+.nt-indigo{--tintbg:rgba(109,125,240,.18);--tintline:rgba(109,125,240,.52);--tintc:#8492FF;--wash:rgba(109,125,240,.13)}
+.nt-cream{--tintbg:rgba(245,239,224,.13);--tintline:rgba(245,239,224,.42);--tintc:var(--cream);--wash:rgba(245,239,224,.07)}
+.nt-cream2{--tintbg:rgba(245,239,224,.08);--tintline:rgba(195,204,255,.4);--tintc:#C3CCFF;--wash:rgba(195,204,255,.06)}
+@media(max-width:370px){.nav-tile{min-height:132px;padding:13px 12px}.nav-ic{width:47px;height:47px}.nav-name{font-size:16px}}
 /* Food on light */
 #view-food .food-select{border-color:rgba(23,20,37,.22);background:rgba(255,253,246,.6);color:var(--ink)}
 #view-food .food-cat-label{color:var(--amber-deep)}
@@ -484,7 +512,7 @@ body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgb
 .tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tabbar .tab.on{color:var(--amber)}
 /* Apple polish: one press language everywhere — a small settle, never a bounce */
-.btn:active,.prev-card:active,.food-card:active,.pv-btn:active,.pv-nav:active,#skip:active{transform:scale(.97);opacity:.92}
+.btn:active,.nav-tile:active,.food-card:active,.pv-btn:active,.pv-nav:active,#skip:active{transform:scale(.97);opacity:.92}
 .tabbar .tab:active{transform:scale(.94);opacity:.85}
 .stepper button:active{transform:scale(.94)}
 .day-dots button:active{transform:scale(.9)}
@@ -1017,13 +1045,17 @@ body.reduced .days-layout{display:block}
    WebKit + Chromium rigs, port-work/fl_webkit_probe.py). As in-flow
    content after the last card, the spacer extends the containing
    block by the beat, so the last card pins for the whole beat and
-   releases with the pile. A small driver recedes covered cards
+   releases with the pile. Beat length is a BRIEF hold only (owner
+   review, Oct 16: the original ~500px beat read as dead space) —
+   the pile completes, holds a moment, and the Stay head rises
+   promptly into the lower frame beneath it; the pile-to-Stay gap
+   stays positive at every scroll position. A small driver recedes covered cards
    (scale ~.95 + dim), gated to the section in view + Home active.
    Reduced motion: a plain condensed list, everything visible, no
    spacer. */
 .fl-sec{padding-top:0}
 .fl-stack{display:flex;flex-direction:column;gap:40px;--fl-peek:46px}
-.fl-tail{flex:0 0 auto;height:max(120px,calc(100vh - 280px))}
+.fl-tail{flex:0 0 auto;height:max(120px,calc(100vh - 560px))}
 .fl-stack.fl-armed .fl-card.fl-wait{opacity:0}
 .fl-card.fl-pop .fl-in{animation:bpPop .6s var(--ease) both}
 .fl-card{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--fl-peek));z-index:calc(2 + var(--i,0));
@@ -1616,17 +1648,17 @@ flash of Home. The router clears the tag when it takes over. */
       <div class="stay-body" id="stayBody"><p class="stay-intro">Bayside, Airdrie — waterfront house on the canals · 18 min to YYC · 30 min to downtown Calgary</p><div class="stay-stats"><div class="stay-stat"><span>Sleeps</span><b>11</b></div><div class="stay-stat"><span>Bedrooms</span><b>4</b></div><div class="stay-stat"><span>Beds</span><b>6</b></div><div class="stay-stat"><span>Baths</span><b>3.5</b></div></div><div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">4:00–11:00 PM</div><p>self check-in, smart lock</p><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1619643402121865110" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Before 11:00 AM</div><p>Leave it tidy; keys as instructed</p><button type="button" class="btn stay-tile-btn" id="stayCopyBtn">Copy details</button></div></div><div class="stay-warns"><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Quiet hours 10:00 PM – 7:00 AM, noise monitored — warnings escalate, and repeat violations can end the stay</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No smoking or vaping — $250 fine</span></div></div><details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>No parties or events</li><li>No pets</li><li>Late checkout is billed: $50 for the first hour, then $35 per 30 minutes</li></ul><div class="amenities"><span>Pool table</span><span>theatre seats</span><span>canal views</span><span>fast Wi-Fi + dedicated office</span><span>free parking (garage + driveway)</span><span>in-home laundry</span><span>full kitchen</span><span>air conditioning</span></div><p class="host-line">Hosted by <b>Susan · Premier Stays · Superhost</b>. Exact address lands in the group chat after booking.</p></details><div class="stay-receipt"><div class="label" style="margin-bottom:4px">The receipt</div><div class="kv"><span>3 × per night</span><span class="t-data">$302.67</span></div><div class="kv"><span>Long-stay discount</span><span class="t-data">−$135.60</span></div><div class="kv"><span>Taxes &amp; fees</span><span class="t-data">$84.96</span></div><div class="kv total"><span>Total</span><span class="t-data">$857.36</span></div><p class="stay-receipt-note">Line items as shown by Airbnb; their per-line rounding lands a cent over the total.</p></div></div>
     </div>
   </div></section>
-  <!-- ================= PREVIEWS (Home) ================= -->
+  <!-- ================= PREVIEWS (Home) — the Launcher nav grid ================= -->
   <section id="previews"><div class="wrap">
-    <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>The whole trip, <span class="serif">at a glance.</span></h2></div>
-    <div class="prev-grid">
-      <a class="prev-card reveal" href="#food"><img class="prev-thumb" src="assets/prev-food.jpg" alt="" loading="lazy"><span class="prev-main"><h3>FOOD FINDER</h3><p id="foodPrevLine">50 spots · 9 breakfast</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <a class="prev-card reveal" href="#photos"><img class="prev-thumb" src="assets/prev-photos.jpg" alt="" loading="lazy"><span class="prev-main"><h3>PHOTO WALL</h3><p id="photoPrevLine">5 shots on the wall</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <a class="prev-card reveal" href="#split"><img class="prev-thumb" src="assets/prev-split.jpg" alt="" loading="lazy"><span class="prev-main"><h3>THE SPLIT</h3><p id="splitPrevLine">Brendan owes Mutasif $37.36</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <a class="prev-card reveal" href="#fifa"><img class="prev-thumb" src="assets/fc-logo.jpg" alt="" loading="lazy"><span class="prev-main"><h3>FC 27 TOURNAMENT</h3><p id="fifaPrevLine">No results yet</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <a class="prev-card reveal" href="#buds"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#232B5E,#10163A)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#A5B4FF;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"></path><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"></path><path d="M12 21v-6"></path></svg></span><span class="prev-main"><h3>BUDS</h3><p>Flower, pre-rolls and edibles — sorted by THC.</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <button type="button" class="prev-card reveal" data-view="poll"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A1333,#0D0A22)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#C4B5FD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="prev-main"><h3>GROUP POLL</h3><p id="pollPrevLine">No active poll</p></span><span class="prev-arrow" aria-hidden="true">→</span></button>
-      <button type="button" class="prev-card reveal" data-view="pack"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A3322,#0A1A12)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#6EE7B7;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg></span><span class="prev-main"><h3>PACKING LIST</h3><p id="packPrevLine">Loading…</p></span><span class="prev-arrow" aria-hidden="true">→</span></button>
+    <div class="sec-head reveal"><div class="label">The Hub · Launchpad</div><h2>Where to, <span class="serif">crew?</span></h2></div>
+    <div class="nav-grid">
+      <a class="nav-tile nt-amber reveal" href="#food"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M2.5 19.5h19"/><path d="M12 8V6.5"/><circle cx="12" cy="5" r="1"/></svg></span><span class="nav-name">Food Finder</span><span class="nav-line" id="foodPrevLine">50 spots · 9 breakfast</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <a class="nav-tile nt-peri reveal" href="#photos"><span class="nav-badge nav-badge-peri" id="photoTileBadge">5</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg></span><span class="nav-name">Photo Wall</span><span class="nav-line" id="photoPrevLine">5 shots on the wall</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <a class="nav-tile nt-cream reveal" href="#split"><span class="nav-badge" id="splitTileBadge">$37.36</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><circle cx="12" cy="6" r="1.7"/><circle cx="12" cy="18" r="1.7"/></svg></span><span class="nav-name">The Split</span><span class="nav-line" id="splitPrevLine">Brendan owes Mutasif</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <a class="nav-tile nt-indigo reveal" href="#fifa"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"/></svg></span><span class="nav-name">FC 27</span><span class="nav-line" id="fifaPrevLine">No results yet</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <a class="nav-tile nt-peri2 reveal" href="#buds"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"/><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"/><path d="M12 21v-6"/></svg></span><span class="nav-name">Buds</span><span class="nav-line wrap">Flower · pre-rolls · edibles</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <button type="button" class="nav-tile nt-amber2 reveal" data-view="poll"><span class="nav-livedot" id="pollTileDot" hidden></span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="nav-name">Group Poll</span><span class="nav-line" id="pollPrevLine">No active poll</span><span class="nav-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="nav-tile nav-tile-wide nt-cream2 reveal" data-view="pack"><span class="nav-badge" id="packTileBadge" hidden>40%</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg></span><span><span class="nav-name">Packing</span><span class="nav-line" id="packPrevLine">Loading…</span></span><span class="nav-bar"><i id="packTileBar"></i></span><span class="nav-arrow" aria-hidden="true">→</span></button>
     </div>
   </div></section>
 <!-- ================= STAY (condensed) ================= -->
@@ -2896,7 +2928,7 @@ function applyRoute(){
  if(h&&h!=='top'){var el=document.getElementById(h); if(el)setTimeout(function(){el.scrollIntoView({block:'start'})},80);}
  else routeTop();
 }
-document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function(t){
+document.querySelectorAll('.tabbar .tab,[data-view].nav-tile').forEach(function(t){
  t.addEventListener('click',function(){
    var v=t.getAttribute('data-view');
    if((location.hash||'')==='#'+v)applyRoute(); else location.hash=v;
@@ -3540,9 +3572,10 @@ function renderSplit(){
    });
  }
  var prev=document.getElementById('splitPrevLine');
+ var prevBadge=document.getElementById('splitTileBadge');
   if(prev){
-    if(transfers.length){ var big=transfers.slice().sort(function(a,b){return b.amountCentsCAD-a.amountCentsCAD})[0]; prev.textContent=big.from+' owes '+big.to+' '+spFmt(big.amountCentsCAD); }
-    else prev.textContent='All settled';
+    if(transfers.length){ var big=transfers.slice().sort(function(a,b){return b.amountCentsCAD-a.amountCentsCAD})[0]; prev.textContent=big.from+' owes '+big.to; if(prevBadge){ prevBadge.textContent=spFmt(big.amountCentsCAD); prevBadge.hidden=false; } }
+    else { prev.textContent='All settled'; if(prevBadge)prevBadge.hidden=true; }
   }
 }
 document.querySelectorAll('#spCurSeg button').forEach(function(b){
@@ -4123,9 +4156,14 @@ renderBuds();
    var fill=document.getElementById('packProgFill');
    var count=document.getElementById('packCount');
    var prev=document.getElementById('packPrevLine');
+   var prevBadge=document.getElementById('packTileBadge');
+   var prevBar=document.getElementById('packTileBar');
+   var pct=total?Math.round(done/total*100):0;
    if(count)count.textContent=done+' / '+total+' packed';
-   if(fill)fill.style.width=(total?Math.round(done/total*100):0)+'%';
-   if(prev)prev.textContent=total?done+' / '+total+' packed':'Nothing added yet';
+   if(fill)fill.style.width=pct+'%';
+   if(prev)prev.textContent=total?done+' of '+total+' packed':'Nothing added yet';
+   if(prevBadge){ prevBadge.textContent=pct+'%'; prevBadge.hidden=!total; }
+   if(prevBar)prevBar.style.width=pct+'%';
  }
  function renderPack(){
    var list=document.getElementById('packList');
@@ -4217,12 +4255,14 @@ renderBuds();
    var el=document.getElementById('pollActive');
    var phase=document.getElementById('pollPhase');
    var prevLine=document.getElementById('pollPrevLine');
+   var tileDot=document.getElementById('pollTileDot');
    if(!el)return;
    var p=_pollData.active;
    if(!p){
      el.innerHTML='<p class="poll-none">No active poll right now.</p>';
      if(phase)phase.textContent='';
      if(prevLine)prevLine.textContent='No active poll';
+     if(tileDot)tileDot.hidden=true;
      renderPollCreate();
      return;
    }
@@ -4232,6 +4272,7 @@ renderBuds();
      p.options.forEach(function(o){if(o.voters.indexOf(_myPerson)>=0)myVote=o.id;});
      if(phase)phase.textContent=p.open?'Open':'Closed';
      if(prevLine)prevLine.textContent=p.question.slice(0,48)+(p.question.length>48?'…':'');
+     if(tileDot)tileDot.hidden=!p.open;
      var html=(p.open?'<div class="poll-active-label"><span class="poll-active-dot"></span>Live</div>':'')
        +'<p class="poll-q">'+escH(p.question)
          +(!p.open?'<span class="poll-closed" style="margin-left:8px">Closed</span>':'')
@@ -4633,8 +4674,8 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     renderNextUp();
   }
   window.__photoCount=function(n){
-    var el=document.getElementById('photoPrevLine'); if(!el)return;
-    el.textContent=n>0?(n+' shot'+(n===1?'':'s')+' on the wall'):'No shots yet \u2014 first one lands Thu';
+    var el=document.getElementById('photoPrevLine'); if(el)el.textContent=n>0?(n+' shot'+(n===1?'':'s')+' on the wall'):'No shots yet \u2014 first one lands Thu';
+    var badge=document.getElementById('photoTileBadge'); if(badge){ badge.textContent=n; badge.hidden=!(n>0); }
   };
   v6Tick(); setInterval(v6Tick,1000);
 })();
