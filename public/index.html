@@ -109,18 +109,41 @@ nav>*{pointer-events:auto}
 #recapPanel p{margin:0;color:var(--muted);font-size:14.5px}
 #recapChamp{color:var(--cream);font-weight:600;margin-top:8px}
 #recapPanel .hero-cta{margin-top:18px}
-/* ---------- Photo Wall ---------- */
-.photo-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+/* ---------- Photo Wall: Camera Roll ---------- */
+#photos{padding-top:calc(var(--header-h) + 16px)}
+.photo-head{margin-bottom:0}
+.photo-head-top{display:flex;align-items:center;gap:14px}
+.photo-dates{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.photo-refresh{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600;line-height:1;padding:9px 0 9px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.photo-refresh:hover,.photo-refresh:focus-visible{color:var(--cream)}
+#view-photos .photo-head h2{margin:14px 0 7px}
+#view-photos .photo-head h2 .serif{color:var(--peri)}
+.photo-count{margin:0;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.photo-count b{color:var(--cream);font-weight:700;font-variant-numeric:tabular-nums}
+.photo-album-bar{display:flex;align-items:center;gap:14px;min-height:78px;margin-top:18px;padding:10px 12px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.018));color:var(--cream);text-decoration:none;box-shadow:var(--shadow-card);-webkit-tap-highlight-color:transparent}
+.photo-album-bar:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.photo-album-cover{width:58px;height:58px;flex:0 0 58px;border-radius:12px;object-fit:cover;background:#10101c}
+.photo-album-main{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.photo-album-kicker{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber2)}
+.photo-album-name{font-size:19px;line-height:1.2;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-album-meta{font-size:13px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-album-chevron{flex:0 0 auto;color:var(--amber2);font-size:30px;line-height:1;padding-right:3px}
 .photo-note{color:var(--muted);font-size:13.5px;margin:14px 0 0}
-.photo-day{font-size:17px;font-weight:600;color:#fff;margin:22px 0 8px;letter-spacing:.01em}
-.photo-day:first-of-type{margin-top:14px}
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-@media(min-width:700px){.photo-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}}
+.photo-status{min-height:20px}
+.photo-status:empty{display:none}
+#photoWall{margin:20px -18px 0}
+.photo-day{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding:10px 18px 8px;margin:0;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cream)}
+.photo-day-count{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;letter-spacing:.04em;color:var(--muted)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px}
+@media(min-width:700px){#photoWall .photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .photo-tile{position:relative;display:block;overflow:hidden;background:#10101c;aspect-ratio:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
 .photo-tile .pt-play{position:absolute;right:5px;bottom:5px;color:#fff;font-size:11px;line-height:1;padding:4px 6px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:3px}
-.photo-empty{color:var(--muted);font-size:14px;margin:18px 0 0}
-.photo-status{min-height:20px}
+.photo-empty{color:var(--muted);font-size:14px;margin:22px 0 0}
+.photo-fab{position:fixed;right:max(18px,calc((100vw - 760px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:115;width:58px;height:58px;border:0;border-radius:50%;background:var(--amber);color:#221A04;font:inherit;font-size:32px;font-weight:500;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 32px rgba(0,0,0,.5),0 0 0 6px rgba(10,14,42,.35);-webkit-tap-highlight-color:transparent}
+.photo-fab[hidden],body:not([data-view="photos"]) .photo-fab{display:none!important}
+.photo-fab:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+@media(max-width:380px){.photo-head-top{gap:8px}.photo-dates{font-size:10px}.photo-refresh{font-size:12px}.photo-album-cover{width:52px;height:52px;flex-basis:52px}.photo-album-name{font-size:17px}}
 .pv{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;animation:pvIn .18s ease-out}
 @keyframes pvIn{from{opacity:0}to{opacity:1}}
 .pv[hidden]{display:none}
@@ -1016,6 +1039,8 @@ body.reduced .days-layout{display:block}
 .fl-arrow::after{content:'›';position:absolute;right:-4px;top:-10px;font-size:16px;color:rgba(245,239,224,.3)}
 .fl-sub{display:flex;align-items:center;gap:7px;margin-top:8px;min-height:20px}
 .fl-person{font-family:"IBM Plex Mono",monospace;font-size:10px;background:rgba(165,180,255,.15);color:var(--peri);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.fl-person--peri{background:rgba(165,180,255,.18);color:#A5B4FF}
+.fl-person--amber{background:rgba(242,179,61,.18);color:#F2B33D}
 .fl-date{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
 .fl-term{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;color:var(--amber2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fl-track{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--peri);text-decoration:none;padding:4px 11px;border:1px solid rgba(165,180,255,.25);border-radius:99px;transition:background .15s;white-space:nowrap}
@@ -1678,19 +1703,29 @@ flash of Home. The router clears the tag when it takes over. */
   <div class="view amb-paused" id="view-photos" hidden="">
 <!-- ================= PHOTO WALL ================= -->
   <section id="photos"><div class="wrap">
-    <div class="sec-head reveal"><div class="label peri">04 · Photo Wall</div><h2>Every shot, <span class="serif">one wall.</span></h2><p>Every shot from the weekend, one wall.</p></div>
-    <div class="card reveal">
-      <h3 style="margin-top:0">CRCMZ Trip 2.0 — the shared album</h3>
-      <div class="photo-cta">
-        <label class="btn primary" for="photoInput" style="cursor:pointer">Add Photos</label>
-        <a class="btn" href="/album">View Album</a>
-        <button class="btn" type="button" id="photoRefresh">Refresh the Wall</button>
-        <input type="file" id="photoInput" accept="image/*,video/*,.heic,.heif" multiple="" hidden="">
+    <div class="sec-head photo-head reveal">
+      <div class="photo-head-top">
+        <div class="label">Photos</div>
+        <div class="photo-dates">Oct 29 — Nov 1</div>
+        <button class="photo-refresh" type="button" id="photoRefresh">Refresh</button>
       </div>
-      <p class="photo-note photo-status" id="photoStatus" aria-live="polite">5 items on the wall.</p>
-      <div id="photoWall"><div class="photo-day">Today</div><div class="photo-grid"><a class="photo-tile" href="assets/stay.jpg" aria-label="The house — Bayside, Airdrie"><img src="assets/stay.jpg" alt="The house — Bayside, Airdrie" loading="lazy"></a><a class="photo-tile" href="assets/prev-food.jpg" aria-label="Dinner spread"><img src="assets/prev-food.jpg" alt="Dinner spread" loading="lazy"></a><a class="photo-tile" href="assets/prev-photos.jpg" aria-label="Wall starter pack"><img src="assets/prev-photos.jpg" alt="Wall starter pack" loading="lazy"></a><a class="photo-tile" href="assets/prev-split.jpg" aria-label="Receipts for the pot"><img src="assets/prev-split.jpg" alt="Receipts for the pot" loading="lazy"></a><a class="photo-tile" href="assets/fc-logo.jpg" aria-label="FC 27 — tournament night"><img src="assets/fc-logo.jpg" alt="FC 27 — tournament night" loading="lazy"></a></div></div>
-      <p class="photo-empty" id="photoEmpty" style="display: none;">Nothing on the wall yet. First shot of the weekend goes here.</p>
+      <h2>Every shot, <span class="serif">one wall.</span></h2>
+      <p class="photo-count"><b id="photoWallCount">5</b> on the wall</p>
     </div>
+    <a class="photo-album-bar reveal" id="photoAlbumBar" href="/album" aria-label="Open the shared album, CRCMZ Trip 2.0">
+      <img class="photo-album-cover" id="photoAlbumCover" src="assets/stay.jpg" alt="">
+      <span class="photo-album-main">
+        <span class="photo-album-kicker">Shared album</span>
+        <span class="photo-album-name">CRCMZ Trip 2.0</span>
+        <span class="photo-album-meta" id="photoAlbumMeta">Open the full album</span>
+      </span>
+      <span class="photo-album-chevron" aria-hidden="true">›</span>
+    </a>
+    <p class="photo-note photo-status" id="photoStatus" aria-live="polite"></p>
+    <div id="photoWall"><div class="photo-day"><span>Today</span><span class="photo-day-count">5</span></div><div class="photo-grid"><a class="photo-tile" href="assets/stay.jpg" aria-label="The house — Bayside, Airdrie"><img src="assets/stay.jpg" alt="The house — Bayside, Airdrie" loading="lazy"></a><a class="photo-tile" href="assets/prev-food.jpg" aria-label="Dinner spread"><img src="assets/prev-food.jpg" alt="Dinner spread" loading="lazy"></a><a class="photo-tile" href="assets/prev-photos.jpg" aria-label="Wall starter pack"><img src="assets/prev-photos.jpg" alt="Wall starter pack" loading="lazy"></a><a class="photo-tile" href="assets/prev-split.jpg" aria-label="Receipts for the pot"><img src="assets/prev-split.jpg" alt="Receipts for the pot" loading="lazy"></a><a class="photo-tile" href="assets/fc-logo.jpg" aria-label="FC 27 — tournament night"><img src="assets/fc-logo.jpg" alt="FC 27 — tournament night" loading="lazy"></a></div></div>
+    <p class="photo-empty" id="photoEmpty" style="display: none;">Nothing on the wall yet. First shot of the weekend goes here.</p>
+    <button class="photo-fab" type="button" id="photoFab" aria-label="Add photos">+</button>
+    <input type="file" id="photoInput" accept="image/*,video/*,.heic,.heif" multiple="" hidden="">
     <div class="pv" id="photoViewer" data-lenis-prevent="" hidden="">
       <div class="pv-top"><button class="pv-btn" type="button" id="pvClose" aria-label="Close viewer">✕</button><span class="pv-count" id="pvCount"></span><span class="pv-spacer"></span><button class="pv-btn pv-save" type="button" id="pvSave" aria-label="Save this photo or video to your device"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11.5"></path><path d="M6.6 10 12 15.4 17.4 10"></path><path d="M4 20h16"></path></svg><span id="pvSaveLabel">Save</span></button></div>
       <div class="pv-stage" id="pvStage"><div class="pv-track" id="pvTrack"></div></div>
@@ -2878,6 +2913,9 @@ applyRoute();
   var status=document.getElementById('photoStatus');
   var input=document.getElementById('photoInput');
   var refreshBtn=document.getElementById('photoRefresh');
+  var albumCover=document.getElementById('photoAlbumCover');
+  var wallCount=document.getElementById('photoWallCount');
+  var fab=document.getElementById('photoFab');
   var viewer=document.getElementById('photoViewer');
   var stage=document.getElementById('pvStage');
   var pvMeta=document.getElementById('pvMeta');
@@ -2934,18 +2972,34 @@ applyRoute();
 
   function renderWall(){
     wall.innerHTML='';
-    var lastDay=null, gridEl=null;
+    if(wallCount) wallCount.textContent=String(items.length);
+    if(albumCover){
+      var cover=null;
+      for(var ci=0;ci<items.length;ci++){
+        if(items[ci].kind==='image'&&(items[ci].thumb||items[ci].url)){ cover=items[ci]; break; }
+      }
+      albumCover.src=cover?(cover.thumb||cover.url):'assets/stay.jpg';
+    }
+    var lastDay=null, gridEl=null, gridCount=null;
     items.forEach(function(p, idx){
       var dl=dayLabel(p.uploadedAt);
       if(dl!==lastDay){
         lastDay=dl;
         var h=document.createElement('div');
-        h.className='photo-day'; h.textContent=dl;
+        h.className='photo-day';
+        var dayName=document.createElement('span');
+        dayName.textContent=dl;
+        h.appendChild(dayName);
+        gridCount=document.createElement('span');
+        gridCount.className='photo-day-count';
+        gridCount.textContent='0';
+        h.appendChild(gridCount);
         wall.appendChild(h);
         gridEl=document.createElement('div');
         gridEl.className='photo-grid';
         wall.appendChild(gridEl);
       }
+      if(gridCount) gridCount.textContent=String(parseInt(gridCount.textContent,10)+1);
       gridEl.appendChild(tile(p, idx));
     });
     if(window.__photoCount)window.__photoCount(items.length);
@@ -3021,6 +3075,7 @@ applyRoute();
   function openViewer(i){
     if(!viewer) return;
     viewer.hidden=false;
+    if(fab) fab.hidden=true;
     document.body.style.overflow='hidden';
     viewer.classList.remove('chrome-off');
     buildSlides();
@@ -3029,6 +3084,7 @@ applyRoute();
   function closeViewer(){
     if(!viewer) return;
     viewer.hidden=true;
+    if(fab) fab.hidden=false;
     if(track){
       Array.prototype.forEach.call(track.querySelectorAll('video'),function(v){ try{v.pause();}catch(e){} });
       track.innerHTML='';
@@ -3129,12 +3185,12 @@ applyRoute();
         items=(data&&data.photos)||[];
         renderWall();
         if(empty) empty.style.display=items.length?'none':'';
-        if(items.length) setStatus(items.length+(items.length===1?' item':' items')+' on the wall.');
+        setStatus('');
       })
       .catch(function(err){
         loading=false;
         if(err&&err.message==='auth') return;
-        setStatus('The wall could not load just now. Pull Refresh the Wall to try again.');
+        setStatus('The wall could not load just now. Tap Refresh to try again.');
       });
   }
 
@@ -3158,6 +3214,7 @@ applyRoute();
   });
 
   if(refreshBtn) refreshBtn.addEventListener('click',function(){ loadWall(true); });
+  if(fab) fab.addEventListener('click',function(){ input.click(); });
   document.addEventListener('click',function(e){
     var t=e.target&&e.target.closest?e.target.closest('[data-view="photos"],a[href="#photos"]'):null;
     if(t) setTimeout(function(){ loadWall(false); },60);
@@ -4325,6 +4382,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     'scheduled':'Scheduled','on-time':'On Time','delayed':'Delayed',
     'boarding':'Boarding','departed':'Departed','landed':'Landed','cancelled':'Cancelled'
   };
+  var FL_PERSON_ACCENTS={'Moiz':'peri','Samad':'amber'};
   var _flights=[];
   var FL_DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var FL_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -4358,6 +4416,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
          track link. Aircraft, cabin, Wi-Fi, duration and notes remain
          in the store/API and are simply not rendered on the face. */
       var termTxt=f.terminal?(escH(f.terminal)+(f.gate?' · Gate '+escH(f.gate):'')):(f.gate?'Gate '+escH(f.gate):'');
+      var personAccent=FL_PERSON_ACCENTS[f.person]||'';
       return '<article class="fl-card" style="--i:'+i+'">'
         +'<div class="fl-in">'
         +'<div class="fl-top">'
@@ -4371,7 +4430,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
           +'<div class="fl-leg r"><span class="fl-time">'+escH(f.arrivalTime||'—')+'</span><span class="fl-city">'+escH(f.destination||f.destinationCode)+'</span></div>'
         +'</div>'
         +'<div class="fl-sub">'
-          +'<span class="fl-person">'+escH(f.person)+'</span>'
+          +'<span class="fl-person'+(personAccent?' fl-person--'+personAccent:'')+'"'+(personAccent?' data-person-accent="'+personAccent+'"':'')+'>'+escH(f.person)+'</span>'
           +'<span class="fl-date">'+escH(flDateLabel(f.departureDate))+'</span>'
           +(termTxt?'<span class="fl-term">'+termTxt+'</span>':'')
           +'<a class="fl-track" href="'+escH(trackUrl)+'" target="_blank" rel="noopener">Track ›</a>'
