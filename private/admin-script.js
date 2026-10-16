@@ -305,7 +305,97 @@ document.querySelectorAll('[data-save]').forEach(function(btn){
     if(window.__splitRosterRefresh)window.__splitRosterRefresh();
     showSaved('split');
   }
+  if(key==='flights'){
+    var entries=[],ferr='';
+    document.querySelectorAll('#admFlightsList .adm-entry').forEach(function(b,i){
+      if(ferr)return;
+      var num=val(b.querySelector('.fl-num'));
+      var ocode=val(b.querySelector('.fl-ocode'));
+      var dcode=val(b.querySelector('.fl-dcode'));
+      var date=val(b.querySelector('.fl-date'));
+      if(!num){ferr='Flight '+(i+1)+': flight number required.';return;}
+      if(!ocode||!dcode){ferr='Flight '+(i+1)+': origin and destination codes required.';return;}
+      if(!date){ferr='Flight '+(i+1)+': date required.';return;}
+      entries.push({
+        id:val(b.querySelector('.fl-id')),
+        person:b.querySelector('.fl-person').value,
+        flightNumber:num,airline:val(b.querySelector('.fl-airline')),
+        origin:val(b.querySelector('.fl-origin')),originCode:ocode.toUpperCase(),
+        destination:val(b.querySelector('.fl-dest')),destinationCode:dcode.toUpperCase(),
+        departureDate:date,departureTime:val(b.querySelector('.fl-dep')),
+        arrivalTime:val(b.querySelector('.fl-arr')),duration:val(b.querySelector('.fl-dur')),
+        aircraft:val(b.querySelector('.fl-aircraft')),cabin:val(b.querySelector('.fl-cabin')),
+        hasWifi:b.querySelector('.fl-wifi').checked,
+        status:b.querySelector('.fl-status').value,
+        gate:val(b.querySelector('.fl-gate')),terminal:val(b.querySelector('.fl-term')),
+        notes:val(b.querySelector('.fl-notes'))
+      });
+    });
+    if(ferr)return showErr('flights',ferr);
+    if(!entries.length){showSaved('flights');return;}
+    var pending=entries.length,saved=0,serr='';
+    entries.forEach(function(e){
+      fetch('/api/flights',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)})
+        .then(function(r){return r.json();})
+        .then(function(){saved++;if(saved===pending){loadAdminFlights();showSaved('flights');}})
+        .catch(function(){serr='Save failed.';saved++;if(saved===pending)showErr('flights',serr);});
+    });
+  }
  });
+});
+
+/* ---------- Flights ---------- */
+var PEOPLE_LIST=['Mutasif','Moiz','Noor','Samad','Brendan','Zubi'];
+var FLIGHT_STATUSES=['scheduled','on-time','delayed','boarding','departed','landed','cancelled'];
+var _adminFlights=[];
+function flightBlock(f,i){
+  var personOpts=PEOPLE_LIST.map(function(p){return '<option value="'+p+'"'+(f.person===p?' selected':'')+'>'+p+'</option>';}).join('');
+  var statusOpts=FLIGHT_STATUSES.map(function(s){return '<option value="'+s+'"'+(f.status===s?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';}).join('');
+  return '<details class="adm-entry" '+(i===0?'open':'')+'>'
+    +'<summary>'+cEsc((f.person||'')+(f.flightNumber?' · '+f.flightNumber:'')+(f.departureDate?' · '+f.departureDate:''))+' <span class="adm-sum-sub">'+cEsc(f.originCode||'')+'→'+cEsc(f.destinationCode||'')+'</span></summary>'
+    +'<div class="adm-entry-body">'
+    +'<div class="adm-grid">'+F('Person','<select class="adm-sel fl-person">'+personOpts+'</select>')+F('Flight number',inp('fl-num',f.flightNumber))+'</div>'
+    +'<div class="adm-grid">'+F('Airline',inp('fl-airline',f.airline))+F('Aircraft',inp('fl-aircraft',f.aircraft))+'</div>'
+    +'<div class="adm-grid">'+F('Origin city',inp('fl-origin',f.origin))+F('Origin code (e.g. YVR)',inp('fl-ocode',f.originCode))+'</div>'
+    +'<div class="adm-grid">'+F('Destination city',inp('fl-dest',f.destination))+F('Destination code (e.g. YYC)',inp('fl-dcode',f.destinationCode))+'</div>'
+    +'<div class="adm-grid">'+F('Date','<input class="adm-inp fl-date" type="date" value="'+cEsc(f.departureDate||'')+'">')+F('Duration',inp('fl-dur',f.duration))+'</div>'
+    +'<div class="adm-grid">'+F('Departure time (HH:MM)',inp('fl-dep',f.departureTime))+F('Arrival time (HH:MM)',inp('fl-arr',f.arrivalTime))+'</div>'
+    +'<div class="adm-grid">'+F('Cabin',inp('fl-cabin',f.cabin))+F('Terminal',inp('fl-term',f.terminal))+'</div>'
+    +'<div class="adm-grid">'+F('Gate (if known)',inp('fl-gate',f.gate))+F('Status','<select class="adm-sel fl-status">'+statusOpts+'</select>')+'</div>'
+    +'<div class="adm-f"><label class="adm-toggle"><input type="checkbox" class="fl-wifi"'+(f.hasWifi?' checked':'')+'> Wi-Fi on board</label></div>'
+    +F('Notes (shown on card)',inp('fl-notes',f.notes))
+    +'<input type="hidden" class="fl-id" value="'+cEsc(f.id||'')+'">'
+    +'<button type="button" class="adm-del fl-del">Delete this flight</button>'
+    +'</div></details>';
+}
+function bindFlightDeletes(){
+  document.querySelectorAll('#admFlightsList .fl-del').forEach(function(b){
+    b.onclick=function(){
+      var entry=b.closest('.adm-entry');
+      var idInp=entry&&entry.querySelector('.fl-id');
+      var fid=idInp&&idInp.value;
+      if(fid)fetch('/api/flights/'+encodeURIComponent(fid),{method:'DELETE'}).catch(function(){});
+      if(entry)entry.remove();
+    };
+  });
+}
+function loadAdminFlights(){
+  fetch('/api/flights').then(function(r){return r.json();}).then(function(j){
+    _adminFlights=j.flights||[];
+    var list=$('admFlightsList');
+    if(list)list.innerHTML=_adminFlights.map(flightBlock).join('');
+    bindFlightDeletes();
+  }).catch(function(){});
+}
+loadAdminFlights();
+$('admFlightsAdd').addEventListener('click',function(){
+  var wrap=document.createElement('div');
+  wrap.innerHTML=flightBlock({id:'',person:'Moiz',flightNumber:'',airline:'',origin:'',originCode:'',
+    destination:'Calgary',destinationCode:'YYC',departureDate:'',departureTime:'',arrivalTime:'',
+    duration:'',aircraft:'',cabin:'Economy',hasWifi:true,status:'scheduled',gate:'',terminal:'',notes:''},0);
+  var node=wrap.firstChild; node.open=true;
+  $('admFlightsList').appendChild(node); bindFlightDeletes();
+  var fn=node.querySelector('.fl-num'); if(fn)fn.focus();
 });
 
 /* ---------- Danger zone ---------- */

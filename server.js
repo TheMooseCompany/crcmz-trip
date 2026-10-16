@@ -713,7 +713,7 @@ async function passkeyLogin(){
     return null;
   }
   app.get('/api/me', requireAuth, (req, res) => {
-    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user), isAdmin: isAdminUser(req.session.user) });
+    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user), isAdmin: isAdminUser(req.session.user), people: PEOPLE });
   });
 
   // ---------- Editable site content (admin-gated) ----------
@@ -1310,6 +1310,77 @@ document.addEventListener('keydown', function(e) {
     s.active.open = false;
     (s.history = s.history || []).push(s.active);
     writePollStore({ active: null, history: s.history });
+    res.json({ ok: true });
+  });
+
+  // ── Flights store ──────────────────────────────────────────────────────────
+  const FLIGHTS_PATH = '/data/flights.json';
+  function readFlights() {
+    try { return JSON.parse(fs.readFileSync(FLIGHTS_PATH, 'utf8')); } catch { return []; }
+  }
+  function writeFlights(arr) {
+    const tmp = FLIGHTS_PATH + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(arr));
+    fs.renameSync(tmp, FLIGHTS_PATH);
+  }
+  (function initFlights() {
+    if (readFlights().length === 0) {
+      writeFlights([{
+        id: 'ac212-20261029',
+        person: 'Moiz',
+        flightNumber: 'AC 212',
+        airline: 'Air Canada',
+        origin: 'Vancouver', originCode: 'YVR',
+        destination: 'Calgary', destinationCode: 'YYC',
+        departureDate: '2026-10-29',
+        departureTime: '11:30', arrivalTime: '13:59',
+        duration: '1h 29m',
+        aircraft: 'Airbus A220-300',
+        cabin: 'Economy', hasWifi: true,
+        status: 'scheduled',
+        gate: '', terminal: 'Terminal M', notes: ''
+      }]);
+    }
+  })();
+  app.get('/api/flights', requireAuth, (req, res) => {
+    res.json({ flights: readFlights() });
+  });
+  app.post('/api/flights', requireAuth, (req, res) => {
+    const { id, person, flightNumber, airline, origin, originCode, destination, destinationCode,
+            departureDate, departureTime, arrivalTime, duration, aircraft, cabin, hasWifi,
+            status, gate, terminal, notes } = req.body || {};
+    if (!person || !flightNumber || !departureDate || !originCode || !destinationCode)
+      return res.status(400).json({ error: 'Missing required fields.' });
+    const VALID_STATUS = ['scheduled','on-time','delayed','boarding','departed','landed','cancelled'];
+    if (status && !VALID_STATUS.includes(status)) return res.status(400).json({ error: 'Invalid status.' });
+    const flights = readFlights();
+    const fid = id || crypto.randomUUID();
+    const flight = { id: fid, person, flightNumber: flightNumber.trim(), airline: airline||'',
+      origin: origin||'', originCode: originCode.toUpperCase().trim(),
+      destination: destination||'', destinationCode: destinationCode.toUpperCase().trim(),
+      departureDate, departureTime: departureTime||'', arrivalTime: arrivalTime||'',
+      duration: duration||'', aircraft: aircraft||'', cabin: cabin||'', hasWifi: !!hasWifi,
+      status: status||'scheduled', gate: gate||'', terminal: terminal||'', notes: notes||'' };
+    const idx = flights.findIndex(f => f.id === fid);
+    if (idx >= 0) flights[idx] = flight; else flights.push(flight);
+    writeFlights(flights);
+    res.json({ ok: true, flight });
+  });
+  app.patch('/api/flights/:id', requireAuth, (req, res) => {
+    const VALID_STATUS = ['scheduled','on-time','delayed','boarding','departed','landed','cancelled'];
+    const flights = readFlights();
+    const idx = flights.findIndex(f => f.id === req.params.id);
+    if (idx < 0) return res.status(404).json({ error: 'Flight not found.' });
+    const { status, gate, terminal, notes } = req.body || {};
+    if (status) { if (!VALID_STATUS.includes(status)) return res.status(400).json({ error: 'Invalid status.' }); flights[idx].status = status; }
+    if (gate !== undefined) flights[idx].gate = gate;
+    if (terminal !== undefined) flights[idx].terminal = terminal;
+    if (notes !== undefined) flights[idx].notes = notes;
+    writeFlights(flights);
+    res.json({ ok: true, flight: flights[idx] });
+  });
+  app.delete('/api/flights/:id', requireAuth, (req, res) => {
+    writeFlights(readFlights().filter(f => f.id !== req.params.id));
     res.json({ ok: true });
   });
 
