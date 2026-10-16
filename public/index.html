@@ -1110,6 +1110,14 @@ body.reduced .days-layout{display:block}
    Reduced motion: a plain condensed list, everything visible, no
    spacer. */
 .fl-sec{padding-top:0}
+/* The flights head hands off to the first card: the card sticks
+   (and pops) while the head is still leaving the top, but the
+   head's bottom margins are unpainted scroll distance — at the
+   global 30px the painted overlap is only ~26px, less than one
+   frame of scroll-event delivery lag under a fling, which could
+   open a blank seam between head and card. At 10px the painted
+   overlap is ~46px and the seam cannot open. */
+#flightsSec .sec-head{margin-bottom:10px}
 .fl-empty{font-size:13.5px;color:var(--muted);padding:8px 2px 4px}
 .fl-stack{display:flex;flex-direction:column;gap:40px;--fl-peek:46px}
 /* The trailing beat after the pile completes (critique P1-5): the
@@ -1744,6 +1752,14 @@ flash of Home. The router clears the tag when it takes over. */
   </div></section>
 <!-- ================= FLIGHTS ================= -->
   <section id="flightsSec" class="fl-sec"><div class="wrap">
+    <!-- Section anchor: painted unconditionally (no .reveal gate).
+         The cards below stay hidden until they stick, so this head
+         is the section's only presence on approach — it must be on
+         screen from the moment the section enters, mid-fling too.
+         Geometry hands off: the first card sticks (and pops) while
+         the head's last ~68px are still on screen, so the section
+         never presents a void. -->
+    <div class="sec-head"><div class="label">The Flights</div><h2>Wheels <span class="serif">up.</span></h2></div>
     <div id="flightsCards"></div>
   </div></section>
   <section id="stay"><div class="wrap">
@@ -4745,12 +4761,17 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    hold mechanics are untouched: .fl-tail spacer, stick ranges,
    pile geometry and release are exactly as proven.
 
-   A 200 ms backstop (the cinematic driver's pattern — its 150 ms
+   An 80 ms backstop (the cinematic driver's pattern — its 150 ms
    interval exists because frame callbacks starve on the phone)
    retries pending pops off the frame loop: after a jump-landing
    in WebKit the rAF pop measured ~1 s late, so the reveal must
    not depend on frame delivery alone. The backstop only ever
-   calls the same stick-gated tryPop; it cannot pop early. */
+   calls the same stick-gated tryPop; it cannot pop early. The
+   interval is tighter than the cinematic's because it also caps
+   the head-to-card handoff lag (see scanPops below).
+   Eligibility is additionally scanned synchronously in the scroll
+   handler (see scanPops below), and pops release through a 280 ms
+   cadence queue so a fling cannot bunch them (see tryPop). */
 (function(){
  if(REDUCED)return;
  var ROTS=[-0.7,0.55,-0.45];
@@ -4765,20 +4786,55 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
  },{rootMargin:'160px 0px 160px 0px'});
  function stickTop(c){ return parseFloat(getComputedStyle(c).top)||0; }
  function stuck(c){ return c.getBoundingClientRect().top<=stickTop(c)+2; }
- function tryPop(c){
+ /* Pop cadence (owner's recording, Oct 16, second pass): the stick
+   gate alone bunches the reveals under a fling — the three stick
+   points sit ~118px of scroll apart, so at fling velocity every
+   card is eligible inside one frame-loop/backstop tick and they
+   slammed in within milliseconds of each other, unreadable. Pops
+   now drain through a queue with a minimum 280 ms cadence: a card
+   that becomes eligible while the queue is idle pops immediately
+   (slow scrolling is untouched — positional spacing there is
+   already ~1s), while cards that pile up in a burst are released
+   one by one, in card order, on timers that owe nothing to rAF or
+   scroll delivery, so a stuck card's sliver is never left blank
+   past its turn. Eligibility is still exactly the stick gate. */
+ var popQueue=[],popTimer=0,lastPopAt=0,POP_STAGGER=280;
+ function doPop(c){
    if(!c.classList.contains('fl-wait'))return;
-   if(!stuck(c))return;
    c.classList.remove('fl-wait');
    c.classList.add('fl-pop');
+   lastPopAt=performance.now();
+ }
+ function drainPops(){
+   if(popTimer||!popQueue.length)return;
+   var wait=Math.max(0,lastPopAt+POP_STAGGER-performance.now());
+   popTimer=setTimeout(function(){
+     popTimer=0;
+     var c=popQueue.shift();
+     if(c&&c.isConnected)doPop(c);
+     drainPops();
+   },wait);
+ }
+ function tryPop(c){
+   if(!c.classList.contains('fl-wait'))return;
+   if(c.__flQueued)return;
+   if(!stuck(c))return;
+   c.__flQueued=true;
+   var ix=cards.indexOf(c),at=popQueue.length;
+   while(at>0&&cards.indexOf(popQueue[at-1])>ix)at--;
+   popQueue.splice(at,0,c);
+   drainPops();
  }
  function homeOn(){ var v=document.getElementById('view-home'); return v&&!v.hidden; }
+ function scanPops(){
+   for(var j=0;j<cards.length;j++){
+     if(cards[j].classList.contains('fl-wait'))tryPop(cards[j]);
+   }
+ }
  function frame(){
    raf=0;
    if(!stack||!inView||!homeOn())return;
-   for(var j=0;j<cards.length;j++){
-     var cc=cards[j];
-     if(cc.classList.contains('fl-wait'))tryPop(cc);
-   }
+   scanPops();
    for(var i=0;i<cards.length-1;i++){
      var a=cards[i],b=cards[i+1];
      var ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
@@ -4795,14 +4851,23 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    if(window.scrollY!==lastY){ lastY=window.scrollY; raf=requestAnimationFrame(frame); }
  }
  function kick(){ if(!raf)raf=requestAnimationFrame(frame); }
- window.addEventListener('scroll',kick,{passive:true});
+ /* Eligibility is also scanned synchronously on the scroll event
+   itself: under a fling the frame loop and the backstop can notice
+   a stick hundreds of milliseconds late (the section head has then
+   already scrolled off, leaving a stuck-but-invisible card — the
+   void in the owner's second recording). The scroll event crosses
+   the stick point at the moment it happens, so the scan rides it;
+   tryPop stays the only gate, the queue still sets the cadence.
+   WebKit can still coalesce scroll delivery by a frame or two
+   under load; the 80 ms backstop above caps that lag, and the
+   head's trimmed margin (see #flightsSec .sec-head) keeps ~46px
+   of painted overlap so the lag cannot open a seam. */
+ window.addEventListener('scroll',function(){ kick(); scanPops(); },{passive:true});
  window.addEventListener('resize',kick);
  var bsTimer=0;
  function backstop(){
    if(!stack||!homeOn())return;
-   for(var j=0;j<cards.length;j++){
-     if(cards[j].classList.contains('fl-wait'))tryPop(cards[j]);
-   }
+   scanPops();
  }
  window.__flRefresh=function(){
    var el=document.getElementById('flightsStack');
@@ -4815,11 +4880,14 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    stack=el;
    cards=Array.prototype.slice.call(stack.querySelectorAll('.fl-card'));
    stack.classList.add('fl-armed');
+   popQueue.length=0;
+   if(popTimer){clearTimeout(popTimer);popTimer=0;}
+   lastPopAt=0;
    cards.forEach(function(c,i){
-     c.__rot=ROTS[i%ROTS.length]; c.__cov=-1;
+     c.__rot=ROTS[i%ROTS.length]; c.__cov=-1; c.__flQueued=false;
      if(!c.classList.contains('fl-pop'))c.classList.add('fl-wait');
    });
-   if(!bsTimer)bsTimer=setInterval(backstop,200);
+   if(!bsTimer)bsTimer=setInterval(backstop,80);
    kick();
  };
 })();
