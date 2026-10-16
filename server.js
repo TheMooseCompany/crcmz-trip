@@ -789,17 +789,16 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 .tile-date{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;flex-shrink:0}
 .empty{padding:60px 0;text-align:center;color:var(--muted);font-size:15px}
 /* Lightbox */
-#lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:max(16px,env(safe-area-inset-top,0px) + 8px) 16px max(16px,env(safe-area-inset-bottom,0px) + 8px)}
+#lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);flex-direction:column}
 #lb.on{display:flex}
-#lb-media{max-width:min(92vw,1200px);max-height:82dvh;display:flex;align-items:center;justify-content:center}
-#lb-media img,#lb-media video{max-width:100%;max-height:82dvh;border-radius:8px;object-fit:contain;display:block}
-#lb-caption{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-align:center}
-.lb-close{position:fixed;top:max(14px,env(safe-area-inset-top,0px) + 10px);right:max(16px,env(safe-area-inset-right,0px) + 10px);background:rgba(4,6,18,.85);border:1px solid var(--line);color:var(--cream);font-size:20px;border-radius:99px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
-.lb-close:hover{border-color:var(--line-amber);color:var(--amber2)}
-.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(4,6,18,.75);border:1px solid var(--line);color:var(--cream);font-size:24px;border-radius:99px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
-.lb-nav:hover{border-color:var(--line-amber);color:var(--amber2)}
-.lb-prev{left:10px}
-.lb-next{right:10px}
+#lb-bar{display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,12px) 12px 8px;flex-shrink:0;min-height:56px}
+#lb-caption{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.06em;flex:1;padding:0 4px}
+.lb-close{background:rgba(255,255,255,.12);border:none;color:#fff;font-size:22px;line-height:1;border-radius:99px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+#lb-media{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 56px}
+#lb-media img,#lb-media video{max-width:100%;max-height:100%;border-radius:8px;object-fit:contain;display:block}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(4,6,18,.75);border:1px solid var(--line);color:var(--cream);font-size:24px;border-radius:99px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lb-prev{left:6px}
+.lb-next{right:6px}
 </style>
 </head>
 <body>
@@ -819,11 +818,15 @@ ${count === 0
 </div>
 
 <div id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
-  <button class="lb-close" onclick="closeLb()" aria-label="Close">✕</button>
-  <button class="lb-nav lb-prev" onclick="lbStep(-1)" aria-label="Previous">‹</button>
-  <div id="lb-media"></div>
-  <div id="lb-caption" class="lb-caption"></div>
-  <button class="lb-nav lb-next" onclick="lbStep(1)" aria-label="Next">›</button>
+  <div id="lb-bar">
+    <div id="lb-caption"></div>
+    <button class="lb-close" onclick="closeLb()" aria-label="Close">&#x2715;</button>
+  </div>
+  <div id="lb-media">
+    <button class="lb-nav lb-prev" onclick="lbStep(-1)" aria-label="Previous">&#x2039;</button>
+    <div id="lb-inner"></div>
+    <button class="lb-nav lb-next" onclick="lbStep(1)" aria-label="Next">&#x203a;</button>
+  </div>
 </div>
 
 <script>
@@ -837,11 +840,11 @@ function openLb(i) {
 function closeLb() {
   document.getElementById('lb').classList.remove('on');
   document.body.style.overflow = '';
-  document.getElementById('lb-media').innerHTML = '';
+  document.getElementById('lb-inner').innerHTML = '';
 }
 function lbStep(d) { idx = (idx + d + ITEMS.length) % ITEMS.length; renderLb(); }
 function renderLb() {
-  var p = ITEMS[idx], m = document.getElementById('lb-media');
+  var p = ITEMS[idx], m = document.getElementById('lb-inner');
   if (p.kind === 'video') {
     m.innerHTML = '<video src="' + esc(p.url) + '" controls autoplay muted playsinline></video>';
   } else {
@@ -850,7 +853,7 @@ function renderLb() {
   document.getElementById('lb-caption').textContent = p.by + (p.by ? '  ·  ' : '') + (idx+1) + ' / ' + ITEMS.length;
 }
 function esc(s) { return s.replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-document.getElementById('lb').addEventListener('click', function(e) { if (e.target===this) closeLb(); });
+document.getElementById('lb-media').addEventListener('click', function(e) { if (e.target===this) closeLb(); });
 document.addEventListener('keydown', function(e) {
   if (!document.getElementById('lb').classList.contains('on')) return;
   if (e.key==='Escape') closeLb();
