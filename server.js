@@ -811,6 +811,10 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 .tile-by{font-size:12px;font-weight:600;color:var(--amber2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile-date{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;flex-shrink:0}
 .empty{padding:60px 0;text-align:center;color:var(--muted);font-size:15px}
+.upload-bar{display:flex;align-items:center;gap:12px;padding:14px 0 10px}
+.btn-upload{display:inline-flex;align-items:center;gap:8px;background:var(--amber2);color:#0a0b12;font-size:14px;font-weight:700;padding:10px 18px;border-radius:99px;cursor:pointer;border:none;transition:opacity .15s}
+.btn-upload:hover{opacity:.85}
+#uploadStatus{font-size:13px;color:var(--muted)}
 /* Lightbox */
 #lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);flex-direction:column}
 #lb.on{display:flex}
@@ -827,16 +831,24 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 <body>
 <header><div class="wrap"><div class="hdr">
   <div class="hdr-left">
-    <div class="label">CRCMZ Trip 2.0 · Album</div>
+    <div class="label">CRCMZ Trip 2.0 · Photos</div>
     <h1>TX/CA — YYC 2.0</h1>
     <div class="hdr-meta">${count} item${count !== 1 ? 's' : ''}${IMMICH_SHARE_URL ? ' &nbsp;·&nbsp; <a href="' + IMMICH_SHARE_URL + '" target="_blank" rel="noopener" class="share-link">Open in Immich ↗</a>' : ''}</div>
   </div>
-  <a class="back" href="/?tab=photos">← Back</a>
+  <a class="back" href="/">← Back</a>
 </div></div></header>
 
 <div class="wrap">
+<div class="upload-bar">
+  <label class="btn-upload" id="uploadLabel">
+    <input type="file" id="uploadInput" accept="image/*,video/*" multiple style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Add Photos
+  </label>
+  <span id="uploadStatus"></span>
+</div>
 ${count === 0
-  ? '<p class="empty">No photos yet — upload some from the Photo Wall.</p>'
+  ? '<p class="empty">No photos yet — be the first to upload!</p>'
   : `<div class="grid">\n${tiles}\n</div>`}
 </div>
 
@@ -883,6 +895,25 @@ document.addEventListener('keydown', function(e) {
   if (e.key==='ArrowLeft') lbStep(-1);
   if (e.key==='ArrowRight') lbStep(1);
 });
+</script>
+<script>
+(function(){
+  var input=document.getElementById('uploadInput');
+  var status=document.getElementById('uploadStatus');
+  if(!input) return;
+  input.addEventListener('change', function(){
+    var files=input.files;
+    if(!files||!files.length) return;
+    var fd=new FormData();
+    for(var i=0;i<files.length;i++) fd.append('photos',files[i]);
+    status.textContent='Uploading '+files.length+(files.length===1?' photo…':' photos…');
+    document.querySelector('.btn-upload').style.opacity='.5';
+    fetch('/api/photos',{method:'POST',body:fd})
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error((j&&j.error)||'Upload failed.'); return j; }); })
+      .then(function(){ status.textContent=''; location.reload(); })
+      .catch(function(err){ status.textContent=err.message||'Upload failed.'; document.querySelector('.btn-upload').style.opacity=''; input.value=''; });
+  });
+})();
 </script>
 </body>
 </html>`);

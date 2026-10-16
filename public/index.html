@@ -437,7 +437,7 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
    Split — the content bleeding through the bar in the owner's recording.
    This rule (0-2-1) keeps the bar's dark slab on every view. */
 body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55))}
-.tabbar .tab{flex:1;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease)}
+.tabbar .tab{flex:1;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
 .tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tabbar .tab.on{color:var(--amber)}
 /* Apple polish: one press language everywhere — a small settle, never a bounce */
@@ -1384,7 +1384,7 @@ img{max-width:100%}
 <nav class="tabbar" aria-label="Trip sections">
   <button type="button" class="tab on" data-view="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
   <button type="button" class="tab" data-view="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M2.5 19.5h19"/><path d="M12 8V6.5"/><circle cx="12" cy="5" r="1"/></svg><span>Food</span></button>
-  <button type="button" class="tab" data-view="photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg><span>Photos</span></button>
+  <a class="tab" href="/album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg><span>Photos</span></a>
   <button type="button" class="tab" data-view="split"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><circle cx="12" cy="6" r="1.7"/><circle cx="12" cy="18" r="1.7"/></svg><span>Split</span></button>
   <button type="button" class="tab" data-view="fifa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"/></svg><span>FIFA</span></button>
   <button type="button" class="tab" data-view="buds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"/><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"/><path d="M12 21v-6"/></svg><span>Buds</span></button>
