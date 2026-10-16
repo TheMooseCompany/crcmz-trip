@@ -672,11 +672,17 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 /* --- Days: boarding-pass stack (sticky pile, Concept 01) ---
    Each pass sticks at an incremental top offset so a covered pass
    leaves its top strip (route row + date stub head) showing as a
-   sliver. The stack driver (below) recedes covered passes; entrances
-   ride the site .rv reveal on the pass's inner wrapper, because the
-   scroll-driven rvIn animation owns transform on its element and
-   would fight the driver's scale. Reduced motion: a plain list. */
-.bp-stack{display:flex;flex-direction:column;gap:16px;--peek:72px}
+   sliver. The tall inter-pass gap is the stack's travel: like the
+   Explee pipeline cards, a pass starts hidden (driver-armed .bp-wait)
+   and pops up — rise + fade, the site's rvIn language, owned by the
+   stack driver on the pass's inner wrapper — only as scroll brings
+   it toward the pile, so an upcoming pass never sits visibly under
+   the stuck stack. The driver also recedes covered passes. Reduced
+   motion: a plain list, everything visible. */
+.bp-stack{display:flex;flex-direction:column;gap:40vh;--peek:72px}
+.bp-stack.bp-armed .bp-pass.bp-wait{opacity:0}
+.bp-pass.bp-pop .bp-in{animation:bpPop .6s var(--ease) both}
+@keyframes bpPop{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
 .bp-pass{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--peek));z-index:calc(2 + var(--i,0));
   min-height:300px;border-radius:18px;overflow:hidden;color:var(--ink);
   background:linear-gradient(165deg,#FFFDF6,#EFE6CF);
@@ -702,12 +708,32 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 .bp-movie-links{display:flex;gap:8px;margin:11px 0 3px}
 .bp-movie-links .movie-btn{flex:1;justify-content:center;margin:0;padding:9px 10px;min-height:0;font-size:13px;line-height:1.3;border-radius:12px;white-space:nowrap}
 .bp-data{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:10px;border-top:1px solid rgba(23,20,37,.16);padding-top:9px;margin-bottom:12px}
-.bp-data.wide1{grid-template-columns:1.45fr .85fr 1fr}
-.bp-data.wide3{grid-template-columns:.85fr .6fr 1.5fr}
+.bp-data.wide1{grid-template-columns:1.35fr 1fr 1fr}
+.bp-data.wide3{grid-template-columns:.7fr .82fr 1.48fr}
+.bp-data.mid3{grid-template-columns:.95fr 1fr 1.05fr}
+.bp-data.sat3{grid-template-columns:1.6fr .9fr .8fr}
 .bp-data div{min-width:0}
 .bp-data div + div{border-left:1px solid rgba(23,20,37,.12);padding-left:10px}
 .bp-data .k{font-size:8.5px;font-weight:700;letter-spacing:.16em;color:var(--paper-mut);text-transform:uppercase}
 .bp-data .v{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap}
+/* Narrow phones (the owner's 360px device): the ticket data row
+   absorbs the full content-store copy — slimmer body padding and
+   cell dividers, and the mono values step down before they can clip. */
+@media (max-width:420px){
+  .bp-body{padding-left:13px;padding-right:13px}
+  .bp-data div + div{padding-left:8px}
+  .bp-data .v{font-size:11px}
+  .bp-data .k{font-size:8px;letter-spacing:.1em}
+  /* The Sat cinema buttons' min-content (logo chip + chain name)
+     sums wider than the 360px body — trim the chrome and let the
+     buttons shrink so the row stays inside the pass. */
+  .bp-movie-links .movie-btn{min-width:0;padding:9px 8px;gap:6px;font-size:12.5px}
+  .bp-movie-links .chain-chip{width:22px;height:22px}
+  .bp-movie-links .chain-chip img{width:14px;height:14px}
+}
+@media (max-width:380px){
+  .bp-data .v{font-size:10.5px}
+}
 .bp-barcode{height:19px;margin-top:auto;border-radius:3px;opacity:.85;
   background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px,var(--ink) 10px 13px,transparent 13px 15px,var(--ink) 15px 16px,transparent 16px 21px)}
 .bp-foot{display:flex;justify-content:space-between;margin-top:5px}
@@ -731,10 +757,14 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 .bp-stack.bp-live .bp-pass.gold.sheen-on .bp-sheen{opacity:1;animation:bpSheen 3.4s var(--ease) infinite}
 @keyframes bpSheen{0%{transform:translateX(-140%) skewX(-16deg)}55%,100%{transform:translateX(330%) skewX(-16deg)}}
 @media (prefers-reduced-motion: reduce){
+  .bp-stack{gap:16px}
   .bp-pass{position:static}
   .bp-stack.bp-live .bp-pass.gold.sheen-on .bp-sheen{animation:none;opacity:0}
 }
+body.reduced .bp-stack{gap:16px}
 body.reduced .bp-pass{position:static}
+body.reduced .bp-stack .bp-pass.bp-wait{opacity:1}
+body.reduced .bp-pass.bp-pop .bp-in{animation:none}
 /* --- Days: sticky-visual step story --- */
 .days-layout{display:block}
 .days-visual{margin:0 0 14px}
@@ -1039,6 +1069,11 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 #detailLayer text{font-family:"Space Grotesk",sans-serif;letter-spacing:1px}
 /* ---------- Home: NEXT UP card (below the countdown + progress) ---------- */
 #nextUpSec{padding-top:14px}
+/* Same lead-in as Next Up: the countdown block's Trip Progress card
+   and the Forecast card below it take the standard inter-card gap
+   (section tail 4 + 14 + card margin 14 = 32px), not the default
+   40px section lead-in that stretched this one gap to 58px. */
+#weatherSec{padding-top:14px}
 .nu-card{margin-top:14px}
 /* Effectively opaque: the old white-glass gradient (4.5% -> 1.5% alpha)
    let the countdown numerals and the Trip Progress text bleed through
@@ -1467,7 +1502,7 @@ flash of Home. The router clears the tag when it takes over. */
   
 <!-- ================= DAYS ================= -->
   <section id="days"><div class="wrap">
-    <div class="sec-head reveal"><div class="label">02 · The Four Days</div><h2>Every day, a <span class="serif">boarding pass</span>.</h2></div>
+    <div class="sec-head reveal"><div class="label">02 · The Four Days</div><h2>The <span class="serif">Moves</span>.</h2></div>
     <div class="bp-stack" id="passStack"></div>
   </div></section>
   </div>
@@ -1779,15 +1814,16 @@ function renderHeroText(){
    from CONTENT.days (admin edits keep working); the ticket chrome
    (route codes, status pill, data row) is presentation metadata keyed
    by day index, matching the content the owner approved. Landing-time
-   placeholders are filled at render with the confirmed flight facts —
-   the same strings the FLIGHT-CARD-PATCH enforces as a backstop. */
+   placeholders are filled at render with the confirmed flight facts. */
 var PASS_META=[
  {route:'YVR \u2192 YYC',pill:'LANDS <b>1:59 PM</b>',foot:'SMART LOCK ENTRY',
+  dataCls:'wide3',
   data:[['Flight','AC 212'],['Terminal','M'],['Check-in','4:00\u201311:00 PM']]},
  {route:'IAH \u2192 YYC',pill:'LANDS <b>11:30 AM</b>',foot:'DAY-TWO PASS',
+  dataCls:'mid3',
   data:[['Flight','WS 1541'],['From','Houston'],['Crew','Complete']]},
  {route:'HOUSE \u2192 CINEMA',foot:'ADMIT THE CREW',
-  dataCls:'wide1',
+  dataCls:'sat3',
   data:[['Feature','Street Fighter'],['After','Meetup'],['Quiet hrs','10 PM']]},
  {route:'YYC \u2192 IAH',pill:'DEPARTS <b>6:00 PM</b>',foot:'RETURN PASS',
   dataCls:'wide1',
@@ -1834,7 +1870,7 @@ function renderDays(){
    var yr=(d.dmon||'').split(' ')[1]||'';
    return '<article class="bp-pass'+(gold?' gold':'')+'" style="--i:'+i+'">'
    +(gold?'<div class="bp-stamp">'+cEsc(d.chip)+'</div><i class="bp-sheen" aria-hidden="true"></i>':'')
-   +'<div class="bp-in rv">'
+   +'<div class="bp-in">'
    +'<div class="bp-stub"><div class="dow">'+cEsc(dow)+'</div><div class="dnum">'+cEsc(d.dnum)+'</div><div class="dmon">'+cEsc(mon)+'</div><div class="yr">'+cEsc(yr)+'</div></div>'
    +'<div class="bp-body">'
    +'<div class="bp-route"><div class="bp-codes">'+(meta.route?cEsc(meta.route).replace(' \u2192 ',' <span>\u2192</span> '):'')+'</div>'
@@ -3695,12 +3731,23 @@ renderBuds();
 
 /* ================= Boarding-pass stack driver =================
    The passes pile up with position:sticky (normal flow, 1:1 scroll);
-   this driver only recedes a pass as the next one covers it — scale
-   toward ~.95 plus a brightness dim, rotation relaxing to square —
-   and runs the gold pass's sheen while it is the uncovered top card.
-   Same pattern family as the cinematic driver: transform/filter only,
-   rAF while the section is near the viewport and Home is the active
-   view, and nothing at all under reduced motion. */
+   this driver owns their pop-up reveals and recedes a pass as the
+   next one covers it — scale toward ~.95 plus a brightness dim,
+   rotation relaxing to square — and runs the gold pass's sheen while
+   it is the uncovered top card. Same pattern family as the cinematic
+   driver: transform/filter only, rAF while the section is near the
+   viewport and Home is the active view, and nothing at all under
+   reduced motion (passes then render as a plain visible list).
+
+   Reveals (the Explee behaviour the owner asked for): a pass starts
+   hidden (.bp-wait, armed by __bpRefresh) and pops — rise + fade on
+   its inner wrapper — only at its scroll moment. The stack's tall
+   inter-pass gap is the travel that keeps an unrevealed pass from
+   ever sitting visibly under the stuck pile; the reveal observer's
+   trigger line sits in the lower viewport, a pass pops only once its
+   predecessor has stuck (the frame loop retries pending pops and
+   force-pops any pass that reaches its own stick point), and a
+   revealed pass never hides again. */
 (function(){
  var stack=document.getElementById('passStack');
  if(!stack||REDUCED)return;
@@ -3714,15 +3761,34 @@ renderBuds();
    });
  },{rootMargin:'160px 0px 160px 0px'});
  io.observe(stack);
+ var rio=new IntersectionObserver(function(es){
+   es.forEach(function(e){
+     if(e.isIntersecting){ e.target.__bpHot=true; tryPop(e.target); }
+   });
+ },{rootMargin:'0px 0px -15% 0px',threshold:0});
+ function stickTop(p){ return parseFloat(getComputedStyle(p).top)||0; }
+ function stuck(p){ return p.getBoundingClientRect().top<=stickTop(p)+2; }
+ function tryPop(p){
+   if(!p.classList.contains('bp-wait'))return;
+   var i=passes.indexOf(p);
+   if(i>0&&!stuck(passes[i-1])&&!stuck(p))return;
+   p.classList.remove('bp-wait');
+   p.classList.add('bp-pop');
+   rio.unobserve(p);
+ }
  function homeOn(){ var v=document.getElementById('view-home'); return v&&!v.hidden; }
  function frame(){
    raf=0;
    if(!inView||!homeOn())return;
+   for(var j=0;j<passes.length;j++){
+     var pp=passes[j];
+     if(pp.classList.contains('bp-wait')&&(pp.__bpHot||stuck(pp)))tryPop(pp);
+   }
    for(var i=0;i<passes.length-1;i++){
      var a=passes[i],b=passes[i+1];
      var ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
      if(!ar.height)continue;
-     var cov=(ar.bottom-br.top)/ar.height;
+     var cov=(a.classList.contains('bp-wait')||b.classList.contains('bp-wait'))?0:(ar.bottom-br.top)/ar.height;
      cov=cov<0?0:(cov>1?1:cov);
      if(Math.abs(cov-(a.__cov||0))>0.002){
        a.__cov=cov;
@@ -3734,7 +3800,7 @@ renderBuds();
    var g=stack.querySelector('.bp-pass.gold');
    if(g){
      var gcov=g.__cov||0,gr=g.getBoundingClientRect();
-     g.classList.toggle('sheen-on',gcov<0.03&&gr.bottom>80&&gr.top<window.innerHeight);
+     g.classList.toggle('sheen-on',!g.classList.contains('bp-wait')&&gcov<0.03&&gr.bottom>80&&gr.top<window.innerHeight);
    }
    if(window.scrollY!==lastY){ lastY=window.scrollY; raf=requestAnimationFrame(frame); }
  }
@@ -3743,7 +3809,14 @@ renderBuds();
  window.addEventListener('resize',kick);
  window.__bpRefresh=function(){
    passes=Array.prototype.slice.call(stack.querySelectorAll('.bp-pass'));
-   passes.forEach(function(p,i){ p.__rot=ROTS[i%ROTS.length]; p.__cov=-1; });
+   stack.classList.add('bp-armed');
+   passes.forEach(function(p,i){
+     p.__rot=ROTS[i%ROTS.length]; p.__cov=-1;
+     if(!p.classList.contains('bp-pop')){
+       p.classList.add('bp-wait');
+       rio.observe(p);
+     }
+   });
    kick();
  };
  window.__bpRefresh();
