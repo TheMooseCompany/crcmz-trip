@@ -7,8 +7,16 @@
 <title>CRCMZ Trip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@1,6..72,500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
+/* Newsreader italic is self-hosted (critique P2-5): a glyph subset of
+   Google's latin variable file (basic latin + punctuation + ★/✓),
+   weight already instanced to 500 — the only weight the app uses.
+   67,580 B from Google Fonts -> 59,536 B local, and one less
+   third-party request. The opsz axis is kept variable on purpose:
+   pinning it would freeze the optical size and change how every
+   serif accent renders — a frozen-baseline call, not a diet fix. */
+@font-face{font-family:"Newsreader";src:url("assets/fonts/newsreader-it.woff2") format("woff2");font-style:italic;font-weight:500;font-display:swap}
 :root{
   --sky:#0A0E27; --sky2:#0D1233; --deep:#060818; --panel:#10163A; --panel2:#141B45;
   --line:rgba(245,239,224,.12); --line-amber:rgba(242,179,61,.45);
@@ -19,6 +27,17 @@
   /* V3 light palette (warm paper) — measured on #F5EFE0: ink 15.7:1,
      paper-mut 7.3:1, paper-mut2 6.2:1, amber-deep 5.0:1 — all AA */
   --paper:#F5EFE0; --paper-card:#FFFDF6; --ink:#171425; --paper-mut:#514B5E; --paper-mut2:#5B5568; --amber-deep:#8A5E10; --line-d:rgba(23,20,37,.13);
+  /* Status tokens (critique P2-4): the ONLY sanctioned hues outside the
+     4-colour palette, used for status semantics and nothing else.
+     --live is THE live colour everywhere (Launcher dot, Poll, flights). */
+  --ok:#4ADE80; --warn:#FB923C; --danger:#B03A2E; --err:#F87171; --live:#4ADE80; --info:#60A5FA; --departed:#C084FC;
+  /* Type roles (critique P2-1/P2-2): mono (IBM Plex Mono) holds three
+     sanctioned roles — data-mono (the T-minus pill + aligned numeric
+     columns), label-mono (small caps section labels + badges) and
+     meta-mono (timestamps, counts, bylines). Micro text is one named
+     size, --micro, for chips and footnotes only. Everything else is
+     Space Grotesk; Newsreader italic is the serif accent (≤3 words). */
+  --micro:11.5px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -55,9 +74,8 @@ nav>*{pointer-events:auto}
 .stage-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(4,5,16,.55) 100%)}
 .layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 20px 40px;pointer-events:none}
 .intro{justify-content:flex-start;padding-top:14vh}
-.scroll-cue{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase}
-.scroll-cue i{display:block;width:1px;height:44px;background:linear-gradient(180deg,var(--amber),transparent);animation:cue 2.2s ease-in-out infinite}
-@keyframes cue{0%,100%{transform:scaleY(.55);opacity:.5;transform-origin:top}50%{transform:scaleY(1);opacity:1;transform-origin:top}}
+
+
 .readout{position:absolute;left:22px;bottom:26px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-align:left;line-height:1.9}
 .readout b{color:var(--cream);font-weight:500}
 .readout .amb{color:var(--amber2)}
@@ -111,10 +129,16 @@ nav>*{pointer-events:auto}
 #recapPanel .hero-cta{margin-top:18px}
 /* ---------- Photo Wall: Camera Roll ---------- */
 #photos{padding-top:calc(var(--header-h) + 16px)}
+/* One clearance token for every view (critique P1-3): a view's first
+   eyebrow starts at header-bottom + 16px. Split/FIFA/Buds/Poll/Pack/Admin
+   previously rode the generic 40px section padding and opened 18px
+   UNDER the fixed header. Food is exempt by design (its hero band
+   carries the clearance); Home's sections are mid-page. */
+#split,#fifa,#buds,#pollSec,#packSec,#admin{padding-top:calc(var(--header-h) + 16px)}
 .photo-head{margin-bottom:0}
 .photo-head-top{display:flex;align-items:center;gap:14px}
 .photo-dates{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.photo-refresh{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600;line-height:1;padding:9px 0 9px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.photo-refresh{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600;line-height:1;padding:9px 0 9px 2px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;display:inline-flex;align-items:center}
 .photo-refresh:hover,.photo-refresh:focus-visible{color:var(--cream)}
 #view-photos .photo-head h2{margin:14px 0 7px}
 #view-photos .photo-head h2 .serif{color:var(--peri)}
@@ -240,7 +264,7 @@ details.house-details p{margin:10px 0 0}
 .split-person .amt{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--amber2);font-weight:600}
 .split-note{border:1px dashed var(--line-amber);border-radius:14px;padding:14px 16px;margin-top:18px;color:var(--muted);font-size:13.5px;line-height:1.6}
 .split-note b{color:var(--amber2)}
-.stay-photo .rating{position:absolute;top:14px;left:14px;background:rgba(6,8,24,.9);border:1px solid var(--line-amber);color:var(--amber2);font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;padding:7px 12px;border-radius:999px}
+.stay-photo .rating{position:absolute;top:14px;left:14px;background:rgba(6,8,24,.9);border:1px solid var(--line-amber);color:var(--amber2);font-family:"IBM Plex Mono",monospace;font-size:var(--micro);letter-spacing:.06em;padding:7px 12px;border-radius:999px}
 .stay-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px}
 @media(max-width:860px){.stay-grid{grid-template-columns:1fr}}
 .stay-title{font-size:clamp(24px,3.4vw,34px);line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;font-weight:600}
@@ -316,7 +340,7 @@ details.house-details p{margin:10px 0 0}
 .t-chips{display:flex;flex-shrink:0}
 .t-chips img{width:24px;height:24px;border-radius:50%;object-fit:cover;object-position:24% 50%;border:2px solid var(--line-amber);background:#060818}
 .t-chips img+img{margin-left:-8px;border-color:var(--amber)}
-.fc-name{flex:1;min-width:0;background:transparent;border:none;border-bottom:1px dashed rgba(245,239,224,.25);color:var(--cream);font:inherit;font-size:15px;font-weight:600;letter-spacing:-.01em;padding:2px 0 4px;text-overflow:ellipsis}
+.fc-name{flex:1;min-width:0;background:transparent;border:none;border-bottom:1px dashed rgba(245,239,224,.25);color:var(--cream);font:inherit;font-size:16px;font-weight:600;letter-spacing:-.01em;padding:2px 0 4px;text-overflow:ellipsis}
 .fc-name:focus{outline:none;border-bottom-color:var(--peri)}
 .q-pill{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--peri);border:1.5px solid var(--peri);border-radius:999px;padding:3px 9px;background:rgba(165,180,255,.08);white-space:nowrap}
 .t-num{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;color:var(--cream);line-height:1}
@@ -440,17 +464,27 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
 .nav-ic{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:var(--tintbg);border:1px solid var(--tintline)}
 .nav-ic svg{width:27px;height:27px;stroke:var(--tintc);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav-name{display:block;font-size:17.5px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
-.nav-line{display:block;color:rgba(245,239,224,.62);margin-top:3px;font-size:12.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:30px}
+/* Launcher lines (critique P1-4): lines WRAP to two lines with the
+   height reserved on every half-width tile, so a content line (the
+   poll's status, a settle pair) can never clip mid-word again;
+   descriptor garnish may still ellipsize inside the clamp. The wide
+   Packing tile keeps its single line. */
+.nav-line{display:block;color:rgba(245,239,224,.62);margin-top:3px;font-size:12.5px;line-height:1.35;overflow:hidden;padding-right:30px}
+.nav-tile:not(.nav-tile-wide) .nav-line{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;height:34px;overflow:hidden}
+.nav-tile-wide .nav-line{white-space:nowrap;text-overflow:ellipsis}
 .nav-line.wrap{white-space:normal;overflow:visible;padding-right:34px}
 .nav-arrow{position:absolute;right:12px;bottom:12px;width:24px;height:24px;border-radius:50%;border:1px solid var(--tintline);color:var(--tintc);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;background:rgba(10,14,42,.35)}
 .nav-badge{position:absolute;top:11px;right:11px;font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.04em;color:#131735;background:var(--amber);border-radius:999px;padding:4px 8px;box-shadow:0 5px 12px rgba(242,179,61,.35)}
 .nav-badge-peri{background:var(--peri);box-shadow:0 5px 12px rgba(165,180,255,.3)}
-.nav-livedot{position:absolute;top:14px;right:13px;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3.5px rgba(242,179,61,.22),0 0 9px rgba(242,179,61,.85)}
+.nav-livedot{position:absolute;top:14px;right:13px;width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 3.5px rgba(74,222,128,.22),0 0 9px rgba(74,222,128,.85)}
 .nav-tile-wide{grid-column:1/-1;min-height:96px;display:flex;align-items:center;gap:14px;padding:14px 16px}
 .nav-tile-wide .nav-ic{margin-bottom:0;width:56px;height:56px;flex:none}
 .nav-tile-wide .nav-name{font-size:18.5px}
 .nav-bar{flex:1;height:5px;border-radius:3px;background:rgba(245,239,224,.14);overflow:hidden;margin-left:6px}
-.nav-bar i{display:block;height:100%;width:0;background:var(--amber);border-radius:3px;transition:width .4s var(--ease)}
+/* Progress fills animate transform:scaleX, never width (critique
+   P2-6): compositor-only, visually identical. Writers set
+   style.transform='scaleX(n)'. */
+.nav-bar i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left center;background:var(--amber);border-radius:3px;transition:transform .4s var(--ease)}
 .nav-tile-wide .nav-arrow{bottom:14px}
 .nt-amber{--tintbg:rgba(242,179,61,.16);--tintline:rgba(242,179,61,.5);--tintc:var(--amber);--wash:rgba(242,179,61,.12)}
 .nt-amber2{--tintbg:rgba(242,179,61,.09);--tintline:rgba(242,179,61,.34);--tintc:#F5C56B;--wash:rgba(242,179,61,.055)}
@@ -483,13 +517,15 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
 #view-split .split-note{border-color:rgba(138,94,16,.55);color:var(--paper-mut)}
 #view-split .split-note b{color:var(--amber-deep)}
 /* Bottom tab bar — CRCMZ app pattern, our colours.
-   Sticky, NOT fixed: in the owner's iPhone webview shell, position:fixed
-   with bottom:0 anchors to the wrong box — the bar floated mid-screen,
-   drifted with scroll and its background never painted. position:sticky
-   is the mechanism the cinematic stage already pins with on that phone,
-   so the bar (last element in the document, in flow) rides the visible
-   bottom with its background painted in normal flow. */
-.tabbar{will-change:transform;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(2,3,10,.45),inset 0 1px 0 rgba(255,255,255,.22);padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+   position:fixed, centred with a transform (critique P2-11: this comment
+   previously claimed the bar was sticky — it is not, and has not been
+   since the webview shell was fixed to anchor fixed boxes correctly).
+   Elevation is a filter:drop-shadow, NOT a box-shadow (critique P1-2):
+   a box-shadow paints from the element's rectangular backing layer —
+   visible on device as square "shoulders" around the pill — while the
+   drop-shadow follows the 30px border-radius silhouette. The inset
+   highlight stays as a box-shadow (it paints inside the radius). */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);filter:drop-shadow(0 14px 20px rgba(2,3,10,.45));padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
 .tabbar::-webkit-scrollbar{display:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
 .view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
@@ -508,7 +544,18 @@ html.booting[data-boot="food"] #view-food,html.booting[data-boot="photos"] #view
    Split — the content bleeding through the bar in the owner's recording.
    This rule (0-2-1) keeps the bar's dark slab on every view. */
 body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55))}
-.tabbar .tab{flex:none;min-width:56px;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
+/* On the cream views the translucent gradient washes out to flat grey
+   plastic (critique P1-2): the same pill, deepened, on light views. */
+body[data-view="food"] .tabbar,body[data-view="split"] .tabbar,body[data-view="admin"] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.86),rgba(10,12,28,.83))}
+/* Tab economy (critique P1-1): only the active tab carries its label;
+   the rest are icon-only. Eight tabs needed 478px inside a 342px pill
+   at 360px wide — Poll and Pack started off the pill with no scroll
+   cue. Collapsed, 8 tabs take ~315px and the admin 9th tab fits too,
+   at both phone widths; overflow-x stays as a safety net only. */
+.tabbar .tab{flex:none;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 7px 4px;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
+.tabbar .tab span{display:none}
+.tabbar .tab.on span{display:block}
+@media (max-width:370px){.tabbar .tab{padding-left:5px;padding-right:5px}}
 .tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tabbar .tab.on{color:var(--amber)}
 /* Apple polish: one press language everywhere — a small settle, never a bounce */
@@ -523,7 +570,7 @@ body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgb
 }
 /* ================= Split calculator ================= */
 .seg{display:inline-flex;background:rgba(23,20,37,.06);border:1px solid var(--line-d);border-radius:999px;padding:3px;gap:2px}
-.seg button{border:0;background:transparent;border-radius:999px;padding:8px 15px;min-height:38px;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;font-weight:600;color:var(--paper-mut);cursor:pointer;transition:background .3s var(--ease),color .3s var(--ease),transform .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 15px;min-height:44px;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;font-weight:600;color:var(--paper-mut);cursor:pointer;transition:background .3s var(--ease),color .3s var(--ease),transform .3s var(--ease);-webkit-tap-highlight-color:transparent}
 .seg button.on{background:var(--ink);color:var(--paper)}
 .seg button:active{transform:scale(.96)}
 .seg.dark{background:rgba(245,239,224,.07);border-color:var(--line)}
@@ -600,16 +647,16 @@ body[data-view="split"] .sp-add-btn{display:inline-flex}
 .nb-nm{font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap}
 .nb-to{margin-left:auto;display:flex;align-items:center;gap:2px;color:var(--paper-mut2);font-size:12px;flex:none}
 .nb-amt{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:15.5px;font-weight:600;color:var(--ink);white-space:nowrap}
-.nb-chip{border:1px solid rgba(23,20,37,.3);background:transparent;color:var(--ink);border-radius:99px;padding:8px 0;font-size:9.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;transition:transform .3s var(--ease),opacity .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.nb-chip{border:1px solid rgba(23,20,37,.3);background:transparent;color:var(--ink);border-radius:99px;padding:8px 10px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;transition:transform .3s var(--ease),opacity .3s var(--ease);-webkit-tap-highlight-color:transparent}
 .nb-chip:active{transform:scale(.96)}
 .nb-chip:disabled{opacity:.45}
 .nb-row.you .nb-chip{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .nb-empty{padding:16px 2px 12px;color:var(--paper-mut);font-size:14.5px}
 #view-split .sp-add-btn{display:flex;width:100%;max-width:none;margin:16px 0 0;border-radius:14px;justify-content:center}
 .nb-footrow{display:flex;align-items:center;gap:14px;margin-top:16px}
-.nb-footrow .split-fxnote{margin:0;flex:1;min-width:0;font-size:11.5px;line-height:1.55}
+.nb-footrow .split-fxnote{margin:0;flex:1;min-width:0;font-size:var(--micro);line-height:1.55}
 .nb-footrow .seg{flex:none}
-.nb-footrow .seg button{min-height:30px;padding:4px 11px}
+.nb-footrow .seg button{min-height:44px;padding:4px 11px}
 .nb-exp{margin-top:26px}
 .nb-exp-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 2px;border:0;border-bottom:1px solid rgba(23,20,37,.08);background:none;text-align:left;color:var(--ink);font:inherit}
 button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -663,17 +710,17 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sh-row input:focus{outline:2px solid var(--amber);outline-offset:0}
 .sh-remain{font-size:13.5px;font-weight:600;margin-top:8px;color:var(--paper-mut)}
 .sh-remain.ok{color:#33419A}
-.sh-remain.bad{color:#B03A2E}
+.sh-remain.bad{color:var(--danger)}
 .sh-desc{width:100%;border:1px solid var(--line-d);background:var(--paper-card);border-radius:14px;padding:13px 15px;font:inherit;font-size:15.5px;color:var(--ink)}
 .sh-desc:focus{outline:2px solid var(--amber);outline-offset:0}
 .sh-receipt-row{display:flex;align-items:center;gap:12px}
 .sh-receipt-thumb{width:52px;height:52px;border-radius:12px;object-fit:cover;border:1px solid var(--line-d)}
 .sh-mini-btn{border:1px solid var(--line-d);background:var(--paper-card);color:var(--ink);border-radius:999px;padding:10px 16px;min-height:44px;font-weight:600;font-size:13.5px;cursor:pointer}
-.sh-mini-btn.danger{color:#B03A2E;border-color:rgba(176,58,46,.4)}
+.sh-mini-btn.danger{color:var(--danger);border-color:rgba(176,58,46,.4)}
 .sh-save{width:100%;margin-top:22px;background:var(--amber);color:#221A04;border:0;border-radius:16px;padding:16px;min-height:54px;font-weight:700;font-size:16px;cursor:pointer;transition:opacity .3s var(--ease),transform .3s var(--ease)}
 .sh-save:disabled{opacity:.38;cursor:default}
 .sh-save:not(:disabled):active{transform:scale(.98)}
-.sh-delete{width:100%;margin-top:10px;background:transparent;color:#B03A2E;border:1px solid rgba(176,58,46,.4);border-radius:16px;padding:14px;min-height:50px;font-weight:600;font-size:15px;cursor:pointer}
+.sh-delete{width:100%;margin-top:10px;background:transparent;color:var(--danger);border:1px solid rgba(176,58,46,.4);border-radius:16px;padding:14px;min-height:50px;font-weight:600;font-size:15px;cursor:pointer}
 .sh-share-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line-d);font-size:14.5px}
 .sh-share-row:last-child{border-bottom:0}
 .sh-share-row span:first-child{color:var(--paper-mut)}
@@ -686,7 +733,7 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .buds-count{color:var(--muted);font-size:13px;margin:14px 2px 12px;font-variant-numeric:tabular-nums}
 .buds-grid{display:flex;flex-direction:column;gap:12px}
 @media(min-width:700px){.buds-grid{display:grid;grid-template-columns:1fr 1fr;align-items:start}}
-.bud-card{background:linear-gradient(165deg,rgba(38,46,102,.45),rgba(13,17,44,.55));border:1px solid rgba(245,239,224,.14);border-radius:20px;padding:18px}
+.bud-card{position:relative;background:linear-gradient(165deg,rgba(38,46,102,.45),rgba(13,17,44,.55));border:1px solid rgba(245,239,224,.14);border-radius:20px;padding:18px}
 .bud-brand{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--peri);font-weight:600}
 .bud-name{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:5px 0 0;line-height:1.25;color:var(--cream)}
 .bud-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
@@ -705,12 +752,14 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bud-head .bud-name{margin-top:4px}
 .bud-head .bud-tags{margin-top:8px}
 .bud-link{display:inline-block;margin-top:13px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);text-decoration:none}
+/* The whole card is the link (critique P1-7): the 19px text link was
+   the only way out of a ~150px card. The stretched ::after keeps the
+   visible link text exactly as-is; the card carries no other
+   interactive element, so nothing is shadowed. */
+.bud-link::after{content:"";position:absolute;inset:0;border-radius:20px}
 .buds-foot{color:var(--muted2);font-size:12.5px;margin-top:22px}
-.tabbar .tab{letter-spacing:.12em}
-@media(max-width:400px){.tabbar .tab{font-size:9px;letter-spacing:.08em}}
 
 /* ================= Admin ================= */
-.tabbar .tab{padding-left:1px;padding-right:1px}
 #view-admin .adm-card{margin-bottom:14px}
 .adm-note{color:var(--paper-mut);font-size:13.5px;margin:2px 0 14px;line-height:1.55}
 .adm-warn{border:1px dashed rgba(138,94,16,.55);border-radius:14px;padding:12px 14px;color:var(--paper-mut);font-size:13.5px;line-height:1.55;margin:0 0 14px}
@@ -725,13 +774,13 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .adm-save{background:var(--amber);color:#221A04;border:0;border-radius:999px;padding:13px 24px;min-height:48px;font-weight:700;font-size:14.5px;cursor:pointer;transition:transform .3s var(--ease),opacity .3s var(--ease)}
 .adm-save:active{transform:scale(.97)}
 .adm-saved{color:#33419A;font-weight:600;font-size:13.5px}
-.adm-err{color:#B03A2E;font-size:13.5px;font-weight:600;margin:10px 0 0;line-height:1.5}
+.adm-err{color:var(--danger);font-size:13.5px;font-weight:600;margin:10px 0 0;line-height:1.5}
 .adm-entry{border:1px solid var(--line-d);border-radius:14px;margin-bottom:10px;background:rgba(255,253,246,.55)}
 .adm-entry>summary{cursor:pointer;padding:13px 15px;font-weight:600;font-size:15px;min-height:48px;display:flex;align-items:center;gap:8px;list-style:none}
 .adm-entry>summary::-webkit-details-marker{display:none}
 .adm-entry>summary .adm-sum-sub{color:var(--paper-mut2);font-weight:500;font-size:12.5px;font-family:"IBM Plex Mono",monospace}
 .adm-entry-body{padding:2px 15px 15px}
-.adm-del{border:1px solid rgba(176,58,46,.45);background:transparent;color:#B03A2E;border-radius:999px;padding:10px 16px;min-height:44px;font-weight:600;font-size:13.5px;cursor:pointer}
+.adm-del{border:1px solid rgba(176,58,46,.45);background:transparent;color:var(--danger);border-radius:999px;padding:10px 16px;min-height:44px;font-weight:600;font-size:13.5px;cursor:pointer}
 .adm-add{border:1px solid rgba(138,94,16,.5);background:rgba(242,179,61,.14);color:var(--amber-deep);border-radius:999px;padding:11px 18px;min-height:46px;font-weight:600;font-size:14px;cursor:pointer;margin-top:4px}
 .adm-checks{display:flex;flex-wrap:wrap;gap:8px}
 .adm-check{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-d);background:var(--paper-card);border-radius:999px;padding:8px 13px;min-height:44px;font-size:13.5px;font-weight:600;cursor:pointer}
@@ -740,8 +789,8 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .adm-toggle{display:inline-flex;align-items:center;gap:9px;min-height:48px;font-weight:600;font-size:14.5px;cursor:pointer}
 .adm-toggle input{width:20px;height:20px;accent-color:var(--amber-deep)}
 .adm-danger{border-color:rgba(176,58,46,.4)}
-.adm-danger .label{color:#B03A2E}
-.adm-reset{background:#B03A2E;color:#fff;border:0;border-radius:999px;padding:13px 24px;min-height:48px;font-weight:700;font-size:14.5px;cursor:pointer}
+.adm-danger .label{color:var(--danger)}
+.adm-reset{background:var(--danger);color:#fff;border:0;border-radius:999px;padding:13px 24px;min-height:48px;font-weight:700;font-size:14.5px;cursor:pointer}
 .adm-reset.arm{background:#7E2418}
 
 /* ================= V5: spine, chapters, polish =================
@@ -812,7 +861,7 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 .bp-plan{font-size:13.5px;line-height:1.5;color:var(--paper-mut);font-weight:500;margin:0}
 .bp-plan + .bp-plan{margin-top:6px}
 .bp-movie-links{display:flex;gap:8px;margin:11px 0 3px}
-.bp-movie-links .movie-btn{flex:1;justify-content:center;margin:0;padding:9px 10px;min-height:0;font-size:13px;line-height:1.3;border-radius:12px;white-space:nowrap}
+.bp-movie-links .movie-btn{flex:1;justify-content:center;margin:0;padding:9px 10px;min-height:44px;font-size:13px;line-height:1.3;border-radius:12px;white-space:nowrap}
 .bp-data{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:10px;border-top:1px solid rgba(23,20,37,.16);padding-top:9px;margin-bottom:12px}
 .bp-data.wide1{grid-template-columns:1.35fr 1fr 1fr}
 .bp-data.wide3{grid-template-columns:.7fr .82fr 1.48fr}
@@ -930,7 +979,7 @@ body.reduced .days-layout{display:block}
 .tp-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .tp-phase{font-size:12px;letter-spacing:.18em;color:var(--amber2);font-weight:600}
 .tp-bar{position:relative;height:6px;border-radius:99px;background:rgba(245,239,224,.12);margin:16px 0 10px}
-.tp-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));width:0;transition:width .8s var(--ease)}
+.tp-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));width:100%;transform:scaleX(0);transform-origin:left center;transition:transform .8s var(--ease)}
 .tp-tick{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;border:2px solid var(--muted2);background:var(--sky2);transform:translate(-50%,-50%)}
 .tp-tick.on{border-color:var(--amber);background:var(--amber)}
 .tp-bar.tp-countdown .tp-tick{display:none}
@@ -954,7 +1003,7 @@ body.reduced .days-layout{display:block}
 .pack-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .pack-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--amber2)}
 .pack-prog{height:3px;border-radius:99px;background:rgba(255,255,255,.08);margin:0 0 12px;overflow:hidden}
-.pack-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));transition:width .5s var(--ease)}
+.pack-prog-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left center;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));transition:transform .5s var(--ease)}
 .pack-cats{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
 .pack-cats::-webkit-scrollbar{display:none}
 .pack-cat-btn{flex:none;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s,color .15s}
@@ -971,11 +1020,13 @@ body.reduced .days-layout{display:block}
 .pack-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
 .pack-badge-cat{background:rgba(165,180,255,.15);color:var(--peri)}
 .pack-badge-who{background:rgba(242,179,61,.15);color:var(--amber2)}
-.pack-del{background:none;border:none;color:var(--muted2);font-size:17px;cursor:pointer;padding:4px;line-height:1;opacity:.5;transition:opacity .15s}
-.pack-del:hover{opacity:1;color:#f87171}
+/* 44px hit area, glyph unchanged (critique P1-8): negative margins
+   hand the extra box back so the row layout does not move. */
+.pack-del{background:none;border:none;color:var(--muted2);font-size:17px;cursor:pointer;width:44px;height:44px;margin:-10px -12px -10px -2px;display:flex;align-items:center;justify-content:center;line-height:1;opacity:.5;transition:opacity .15s;flex:none}
+.pack-del:hover{opacity:1;color:var(--err)}
 .pack-add{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,239,224,.07)}
 .pack-add-row{display:flex;gap:8px}
-.pack-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none}
+.pack-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:16px;font-family:inherit;outline:none}
 .pack-input:focus{border-color:rgba(242,179,61,.5)}
 .pack-input::placeholder{color:rgba(245,239,224,.35)}
 .pack-select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 10px;color:var(--cream);font-size:13px;font-family:inherit;outline:none;cursor:pointer}
@@ -984,16 +1035,16 @@ body.reduced .days-layout{display:block}
 .pack-empty{color:var(--muted);font-size:13.5px;padding:8px 0}
 /* --- group poll --- */
 .poll-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
-.poll-active-label{display:inline-flex;align-items:center;gap:5px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px}
-.poll-active-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pollPulse 1.4s ease-in-out infinite}
+.poll-active-label{display:inline-flex;align-items:center;gap:5px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ok);margin-bottom:8px}
+.poll-active-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pollPulse 1.4s ease-in-out infinite}
 @keyframes pollPulse{0%,100%{opacity:1}50%{opacity:.4}}
-.poll-q{font-size:17px;font-weight:600;line-height:1.35;color:var(--cream);margin:0 0 14px}
+.poll-q{font-size:16px;font-weight:600;line-height:1.5;color:var(--cream);margin:0 0 14px}
 .poll-opts{display:flex;flex-direction:column;gap:8px}
 .poll-opt{position:relative;border:1px solid rgba(245,239,224,.12);border-radius:12px;padding:11px 14px;overflow:hidden;transition:border-color .18s,transform .12s}
 .poll-opt.open{cursor:pointer}
 .poll-opt.open:active{transform:scale(.98)}
 .poll-opt.voted{border-color:var(--amber2)}
-.poll-opt-fill{position:absolute;left:0;top:0;bottom:0;border-radius:12px;transition:width .45s var(--ease)}
+.poll-opt-fill{position:absolute;left:0;top:0;bottom:0;width:100%;transform-origin:left center;border-radius:12px;transition:transform .45s var(--ease)}
 .poll-opt-fill.mine{background:rgba(242,179,61,.2)}
 .poll-opt-fill.other{background:rgba(242,179,61,.09)}
 .poll-opt-row{position:relative;display:flex;align-items:center;gap:8px}
@@ -1015,12 +1066,12 @@ body.reduced .days-layout{display:block}
 .poll-opts-create{display:flex;flex-direction:column;gap:6px}
 .poll-opt-create-row{display:flex;gap:6px;align-items:center}
 .poll-opt-del{background:none;border:none;color:var(--muted2);font-size:17px;cursor:pointer;padding:4px;opacity:.6;transition:opacity .15s}
-.poll-opt-del:hover{opacity:1;color:#f87171}
+.poll-opt-del:hover{opacity:1;color:var(--err)}
 .poll-add-opt{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background .15s}
 .poll-add-opt:hover{background:rgba(255,255,255,.1)}
 .poll-create-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .poll-btn-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 18px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer}
-.poll-btn-close,.poll-btn-cancel{background:rgba(255,255,255,.08);border:none;border-radius:10px;padding:9px 16px;color:var(--cream);font-weight:600;font-size:13px;cursor:pointer}
+.poll-btn-close,.poll-btn-cancel{background:rgba(255,255,255,.08);border:none;border-radius:10px;padding:9px 16px;min-height:44px;color:var(--cream);font-weight:600;font-size:13px;cursor:pointer}
 /* --- flight cards: condensed stack ---
    The flight board borrows the boarding-pass system whole: condensed
    cards (critical info only — person, flight + airline, route, date,
@@ -1054,8 +1105,13 @@ body.reduced .days-layout{display:block}
    Reduced motion: a plain condensed list, everything visible, no
    spacer. */
 .fl-sec{padding-top:0}
+.fl-empty{font-size:13.5px;color:var(--muted);padding:8px 2px 4px}
 .fl-stack{display:flex;flex-direction:column;gap:40px;--fl-peek:46px}
-.fl-tail{flex:0 0 auto;height:max(120px,calc(100vh - 560px))}
+/* The trailing beat after the pile completes (critique P1-5): the
+   owner trialled the flat 120px floor — the vh-sized beat read as a
+   long static hold (~1/3 of a screen) after the last card stacked.
+   The pile still holds, briefly, then Stay arrives. */
+.fl-tail{flex:0 0 auto;height:120px}
 .fl-stack.fl-armed .fl-card.fl-wait{opacity:0}
 .fl-card.fl-pop .fl-in{animation:bpPop .6s var(--ease) both}
 .fl-card{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--fl-peek));z-index:calc(2 + var(--i,0));
@@ -1086,12 +1142,12 @@ body.reduced .days-layout{display:block}
 .fl-track:hover{background:rgba(165,180,255,.1)}
 .fl-status{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap}
 .fl-status.scheduled{background:rgba(165,180,255,.12);color:var(--peri)}
-.fl-status.on-time{background:rgba(74,222,128,.12);color:#4ade80}
-.fl-status.delayed{background:rgba(251,146,60,.12);color:#fb923c}
-.fl-status.boarding{background:rgba(96,165,250,.18);color:#60a5fa;animation:pollPulse 1.2s ease-in-out infinite}
-.fl-status.departed{background:rgba(192,132,252,.12);color:#c084fc}
-.fl-status.landed{background:rgba(74,222,128,.18);color:#4ade80}
-.fl-status.cancelled{background:rgba(248,113,113,.12);color:#f87171}
+.fl-status.on-time{background:rgba(74,222,128,.12);color:var(--ok)}
+.fl-status.delayed{background:rgba(251,146,60,.12);color:var(--warn)}
+.fl-status.boarding{background:rgba(96,165,250,.18);color:var(--info);animation:pollPulse 1.2s ease-in-out infinite}
+.fl-status.departed{background:rgba(192,132,252,.12);color:var(--departed)}
+.fl-status.landed{background:rgba(74,222,128,.18);color:var(--ok)}
+.fl-status.cancelled{background:rgba(248,113,113,.12);color:var(--err)}
 .fl-status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:0 0 auto}
 @media (prefers-reduced-motion: reduce){
   .fl-stack{gap:14px}
@@ -1113,7 +1169,7 @@ body.reduced .fl-card.fl-pop .fl-in{animation:none}
 .poll-hist-q{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:8px}
 .poll-hist-opt{display:flex;align-items:center;gap:8px;padding:5px 0}
 .poll-hist-bar-wrap{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
-.poll-hist-bar{height:100%;border-radius:99px;background:var(--amber);transition:width .4s var(--ease)}
+.poll-hist-bar{height:100%;width:100%;transform-origin:left center;border-radius:99px;background:var(--amber);transition:transform .4s var(--ease)}
 .poll-hist-bar.winner{background:linear-gradient(90deg,var(--amber),var(--peri))}
 .poll-hist-pct{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);min-width:30px;text-align:right}
 .poll-hist-text{font-size:13px;color:var(--cream);min-width:0;flex:2}
@@ -1170,17 +1226,22 @@ p{text-wrap:pretty}
 body{font-size:16px;letter-spacing:.01em}
 .label{font-family:"Space Grotesk",sans-serif;font-size:12px;letter-spacing:.08em;font-weight:600}
 .sec-head h2{font-size:32px;line-height:1.2;font-weight:600;letter-spacing:-.01em}
+/* One opener role per view (critique P2-2): every tab view opens at
+   display-2 — Food and Split already did (via .t-display2); the other
+   six now match. Home's mid-page section heads keep headline (32px):
+   they are not view openers. */
+.view:not(#view-home) .sec-head h2{font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
 .sec-head h2.t-display2{font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
 .sec-head p{font-size:16px;line-height:1.5}
 .card h3{font-size:20px;line-height:1.3}
 .hero-title{font-size:clamp(48px,13vw,84px)}
 /* mono evicted from labels, stats and navigation (sans takes those jobs) */
-.nav-brand,.nav-links a,.scroll-cue,.readout,.bigword small,.hero-dates,#skip,.stamp,.champ-stamp,#cd-msg,.tp-days,.dv-node,.day-card .dow,.day-card .dmon,.chip,.who-main span,.fc-wordmark,.match-title,.match-status,.q-pill,.t-rank,.bud-brand,.bud-tag,.bud-link,.sh-label,.seg button,.tabbar .tab,.stay-photo .rating,.fc-badge span,#fcChamp .cl,.adm-f label,.tp-phase,.th-phase,.food-cat-label,details.house-details summary{font-family:"Space Grotesk",sans-serif}
+.nav-brand,.nav-links a,.readout,.bigword small,.hero-dates,#skip,.stamp,.champ-stamp,#cd-msg,.tp-days,.dv-node,.day-card .dow,.day-card .dmon,.chip,.who-main span,.fc-wordmark,.match-title,.match-status,.q-pill,.t-rank,.bud-brand,.bud-tag,.bud-link,.sh-label,.seg button,.tabbar .tab,.stay-photo .rating,.fc-badge span,#fcChamp .cl,.adm-f label,.tp-phase,.th-phase,.food-cat-label,details.house-details summary{font-family:"Space Grotesk",sans-serif}
 .nav-brand{font-size:12px;letter-spacing:.08em}
 .nav-links a{font-size:12px;letter-spacing:.08em;font-weight:600}
 .tabbar .tab{font-size:11px;letter-spacing:.08em;font-weight:600}
 .chip{font-size:11px;letter-spacing:.06em;font-weight:600}
-.scroll-cue{font-size:11px;letter-spacing:.08em;font-weight:600}
+
 .readout{font-size:12px;letter-spacing:.06em;line-height:1.8}
 .bigword small{font-size:12px;letter-spacing:.08em;font-weight:600}
 .hero-dates{font-size:12px;letter-spacing:.08em;font-weight:600}
@@ -1582,7 +1643,9 @@ flash of Home. The router clears the tag when it takes over. */
       <div>ROUTE <b>CA → YYC</b> · <b>TX → YYC</b></div>
       <div>ZOOM <b class="amb" id="zoomVal">×1.9</b> · CAM <b id="camVal">NORTH AMERICA</b></div>
     </div>
-    <div class="scroll-cue" id="scrollCue" style="opacity: 1;"><span>Scroll to fly</span><i></i></div>
+    <!-- One scroll cue only (critique P2-9): the SKIP TO THE HUB pill
+         won; the 'Scroll to fly' cue that sat here contradicted it.
+         The scrub driver guards its (now absent) element. -->
     <button id="skip" type="button" style="opacity: 1; pointer-events: auto;">Skip to the hub →</button>
   </div>
   <div class="step-sentinel" data-step="0" style="top:0"></div>
@@ -1611,8 +1674,8 @@ flash of Home. The router clears the tag when it takes over. */
       <p id="cd-msg"></p>
     </div>
     <div class="tp-card reveal">
-      <div class="tp-top"><span class="label">Trip Progress</span><span class="tp-phase mono" id="tpPhase">T-MINUS 13 DAYS</span></div>
-      <div class="tp-bar tp-countdown" id="tpBar"><i id="tpFill" style="width: 54.9%;"></i><span class="tp-tick" data-tick="0" style="left:12.5%"></span><span class="tp-tick" data-tick="1" style="left:37.5%"></span><span class="tp-tick" data-tick="2" style="left:62.5%"></span><span class="tp-tick" data-tick="3" style="left:87.5%"></span></div>
+      <div class="tp-top"><span class="label">Trip Progress</span><span class="tp-phase mono" id="tpPhase">COUNTING DOWN</span></div>
+      <div class="tp-bar tp-countdown" id="tpBar"><i id="tpFill" style="transform:scaleX(.549)"></i><span class="tp-tick" data-tick="0" style="left:12.5%"></span><span class="tp-tick" data-tick="1" style="left:37.5%"></span><span class="tp-tick" data-tick="2" style="left:62.5%"></span><span class="tp-tick" data-tick="3" style="left:87.5%"></span></div>
       <div class="tp-scale" id="tpScale" aria-label="Progress measured from October 1 to October 29"><span>OCT 1</span><span>OCT 29</span></div>
       <div class="tp-days tp-hidden" id="tpDays"><span data-ticklab="0">Thu 29</span><span data-ticklab="1">Fri 30</span><span data-ticklab="2">Sat 31</span><span data-ticklab="3">Sun 1</span></div>
     </div>
@@ -1643,7 +1706,7 @@ flash of Home. The router clears the tag when it takes over. */
       <div class="stay-photo">
         <img src="assets/stay.jpg" alt="The Airbnb in Bayside, Airdrie — living space of the 4-bedroom house the crew is staying in" loading="lazy">
         <span class="rating" id="stayRating">★ 4.92 · Guest Favorite</span>
-        <div class="stay-scrim"><div class="stay-scrim-main"><div class="stay-scrim-name">Bayside, Airdrie</div><div class="stay-scrim-sub">Waterfront house on the canals · Oct 29 – Nov 1</div></div><span class="stay-phase-chip" id="stayPhaseChip">T-minus 13d</span></div>
+        <div class="stay-scrim"><div class="stay-scrim-main"><div class="stay-scrim-name">Bayside, Airdrie</div><div class="stay-scrim-sub">Waterfront house on the canals · Oct 29 – Nov 1</div></div><span class="stay-phase-chip" id="stayPhaseChip">Oct 29 – Nov 1</span></div>
       </div>
       <div class="stay-body" id="stayBody"><p class="stay-intro">Bayside, Airdrie — waterfront house on the canals · 18 min to YYC · 30 min to downtown Calgary</p><div class="stay-stats"><div class="stay-stat"><span>Sleeps</span><b>11</b></div><div class="stay-stat"><span>Bedrooms</span><b>4</b></div><div class="stay-stat"><span>Beds</span><b>6</b></div><div class="stay-stat"><span>Baths</span><b>3.5</b></div></div><div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">4:00–11:00 PM</div><p>self check-in, smart lock</p><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1619643402121865110" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Before 11:00 AM</div><p>Leave it tidy; keys as instructed</p><button type="button" class="btn stay-tile-btn" id="stayCopyBtn">Copy details</button></div></div><div class="stay-warns"><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Quiet hours 10:00 PM – 7:00 AM, noise monitored — warnings escalate, and repeat violations can end the stay</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No smoking or vaping — $250 fine</span></div></div><details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>No parties or events</li><li>No pets</li><li>Late checkout is billed: $50 for the first hour, then $35 per 30 minutes</li></ul><div class="amenities"><span>Pool table</span><span>theatre seats</span><span>canal views</span><span>fast Wi-Fi + dedicated office</span><span>free parking (garage + driveway)</span><span>in-home laundry</span><span>full kitchen</span><span>air conditioning</span></div><p class="host-line">Hosted by <b>Susan · Premier Stays · Superhost</b>. Exact address lands in the group chat after booking.</p></details><div class="stay-receipt"><div class="label" style="margin-bottom:4px">The receipt</div><div class="kv"><span>3 × per night</span><span class="t-data">$302.67</span></div><div class="kv"><span>Long-stay discount</span><span class="t-data">−$135.60</span></div><div class="kv"><span>Taxes &amp; fees</span><span class="t-data">$84.96</span></div><div class="kv total"><span>Total</span><span class="t-data">$857.36</span></div><p class="stay-receipt-note">Line items as shown by Airbnb; their per-line rounding lands a cent over the total.</p></div></div>
     </div>
@@ -1722,7 +1785,7 @@ flash of Home. The router clears the tag when it takes over. */
 <!-- ================= FOOD FINDER · NIGHT MARKET ================= -->
   <section id="food">
     <div class="food-band reveal">
-      <img class="food-band-img" src="assets/food/band.jpg" alt="A night-market grill stall glowing under string lights, shawarma spit turning">
+      <img class="food-band-img" src="assets/food/band.jpg" alt="A night-market grill stall glowing under string lights, shawarma spit turning" loading="lazy">
       <div class="food-band-scrim"></div>
       <div class="food-band-copy">
         <div class="label">03 · Food Finder · Night Market</div>
@@ -1751,11 +1814,11 @@ flash of Home. The router clears the tag when it takes over. */
       <h2>Every shot, <span class="serif">one wall.</span></h2>
       <p class="photo-count"><b id="photoWallCount">5</b> on the wall</p>
     </div>
-    <a class="photo-album-bar reveal" id="photoAlbumBar" href="/album" aria-label="Open the shared album, CRCMZ Trip 2.0">
+    <a class="photo-album-bar reveal" id="photoAlbumBar" href="/album" aria-label="Open the shared album, CRCMZ Trip">
       <img class="photo-album-cover" id="photoAlbumCover" src="assets/stay.jpg" alt="">
       <span class="photo-album-main">
         <span class="photo-album-kicker">Shared album</span>
-        <span class="photo-album-name">CRCMZ Trip 2.0</span>
+        <span class="photo-album-name">CRCMZ Trip</span>
         <span class="photo-album-meta" id="photoAlbumMeta">Open the full album</span>
       </span>
       <span class="photo-album-chevron" aria-hidden="true">›</span>
@@ -1857,10 +1920,10 @@ flash of Home. The router clears the tag when it takes over. */
     <div id="fcChamp" style="display: none;"><div class="cl">Tournament Winners</div><div id="fcChampLogos"></div><div class="cn" id="fcChampName"></div><span class="champ-stamp">CHAMPIONS</span></div>
     <h3 class="fc-h3 reveal">Title race</h3>
     <p class="fc-sub reveal">Rows spring to their new spot, flash and count up as results land. A duo locked into the final wears the QUALIFIED pill.</p>
-    <div class="live-table reveal" id="fcRace"><div class="tbl-row tbl-head" aria-hidden="true"><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GF</span><span>GA</span><span>GD</span><span>Pts</span></div><div class="tbl-row trow" data-team="0" role="button" tabindex="0" aria-label="Highlight Asamad + Kaptaan matches"><div class="t-team"><div class="t-line1"><span class="t-rank">1</span><input class="fc-name" data-name="0" type="text" maxlength="28" value="Asamad + Kaptaan" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/samad.png" alt="" loading="lazy"><img src="assets/kap.png" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="2" role="button" tabindex="0" aria-label="Highlight Killer + Deception matches"><div class="t-team"><div class="t-line1"><span class="t-rank">2</span><input class="fc-name" data-name="2" type="text" maxlength="28" value="Killer + Deception" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/killer.png" alt="" loading="lazy"><img src="assets/decep.png" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="1" role="button" tabindex="0" aria-label="Highlight Moiz + Moose matches"><div class="t-team"><div class="t-line1"><span class="t-rank">3</span><input class="fc-name" data-name="1" type="text" maxlength="28" value="Moiz + Moose" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/soup.png" alt="" loading="lazy"><img src="assets/moose.png" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div></div>
+    <div class="live-table reveal" id="fcRace"><div class="tbl-row tbl-head" aria-hidden="true"><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GF</span><span>GA</span><span>GD</span><span>Pts</span></div><div class="tbl-row trow" data-team="0" role="button" tabindex="0" aria-label="Highlight Asamad + Kaptaan matches"><div class="t-team"><div class="t-line1"><span class="t-rank">1</span><input class="fc-name" data-name="0" type="text" maxlength="28" value="Asamad + Kaptaan" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="2" role="button" tabindex="0" aria-label="Highlight Killer + Deception matches"><div class="t-team"><div class="t-line1"><span class="t-rank">2</span><input class="fc-name" data-name="2" type="text" maxlength="28" value="Killer + Deception" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="1" role="button" tabindex="0" aria-label="Highlight Moiz + Moose matches"><div class="t-team"><div class="t-line1"><span class="t-rank">3</span><input class="fc-name" data-name="1" type="text" maxlength="28" value="Moiz + Moose" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div></div>
     <h3 class="fc-h3 reveal">The gauntlet</h3>
     <p class="fc-sub reveal">Thumb the scores in with the steppers. The final unlocks once all three group matches are played.</p>
-    <div class="gauntlet reveal" id="fcGauntlet"><div class="match"><div class="match-top"><span class="match-title">Match 1</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.png" alt="" loading="lazy"><img src="assets/kap.png" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="0" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.png" alt="" loading="lazy"><img src="assets/moose.png" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="0" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 2</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.png" alt="" loading="lazy"><img src="assets/moose.png" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="1" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.png" alt="" loading="lazy"><img src="assets/decep.png" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="1" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 3</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.png" alt="" loading="lazy"><img src="assets/kap.png" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="2" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.png" alt="" loading="lazy"><img src="assets/decep.png" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="2" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match final locked"><div class="match-top"><span class="match-title">The Final</span><span class="match-status">Locked</span></div><p class="match-note">Top two after the group stage.</p><p class="match-note">Locked — finish all three group matches to open the final.</p></div></div>
+    <div class="gauntlet reveal" id="fcGauntlet"><div class="match"><div class="match-top"><span class="match-title">Match 1</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="0" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="0" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 2</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="1" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="1" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 3</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="2" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="2" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match final locked"><div class="match-top"><span class="match-title">The Final</span><span class="match-status">Locked</span></div><p class="match-note">Top two after the group stage.</p><p class="match-note">Locked — finish all three group matches to open the final.</p></div></div>
     <div class="fc-foot reveal">
       <p class="fc-note">Scores live on this phone. Screenshot the race for the chat.</p>
       <button class="btn danger" id="fcReset" type="button">Reset tournament</button>
@@ -2441,7 +2504,7 @@ function renderProgress(p){
  readout.style.opacity=chromeOut.toFixed(2);
  skipBtn.style.opacity=chromeOut.toFixed(2);
  skipBtn.style.pointerEvents=chromeOut>0.02?'auto':'none';
- scrollCue.style.opacity=(1-fadeWin(p,0,0.06)).toFixed(2);
+ if(scrollCue)scrollCue.style.opacity=(1-fadeWin(p,0,0.06)).toFixed(2);
  var hlE=fadeWin(p,0.90,0.99);
  heroLate.style.opacity=hlE.toFixed(2);
  heroLate.style.transform='translateY('+(22*(1-hlE)).toFixed(1)+'px)';
@@ -2513,7 +2576,7 @@ if(REDUCED){
  cine.classList.add('landed-fit');
  document.querySelectorAll('.step-sentinel').forEach(function(s){s.style.display='none'});
  heroLayer.classList.add('landed'); heroLayer.style.pointerEvents='auto';
- skipBtn.style.display='none'; scrollCue.style.display='none'; landStamp();
+ skipBtn.style.display='none'; if(scrollCue)scrollCue.style.display='none'; landStamp();
  renderProgress(1);
  setPulses(false);
 }else{
@@ -2559,7 +2622,7 @@ if(REDUCED){
 
 /* ================= FC 27 tournament: title race + gauntlet ================= */
 var FC_KEY='crcmz-fc27-v2',FC_OLD_KEY='crcmz-fc27-v1';
-var FC_LOGOS={samad:'assets/samad.png',kaptaan:'assets/kap.png',moiz:'assets/soup.png',moose:'assets/moose.png',killer:'assets/killer.png',deception:'assets/decep.png'};
+var FC_LOGOS={samad:'assets/samad.webp',kaptaan:'assets/kap.webp',moiz:'assets/soup.webp',moose:'assets/moose.webp',killer:'assets/killer.webp',deception:'assets/decep.webp'};
 function buildFcTeams(){
  return CONTENT.fifaTeams.map(function(t){
    return {def:t.def,players:t.members.map(function(m){return [m.name,FC_LOGOS[m.logo]||FC_LOGOS.samad]})};
@@ -3111,8 +3174,21 @@ applyRoute();
     if(settleTimer) clearTimeout(settleTimer);
     if(animate) settleTimer=setTimeout(settle, 400); else settle();
   }
+  /* The viewer must live at <body> level while open: inside
+     section#photos it is capped by .view>section's z-index:1 stacking
+     context, so the body-level nav (z-60) and tabbar (z-120) painted —
+     and hit-tested — above its z-200, burying ✕/Save under the nav.
+     Worse, openViewer's body scroll lock is cleared only by
+     closeViewer(), whose only touch path was the buried ✕: on the
+     owner's phone the viewer trapped the whole site until a URL reset
+     (P0-1). Reparent on open, restore on close; nothing else moves. */
+  var viewerHome=null;
   function openViewer(i){
     if(!viewer) return;
+    if(viewer.parentNode!==document.body){
+      if(!viewerHome) viewerHome={parent:viewer.parentNode, next:viewer.nextSibling};
+      document.body.appendChild(viewer);
+    }
     viewer.hidden=false;
     if(fab) fab.hidden=true;
     document.body.style.overflow='hidden';
@@ -3129,8 +3205,17 @@ applyRoute();
       track.innerHTML='';
     }
     document.body.style.overflow='';
+    if(viewerHome&&viewer.parentNode===document.body){
+      if(viewerHome.next&&viewerHome.next.parentNode===viewerHome.parent) viewerHome.parent.insertBefore(viewer, viewerHome.next);
+      else viewerHome.parent.appendChild(viewer);
+    }
     cur=-1;
   }
+  /* Anti-trap: any route change away from Photos while the viewer is
+     open closes it, so the scroll lock can never outlive its view. */
+  window.addEventListener('hashchange', function(){
+    if(viewer&&!viewer.hidden&&(location.hash||'')!=='#photos') closeViewer();
+  });
   function step(d){ if(cur>-1) goTo(cur+d, true); }
   if(pvClose) pvClose.addEventListener('click', closeViewer);
   if(pvPrev) pvPrev.addEventListener('click', function(){ step(-1); });
@@ -3574,7 +3659,12 @@ function renderSplit(){
  var prev=document.getElementById('splitPrevLine');
  var prevBadge=document.getElementById('splitTileBadge');
   if(prev){
-    if(transfers.length){ var big=transfers.slice().sort(function(a,b){return b.amountCentsCAD-a.amountCentsCAD})[0]; prev.textContent=big.from+' owes '+big.to; if(prevBadge){ prevBadge.textContent=spFmt(big.amountCentsCAD); prevBadge.hidden=false; } }
+    /* Viewer-relative settle line (critique P1-4): the payer sees
+       'Owes Moiz', the payee sees 'Mutasif owes you', everyone else
+       the full pair — the badge carries the amount either way. */
+    if(transfers.length){ var big=transfers.slice().sort(function(a,b){return b.amountCentsCAD-a.amountCentsCAD})[0];
+      prev.textContent=big.from===spMePerson?('Owes '+big.to):(big.to===spMePerson?(big.from+' owes you'):(big.from+' owes '+big.to));
+      if(prevBadge){ prevBadge.textContent=spFmt(big.amountCentsCAD); prevBadge.hidden=false; } }
     else { prev.textContent='All settled'; if(prevBadge)prevBadge.hidden=true; }
   }
 }
@@ -4029,8 +4119,10 @@ renderBuds();
    var now=Date.now(),txt='',pct=0,active=-1;
    var isCountdown=now<TARGET;
    if(isCountdown){
-     var days=Math.floor((TARGET-now)/86400000);
-     txt='T-MINUS '+days+' DAY'+(days===1?'':'S');
+     /* Phase words, not a third countdown readout (critique P2-3):
+        the hero tiles are the canonical countdown, the nav pill the
+        chrome echo; this line names the phase. */
+     txt='COUNTING DOWN';
      pct=Math.max(2,Math.min(96,(1-(TARGET-now)/(28*86400000))*100));
    }else if(now<END){
      var iso=edmISO(edmParts());
@@ -4042,7 +4134,7 @@ renderBuds();
      txt='TRIP COMPLETE'; pct=100; active=CONTENT.days.length-1;
    }
    if(txt!==lastTxt){phase.textContent=txt;lastTxt=txt;}
-   fill.style.width=pct.toFixed(1)+'%';
+   fill.style.transform='scaleX('+(pct/100)+')';
    if(tpBar)tpBar.classList.toggle('tp-countdown',isCountdown);
    if(tpDays)tpDays.classList.toggle('tp-hidden',isCountdown);
    if(tpScale&&CONTENT.days&&CONTENT.days.length){
@@ -4160,10 +4252,10 @@ renderBuds();
    var prevBar=document.getElementById('packTileBar');
    var pct=total?Math.round(done/total*100):0;
    if(count)count.textContent=done+' / '+total+' packed';
-   if(fill)fill.style.width=pct+'%';
+   if(fill)fill.style.transform='scaleX('+(pct/100)+')';
    if(prev)prev.textContent=total?done+' of '+total+' packed':'Nothing added yet';
    if(prevBadge){ prevBadge.textContent=pct+'%'; prevBadge.hidden=!total; }
-   if(prevBar)prevBar.style.width=pct+'%';
+   if(prevBar)prevBar.style.transform='scaleX('+(pct/100)+')';
  }
  function renderPack(){
    var list=document.getElementById('packList');
@@ -4208,6 +4300,17 @@ renderBuds();
        fetch('/api/packing/'+id,{method:'DELETE'})
          .then(function(){_packItems=_packItems.filter(function(i){return i.id!==id;});renderPack();})
          .catch(function(){btn.disabled=false;});
+     });
+   });
+   /* The whole row toggles (critique P1-8): the 22px checkbox was the
+      only way to check an item off. Row clicks route through the same
+      check button handler; clicks on the buttons themselves are left
+      to their own handlers. */
+   list.querySelectorAll('.pack-item').forEach(function(row){
+     row.addEventListener('click',function(ev){
+       if(ev.target.closest('button'))return;
+       var chk=row.querySelector('.pack-check');
+       if(chk)chk.click();
      });
    });
  }
@@ -4271,7 +4374,11 @@ renderBuds();
      var myVote=null;
      p.options.forEach(function(o){if(o.voters.indexOf(_myPerson)>=0)myVote=o.id;});
      if(phase)phase.textContent=p.open?'Open':'Closed';
-     if(prevLine)prevLine.textContent=p.question.slice(0,48)+(p.question.length>48?'…':'');
+     /* Launcher tile line = poll STATUS, never the question itself
+        (critique P1-4): the question is content (it lives in the Poll
+        view, one tap away) and at 198px it clipped mid-word in a
+        131px line box. Status form, per the R1 mock: 'Open now'. */
+     if(prevLine)prevLine.textContent=p.open?'Open now':'Closed';
      if(tileDot)tileDot.hidden=!p.open;
      var html=(p.open?'<div class="poll-active-label"><span class="poll-active-dot"></span>Live</div>':'')
        +'<p class="poll-q">'+escH(p.question)
@@ -4284,7 +4391,7 @@ renderBuds();
        var isMe=(o.id===myVote);
        var votersStr=n?o.voters.map(escH).join(', '):'';
        html+='<div class="poll-opt'+(isMe?' voted':'')+(p.open?' open':'')+'" data-oid="'+escH(o.id)+'">'
-         +'<div class="poll-opt-fill '+(isMe?'mine':'other')+'" style="width:'+pct+'%"></div>'
+         +'<div class="poll-opt-fill '+(isMe?'mine':'other')+'" style="transform:scaleX('+(pct/100)+')"></div>'
          +'<div class="poll-opt-row">'
            +'<span class="poll-opt-text">'+escH(o.text)+(isMe?'<span class="poll-you-chip">you</span>':'')+'</span>'
            +'<span class="poll-opt-pct">'+pct+'%</span>'
@@ -4390,7 +4497,7 @@ renderBuds();
        var isWinner=(n===maxN&&n>0);
        inner+='<div class="poll-hist-opt">'
          +'<span class="poll-hist-text">'+escH(o.text)+'</span>'
-         +'<div class="poll-hist-bar-wrap"><div class="poll-hist-bar'+(isWinner?' winner':'')+'" style="width:'+pct+'%"></div></div>'
+         +'<div class="poll-hist-bar-wrap"><div class="poll-hist-bar'+(isWinner?' winner':'')+'" style="transform:scaleX('+(pct/100)+')"></div></div>'
          +'<span class="poll-hist-pct">'+pct+'%</span>'
          +'</div>';
      });
@@ -4453,7 +4560,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
       if(d)return d;
       return (a.departureTime||'').localeCompare(b.departureTime||'');
     });
-    if(!visible.length){container.innerHTML='';return;}
+    if(!visible.length){container.innerHTML=flLoadFailed?'<p class="fl-empty">Flights couldn\'t load</p>':'';return;}
     container.innerHTML='<div class="fl-stack" id="flightsStack">'+visible.map(function(f,i){
       var st=f.status||'scheduled';
       var stLabel=FL_STATUS_LABELS[st]||st;
@@ -4489,8 +4596,17 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     if(window.__flRefresh)window.__flRefresh();
   }
   var flSig=null;
+  /* A failed or malformed flights payload must never render as a
+     silent empty section (critique §4): the section says so, in one
+     line, and the next good poll restores the cards. */
+  var flLoadFailed=false;
   function fetchFlights(){
     fetch('/api/flights').then(function(r){return r.json();}).then(function(j){
+      if(!j||!Array.isArray(j.flights)){
+        if(!flLoadFailed){flLoadFailed=true;renderFlights();}
+        return;
+      }
+      flLoadFailed=false;
       /* The 60s poll rebuilds the cards only when the data actually
          changed; an identical payload leaves the DOM (and any
          running status pulse) untouched. */
@@ -4500,7 +4616,9 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
       _flights=j.flights||[];
       renderFlights();
       if(window.__flightsLoaded)window.__flightsLoaded(_flights);
-    }).catch(function(){});
+    }).catch(function(){
+      if(!flLoadFailed){flLoadFailed=true;renderFlights();}
+    });
   }
   fetchFlights();
   setInterval(fetchFlights,60000);
@@ -4643,7 +4761,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   function phaseInfo(){
     var now=Date.now();
     if(typeof TARGET==='undefined'||typeof END==='undefined')return null;
-    if(now<TARGET){ var d=Math.floor((TARGET-now)/86400000); return {txt:'T-MINUS '+d+' DAY'+(d===1?'':'S'),chip:'T-minus '+d+'d',pct:Math.max(2,Math.min(96,(1-(TARGET-now)/(28*86400000))*100)),active:-1}; }
+    if(now<TARGET){ var d=Math.floor((TARGET-now)/86400000); return {txt:'T-MINUS '+d+' DAY'+(d===1?'':'S'),chip:'Oct 29 – Nov 1',pct:Math.max(2,Math.min(96,(1-(TARGET-now)/(28*86400000))*100)),active:-1}; }
     if(now<END){ var iso=edmISO(edmParts()),active=0; CONTENT.days.forEach(function(day,i){ if(day.dateISO===iso)active=i; }); return {txt:'DAY '+(active+1)+' OF '+CONTENT.days.length,chip:'Day '+(active+1)+' of '+CONTENT.days.length,pct:((active+1)/CONTENT.days.length)*100,active:active}; }
     return {txt:'TRIP COMPLETE',chip:'Complete',pct:100,active:CONTENT.days.length-1};
   }
@@ -4674,7 +4792,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     renderNextUp();
   }
   window.__photoCount=function(n){
-    var el=document.getElementById('photoPrevLine'); if(el)el.textContent=n>0?(n+' shot'+(n===1?'':'s')+' on the wall'):'No shots yet \u2014 first one lands Thu';
+    var el=document.getElementById('photoPrevLine'); if(el)el.textContent=n>0?(n+' shot'+(n===1?'':'s')+' on the wall'):'No shots yet';
     var badge=document.getElementById('photoTileBadge'); if(badge){ badge.textContent=n; badge.hidden=!(n>0); }
   };
   v6Tick(); setInterval(v6Tick,1000);
