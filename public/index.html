@@ -22,8 +22,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--sky);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;overflow-x:hidden;overflow-x:clip;line-height:1.55;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;overscroll-behavior:none}
+body{margin:0;background:var(--sky);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;overflow-x:hidden;overflow-x:clip;overscroll-behavior:none;line-height:1.55;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 button{font:inherit}
 .mono{font-family:"IBM Plex Mono",monospace}
@@ -118,7 +118,8 @@ nav>*{pointer-events:auto}
 .photo-tile .pt-play{position:absolute;right:5px;bottom:5px;color:#fff;font-size:11px;line-height:1;padding:4px 6px;border-radius:6px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:3px}
 .photo-empty{color:var(--muted);font-size:14px;margin:18px 0 0}
 .photo-status{min-height:20px}
-.pv{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column}
+.pv{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;animation:pvIn .18s ease-out}
+@keyframes pvIn{from{opacity:0}to{opacity:1}}
 .pv[hidden]{display:none}
 .pv-top{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 8px;color:#fff}
 .pv-count{font-size:13.5px;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
@@ -521,7 +522,12 @@ body[data-view="split"] .sp-add-btn{display:inline-flex}
 .sheet-wrap{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center}
 .sheet-wrap[hidden]{display:none}
 .sheet-bg{position:absolute;inset:0;background:rgba(4,5,16,.55)}
-.sheet{position:relative;width:min(560px,100%);max-height:92vh;max-height:92svh;overflow-y:auto;background:var(--paper);color:var(--ink);border-radius:24px 24px 0 0;padding:12px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(3,4,12,.4);animation:sheetUp .38s var(--ease)}
+.sheet{position:relative;width:min(560px,100%);max-height:92vh;max-height:92svh;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--ink);border-radius:24px 24px 0 0;padding:12px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(3,4,12,.4);animation:sheetUp .38s var(--ease)}
+.sheet-bg{animation:sheetBgIn .25s ease;transition:opacity .22s ease}
+.sheet-wrap.closing .sheet{animation:sheetDown .22s var(--ease) forwards}
+.sheet-wrap.closing .sheet-bg{opacity:0}
+@keyframes sheetDown{from{transform:none;opacity:1}to{transform:translateY(52px);opacity:0}}
+@keyframes sheetBgIn{from{opacity:0}to{opacity:1}}
 @keyframes sheetUp{from{transform:translateY(52px)}to{transform:none}}
 .sheet-grab{width:40px;height:5px;border-radius:99px;background:rgba(23,20,37,.18);margin:0 auto 14px}
 .sheet h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}
@@ -1066,7 +1072,7 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-day.on{background:var(--amber);color:#221A04;border-color:transparent;font-weight:600}
 .nm-day.nm-remove{color:#FF9D8A;border-color:rgba(255,157,138,.4)}
 #view-food .food-note{color:var(--muted);margin-top:22px;font-size:14px;line-height:1.45}
-@media (prefers-reduced-motion: reduce){.food-band-img{animation:none}}
+@media (prefers-reduced-motion: reduce){.food-band-img{animation:none}.pv{animation:none}.sheet{animation:none}}
 
 /* ================= V7 · DEVICE FIXES (owner's phones) =================
    Defect 1 — hero/header collision: the fixed top nav is now a defined
@@ -3214,9 +3220,11 @@ function openSpDetail(id){
    return '<div class="sh-share-row"><span>'+esc(p)+(p===e.payer?' · paid':'')+'</span><span>'+spFmtCAD(e.shares[p])+'</span></div>';
  }).join('');
  document.getElementById('spDetailReceipt').innerHTML=e.receipt?('<div class="sh-label">Receipt</div><img class="sh-receipt-full" src="'+spReceiptUrl(e)+'" alt="Receipt for '+esc(e.desc)+'">'):'';
- spDetailEl.hidden=false; document.body.style.overflow='hidden';
+ spDetailEl.classList.remove('closing'); spDetailEl.hidden=false; document.body.style.overflow='hidden';
 }
-function closeSpDetail(){ spDetailEl.hidden=true; document.body.style.overflow=''; spDetailId=null; }
+function closeSpDetail(){ if(spDetailEl.hidden)return; if(REDUCED){ spDetailEl.hidden=true; document.body.style.overflow=''; spDetailId=null; return; }
+ spDetailEl.classList.add('closing');
+ setTimeout(function(){ if(!spDetailEl.classList.contains('closing'))return; spDetailEl.hidden=true; spDetailEl.classList.remove('closing'); document.body.style.overflow=''; spDetailId=null; },230); }
 if(spDetailEl){
  spDetailEl.addEventListener('click',function(ev){ if(ev.target.getAttribute('data-close'))closeSpDetail(); });
  document.getElementById('spDeleteBtn').addEventListener('click',function(){
@@ -3340,9 +3348,11 @@ function openSpSheet(){
  document.getElementById('spReceiptRemove').hidden=true;
  document.getElementById('spReceiptInput').value='';
  renderSpSheet();
- spSheetEl.hidden=false; document.body.style.overflow='hidden';
+ spSheetEl.classList.remove('closing'); spSheetEl.hidden=false; document.body.style.overflow='hidden';
 }
-function closeSpSheet(){ spSheetEl.hidden=true; document.body.style.overflow=''; spDraft=null; }
+function closeSpSheet(){ if(spSheetEl.hidden)return; if(REDUCED){ spSheetEl.hidden=true; document.body.style.overflow=''; spDraft=null; return; }
+ spSheetEl.classList.add('closing');
+ setTimeout(function(){ if(!spSheetEl.classList.contains('closing'))return; spSheetEl.hidden=true; spSheetEl.classList.remove('closing'); document.body.style.overflow=''; spDraft=null; },230); }
 if(spSheetEl){
  document.getElementById('spAddBtn').addEventListener('click',openSpSheet);
  spSheetEl.addEventListener('click',function(ev){ if(ev.target.getAttribute('data-close'))closeSpSheet(); });
@@ -4061,8 +4071,15 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
         +'</div>';
     }).join('');
   }
+  var flSig=null;
   function fetchFlights(){
     fetch('/api/flights').then(function(r){return r.json();}).then(function(j){
+      /* The 60s poll rebuilds the cards only when the data actually
+         changed; an identical payload leaves the DOM (and any
+         running status pulse) untouched. */
+      var sig=JSON.stringify(j.flights||[]);
+      if(sig===flSig)return;
+      flSig=sig;
       _flights=j.flights||[];
       renderFlights();
       if(window.__flightsLoaded)window.__flightsLoaded(_flights);
