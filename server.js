@@ -789,7 +789,7 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 .tile-date{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;flex-shrink:0}
 .empty{padding:60px 0;text-align:center;color:var(--muted);font-size:15px}
 /* Lightbox */
-#lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px}
+#lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:max(16px,env(safe-area-inset-top,0px) + 8px) 16px max(16px,env(safe-area-inset-bottom,0px) + 8px)}
 #lb.on{display:flex}
 #lb-media{max-width:min(92vw,1200px);max-height:82dvh;display:flex;align-items:center;justify-content:center}
 #lb-media img,#lb-media video{max-width:100%;max-height:82dvh;border-radius:8px;object-fit:contain;display:block}
