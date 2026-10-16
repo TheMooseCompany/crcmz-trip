@@ -521,6 +521,61 @@ body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgb
 .sp-add-btn{position:relative;display:none;margin:16px auto 2px;width:max-content;max-width:92%;align-items:center;gap:8px;background:var(--amber);color:#221A04;border:0;border-radius:999px;padding:15px 26px;min-height:52px;font-weight:700;font-size:15.5px;box-shadow:0 14px 34px rgba(138,94,16,.35);cursor:pointer;transition:transform .3s var(--ease)}
 body[data-view="split"] .sp-add-btn{display:inline-flex}
 .sp-add-btn:active{transform:scale(.96)}
+/* ================= Split — Net-First Board (Concept 02) =================
+   The settle table is the page: an ink strip carries the trip total and
+   your net position as a single pill; below it, a quiet board of
+   numbered transfers (your row tinted, its Mark paid filled); the
+   add-expense button goes full width under the board; the currency
+   toggle lives in the footnote row; expenses and recorded settlements
+   (with Undo) sit in a second quiet table under that. */
+#view-split .sec-head h2 .serif{color:#3D4DB0}
+.nb-sec-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.nb-dates{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-mut2);white-space:nowrap}
+.nb-strip{background:var(--ink);color:var(--paper);border-radius:16px;display:flex;align-items:center;gap:12px;padding:13px 16px;box-shadow:0 14px 26px rgba(23,20,37,.22)}
+.nb-strip .k{font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#A5B4FF}
+.nb-strip .v{font-family:"IBM Plex Mono",monospace;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px}
+.nb-strip .nb-pill{margin-left:auto;background:var(--amber);color:#221A04;border-radius:99px;padding:8px 13px;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;white-space:nowrap}
+.nb-strip .nb-pill small{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-right:5px}
+.nb-board{background:var(--paper-card);border:1px solid var(--line-d);border-radius:18px;padding:4px 14px 6px;margin-top:14px;box-shadow:var(--shadow-card-l)}
+.nb-thead,.nb-row{display:grid;grid-template-columns:20px 26px minmax(0,1fr) 84px 70px;align-items:center;gap:5px}
+.nb-thead{padding:11px 2px 7px;border-bottom:1px solid var(--line-d);font-family:"IBM Plex Mono",monospace;font-size:8.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--paper-mut2)}
+.nb-thead .r{text-align:right}
+.nb-row{padding:10px 2px;border-bottom:1px solid rgba(23,20,37,.08)}
+.nb-row:last-child{border-bottom:0}
+.nb-row.you{background:rgba(242,179,61,.17);border-radius:10px;padding-left:8px;padding-right:8px;margin:3px -6px;border-bottom-color:transparent}
+.nb-rk{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:#3D4DB0}
+.sp-av.nb-av{width:26px;height:26px;font-size:9.5px;border:0}
+.sp-av.nb-toav{width:22px;height:22px;font-size:8px;background:var(--ink)!important;color:var(--paper)}
+.nb-nm{font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap}
+.nb-to{margin-left:auto;display:flex;align-items:center;gap:2px;color:var(--paper-mut2);font-size:12px;flex:none}
+.nb-amt{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:15.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+.nb-chip{border:1px solid rgba(23,20,37,.3);background:transparent;color:var(--ink);border-radius:99px;padding:8px 0;font-size:9.5px;font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;transition:transform .3s var(--ease),opacity .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.nb-chip:active{transform:scale(.96)}
+.nb-chip:disabled{opacity:.45}
+.nb-row.you .nb-chip{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.nb-empty{padding:16px 2px 12px;color:var(--paper-mut);font-size:14.5px}
+#view-split .sp-add-btn{display:flex;width:100%;max-width:none;margin:16px 0 0;border-radius:14px;justify-content:center}
+.nb-footrow{display:flex;align-items:center;gap:14px;margin-top:16px}
+.nb-footrow .split-fxnote{margin:0;flex:1;min-width:0;font-size:11.5px;line-height:1.55}
+.nb-footrow .seg{flex:none}
+.nb-footrow .seg button{min-height:30px;padding:4px 11px}
+.nb-exp{margin-top:26px}
+.nb-exp-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 2px;border:0;border-bottom:1px solid rgba(23,20,37,.08);background:none;text-align:left;color:var(--ink);font:inherit}
+button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nb-exp-row:last-child{border-bottom:0}
+.nb-exp-row .sp-glyph,.nb-exp-row .sp-thumb{width:38px;height:38px;border-radius:10px}
+.nb-exp-main{flex:1;min-width:0}
+.nb-exp-desc{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb-exp-sub{display:block;color:var(--paper-mut);font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb-exp-amt{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:370px){
+.nb-board{padding-left:10px;padding-right:10px}
+.nb-thead,.nb-row{grid-template-columns:18px 24px minmax(0,1fr) 78px 64px;gap:4px}
+.nb-amt{font-size:14px}
+.nb-nm{font-size:12.5px}
+.sp-av.nb-av{width:24px;height:24px}
+.sp-av.nb-toav{width:19px;height:19px}
+}
 /* iOS bottom sheets (Split) */
 .sheet-wrap{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center}
 .sheet-wrap[hidden]{display:none}
@@ -1648,37 +1703,23 @@ flash of Home. The router clears the tag when it takes over. */
   <div class="view view-light amb-paused" id="view-split" hidden="">
 <!-- ================= THE SPLIT (calculator) ================= -->
   <section id="split"><div class="wrap" id="splitRoot">
-    <div class="sec-head reveal"><div class="label">05 · The Split</div><h2 class="t-display2">One pot.</h2><p class="split-sub">Settled once, at the end. Every shared cost lands here — add it, split it, square up on Sunday.</p></div>
-    <div class="card sp-card sp-hero reveal">
-      <div class="label">Your position · Mutasif</div>
-      <div class="sp-net" id="spNet">You’re owed $49.04</div>
-      <div class="sp-hero-meta" id="spNetMeta">Trip total $197.16 · 3 expenses · 5 payments to square up</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap" class="reveal">
-      <span class="food-cat-label" style="color:var(--amber-deep)">View in</span>
+    <div class="sec-head reveal"><div class="nb-sec-top"><div class="label">Split</div><div class="nb-dates">Oct 29 – Nov 1</div></div><h2 class="t-display2">Settle <span class="serif">up.</span></h2></div>
+    <div class="nb-strip reveal"><div><div class="k" id="spStripMeta">Trip total · 0 expenses</div><div class="v" id="spStripTotal">$0.00</div></div><div class="nb-pill" id="spPill" hidden=""></div></div>
+    <div class="nb-board reveal" id="spSettle"><div class="nb-empty">Nothing to settle yet.</div></div>
+    <button type="button" class="sp-add-btn" id="spAddBtn">+ Add expense</button>
+    <div class="nb-footrow reveal">
+      <p class="split-fxnote" id="spFxNote">Balances kept in CAD.</p>
       <span class="seg" id="spCurSeg" role="group" aria-label="View currency">
         <button type="button" data-cur="CAD" class="on">CAD</button>
         <button type="button" data-cur="USD">USD</button>
       </span>
     </div>
-    <p class="split-fxnote reveal" id="spFxNote">Amounts in CAD. USD entries convert at <span class="t-data-mono">1 USD = 1.419 CAD · rate as of Oct 15, 2026 (demo)</span> — live rates arrive with the server.</p>
-    <div class="card sp-card reveal">
-      <div class="label" style="margin-bottom:8px">Settle up</div>
-      <div id="spSettle"><div class="sp-settle-row"><span class="sp-avpair"><span class="sp-av " style="background:#E8A33D" aria-hidden="true">BR</span><span class="sp-av " style="background:#F2B33D" aria-hidden="true">MU</span></span><span class="sp-settle-main"><b>Brendan</b> pays <b>Mutasif</b></span><span class="sp-settle-amt">$37.36</span><button type="button" class="sp-paid-btn" data-settle="0">Mark paid</button></div><div class="sp-settle-row"><span class="sp-avpair"><span class="sp-av " style="background:#C6CFFF" aria-hidden="true">ZU</span><span class="sp-av " style="background:#A5B4FF" aria-hidden="true">MO</span></span><span class="sp-settle-main"><b>Zubi</b> pays <b>Moiz</b></span><span class="sp-settle-amt">$32.90</span><button type="button" class="sp-paid-btn" data-settle="1">Mark paid</button></div><div class="sp-settle-row"><span class="sp-avpair"><span class="sp-av " style="background:#FFC65C" aria-hidden="true">NO</span><span class="sp-av " style="background:#8E9BFF" aria-hidden="true">SA</span></span><span class="sp-settle-main"><b>Noor</b> pays <b>Samad</b></span><span class="sp-settle-amt">$16.64</span><button type="button" class="sp-paid-btn" data-settle="2">Mark paid</button></div><div class="sp-settle-row"><span class="sp-avpair"><span class="sp-av " style="background:#FFC65C" aria-hidden="true">NO</span><span class="sp-av " style="background:#F2B33D" aria-hidden="true">MU</span></span><span class="sp-settle-main"><b>Noor</b> pays <b>Mutasif</b></span><span class="sp-settle-amt">$7.22</span><button type="button" class="sp-paid-btn" data-settle="3">Mark paid</button></div><div class="sp-settle-row"><span class="sp-avpair"><span class="sp-av " style="background:#C6CFFF" aria-hidden="true">ZU</span><span class="sp-av " style="background:#F2B33D" aria-hidden="true">MU</span></span><span class="sp-settle-main"><b>Zubi</b> pays <b>Mutasif</b></span><span class="sp-settle-amt">$4.46</span><button type="button" class="sp-paid-btn" data-settle="4">Mark paid</button></div></div>
+    <div class="nb-exp reveal">
+      <div class="label" style="margin-bottom:6px">Expenses</div>
+      <div id="spExpTable"></div>
+      <p class="photo-empty" id="spEmpty" style="color:var(--paper-mut)" hidden="">No expenses yet. First run to the store starts the pot.</p>
     </div>
-    <div class="card sp-card reveal">
-      <div class="label" style="margin-bottom:8px">Balances</div>
-      <div id="spBalances"><div class="sp-bal-row"><span class="sp-av " style="background:#F2B33D" aria-hidden="true">MU</span><div class="sp-bal-main"><div class="sp-bal-name">Mutasif</div><div class="sp-bal-bar"><i style="width:100%;background:#33419A"></i></div></div><span class="sp-bal-net owed">is owed $49.04</span></div><div class="sp-bal-row"><span class="sp-av " style="background:#A5B4FF" aria-hidden="true">MO</span><div class="sp-bal-main"><div class="sp-bal-name">Moiz</div><div class="sp-bal-bar"><i style="width:67%;background:#33419A"></i></div></div><span class="sp-bal-net owed">is owed $32.90</span></div><div class="sp-bal-row"><span class="sp-av " style="background:#FFC65C" aria-hidden="true">NO</span><div class="sp-bal-main"><div class="sp-bal-name">Noor</div><div class="sp-bal-bar"><i style="width:49%;background:var(--amber-deep)"></i></div></div><span class="sp-bal-net owes">owes $23.86</span></div><div class="sp-bal-row"><span class="sp-av " style="background:#8E9BFF" aria-hidden="true">SA</span><div class="sp-bal-main"><div class="sp-bal-name">Samad</div><div class="sp-bal-bar"><i style="width:34%;background:#33419A"></i></div></div><span class="sp-bal-net owed">is owed $16.64</span></div><div class="sp-bal-row"><span class="sp-av " style="background:#E8A33D" aria-hidden="true">BR</span><div class="sp-bal-main"><div class="sp-bal-name">Brendan</div><div class="sp-bal-bar"><i style="width:76%;background:var(--amber-deep)"></i></div></div><span class="sp-bal-net owes">owes $37.36</span></div><div class="sp-bal-row"><span class="sp-av " style="background:#C6CFFF" aria-hidden="true">ZU</span><div class="sp-bal-main"><div class="sp-bal-name">Zubi</div><div class="sp-bal-bar"><i style="width:76%;background:var(--amber-deep)"></i></div></div><span class="sp-bal-net owes">owes $37.36</span></div></div>
-    </div>
-    <div class="sp-total reveal">
-      <div class="stat"><b id="spTotalAmt">$197.16</b><span>Total spent</span></div>
-      <div class="stat"><b id="spTotalCount">3</b><span>Expenses</span></div>
-    </div>
-    <div class="label reveal" style="margin:4px 0 12px">Activity</div>
-    <div class="sp-feed reveal" id="spFeed"><button type="button" class="sp-item" data-exp="emvaqbd2b0yrsm6"><span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"></path><path d="M9 8h6M9 12h6"></path></svg></span><span class="sp-item-main"><span class="sp-item-desc">Sample — Pizza night</span><span class="sp-item-sub" style="display:block">Samad paid · split 4 ways · Equally · Oct 15, 2026</span></span><span class="sp-item-amt">$54.00</span></button><button type="button" class="sp-item" data-exp="emvaqbd2b10pyxx"><span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"></path><path d="M9 8h6M9 12h6"></path></svg></span><span class="sp-item-main"><span class="sp-item-desc">Sample — Gas + ice</span><span class="sp-item-sub" style="display:block">Moiz paid · split 6 ways · Equally · Oct 15, 2026 · US$40.00 · @ 1.419</span></span><span class="sp-item-amt">$56.76</span></button><button type="button" class="sp-item" data-exp="emvaqbd2b22itv3"><span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"></path><path d="M9 8h6M9 12h6"></path></svg></span><span class="sp-item-main"><span class="sp-item-desc">Sample — Groceries run</span><span class="sp-item-sub" style="display:block">Mutasif paid · split 6 ways · Equally · Oct 14, 2026</span></span><span class="sp-item-amt">$86.40</span></button></div>
-    <p class="photo-empty" id="spEmpty" style="color:var(--paper-mut)" hidden="">No expenses yet. First run to the store starts the pot.</p>
   </div></section>
-  <button type="button" class="sp-add-btn" id="spAddBtn">+ Add expense</button>
   <!-- Add expense sheet -->
   <div class="sheet-wrap" id="spSheet" data-lenis-prevent="" hidden="">
     <div class="sheet-bg" data-close="1"></div>
@@ -2819,9 +2860,6 @@ document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function
    if((location.hash||'')==='#'+v)applyRoute(); else location.hash=v;
  });
 });
-/* The Add expense button lives in the Split view's flow, directly
-   under the position card - never fixed over content. */
-(function(){var b=document.getElementById('spAddBtn'),h=document.querySelector('#view-split .sp-hero');if(b&&h)h.after(b);})();
 var scrollIdleT=0;
 window.addEventListener('scroll',function(){
  document.body.classList.add('scrolling');
@@ -3338,23 +3376,48 @@ function spAvatar(name,cls){
  return '<span class="sp-av '+(cls||'')+'" style="background:'+(SP_COLORS[name]||'#ccc')+'" aria-hidden="true">'+ini+'</span>';
 }
 /* ---------- rendering ---------- */
-var spSettleEl=document.getElementById('spSettle'),spBalEl=document.getElementById('spBalances'),
-    spFeedEl=document.getElementById('spFeed'),spDetailId=null;
+var spSettleEl=document.getElementById('spSettle'),spExpEl=document.getElementById('spExpTable'),spDetailId=null;
 function spModeLabel(m){return m==='equal'?'Equally':(m==='exact'?'Exact amounts':'Percentages')}
+function spFmtWords(n){
+ var w=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine'];
+ return n>=0&&n<w.length?w[n]:String(n);
+}
 function renderSplit(){
  if(!spSettleEl)return;
  document.querySelectorAll('#spCurSeg button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-cur')===spState.viewCur)});
- var fxEl=document.getElementById('spFxNote');
-  if(fxEl)fxEl.innerHTML='Amounts in CAD. USD entries convert at <span class="t-data-mono">1 USD = '+SP_FX.toFixed(3)+' CAD · ECB rate'+(SP_FX_STALE?' · last known':'')+'</span>. Balances are kept in CAD; the toggle only changes how amounts read.';
  var bal=spBalances(spState),transfers=spSimplify(bal);
- if(!transfers.length){
-   spSettleEl.innerHTML='<p class="sp-empty">All settled up. Nobody owes anybody anything.</p>';
+ var total=spState.expenses.reduce(function(s,e){return s+e.amountCentsCAD},0);
+ /* --- ink strip: trip total + your position as one pill --- */
+ var stripTotal=document.getElementById('spStripTotal');
+ if(stripTotal)stripTotal.textContent=spFmt(total);
+ var stripMeta=document.getElementById('spStripMeta');
+ if(stripMeta)stripMeta.textContent='Trip total · '+spState.expenses.length+' expense'+(spState.expenses.length===1?'':'s');
+ var pill=document.getElementById('spPill');
+ if(pill){
+   var myBal=(spMePerson&&SP_PEOPLE.indexOf(spMePerson)>-1)?(bal[spMePerson]||0):null;
+   if(myBal===null){pill.hidden=true;pill.innerHTML='';}
+   else{
+     pill.hidden=false;
+     pill.innerHTML=myBal>0?('<small>You</small>+'+spFmt(myBal)):(myBal<0?('<small>You</small>\u2212'+spFmt(-myBal)):'You\u2019re square');
+   }
+ }
+ /* --- settle board: the table is the page --- */
+ if(!spState.expenses.length){
+   spSettleEl.innerHTML='<div class="nb-empty">Nothing to settle yet.</div>';
+ }else if(!transfers.length){
+   spSettleEl.innerHTML='<div class="nb-empty">All square.</div>';
  }else{
-   spSettleEl.innerHTML=transfers.map(function(t,i){
-     return '<div class="sp-settle-row"><span class="sp-avpair">'+spAvatar(t.from)+spAvatar(t.to)+'</span>'
-       +'<span class="sp-settle-main"><b>'+esc(t.from)+'</b> pays <b>'+esc(t.to)+'</b></span>'
-       +'<span class="sp-settle-amt">'+spFmt(t.amountCentsCAD)+'</span>'
-       +'<button type="button" class="sp-paid-btn" data-settle="'+i+'">Mark paid</button></div>';
+   var onePayee=transfers.every(function(t){return t.to===transfers[0].to});
+   var head=onePayee?('Payer \u2192 '+esc(transfers[0].to)):'Payer \u2192 Payee';
+   spSettleEl.innerHTML='<div class="nb-thead" aria-hidden="true"><span>#</span><span></span><span>'+head+'</span><span class="r">Owes</span><span></span></div>'
+   +transfers.map(function(t,i){
+     var you=!!spMePerson&&t.from===spMePerson;
+     return '<div class="nb-row'+(you?' you':'')+'">'
+       +'<span class="nb-rk">'+('0'+(i+1)).slice(-2)+'</span>'
+       +spAvatar(t.from,'nb-av')
+       +'<span class="nb-nm">'+esc(t.from)+'<span class="nb-to">\u2192'+spAvatar(t.to,'nb-av nb-toav')+'</span></span>'
+       +'<span class="nb-amt">'+spFmt(t.amountCentsCAD)+'</span>'
+       +'<button type="button" class="nb-chip" data-settle="'+i+'">Mark paid</button></div>';
    }).join('');
    spSettleEl.querySelectorAll('[data-settle]').forEach(function(btn){
      btn.addEventListener('click',function(){
@@ -3363,65 +3426,55 @@ function renderSplit(){
      });
    });
  }
- var maxAbs=0; SP_PEOPLE.forEach(function(p){maxAbs=Math.max(maxAbs,Math.abs(bal[p]))});
- spBalEl.innerHTML=SP_PEOPLE.map(function(p){
-   var v=bal[p],cls=v<-0?'owes':(v>0?'owed':'settled');
-   var txt=v<-0?('owes '+spFmt(-v)):(v>0?('is owed '+spFmt(v)):'settled up');
-   var w=maxAbs?Math.round(Math.abs(v)/maxAbs*100):0;
-   var col=v<0?'var(--amber-deep)':(v>0?'#33419A':'rgba(23,20,37,.15)');
-   return '<div class="sp-bal-row">'+spAvatar(p)+'<div class="sp-bal-main"><div class="sp-bal-name">'+esc(p)+'</div>'
-     +'<div class="sp-bal-bar"><i style="width:'+w+'%;background:'+col+'"></i></div></div>'
-     +'<span class="sp-bal-net '+cls+'">'+txt+'</span></div>';
- }).join('');
- var total=spState.expenses.reduce(function(s,e){return s+e.amountCentsCAD},0);
- document.getElementById('spTotalAmt').textContent=spFmt(total);
- document.getElementById('spTotalCount').textContent=String(spState.expenses.length);
+ /* --- footnote: payment count + FX (the view toggle sits beside it) --- */
+ var fxEl=document.getElementById('spFxNote');
+ if(fxEl){
+   var cnt=transfers.length?(spFmtWords(transfers.length)+' payment'+(transfers.length===1?' squares':'s square')+' the pot.'):'All square.';
+   fxEl.textContent=cnt+' Balances kept in CAD · 1 USD = '+SP_FX.toFixed(3)+' CAD · ECB rate'+(SP_FX_STALE?' · last known':'')+'.';
+ }
+ /* --- expenses table: expenses + recorded settlements (Undo) --- */
  var rows=[];
  spState.expenses.forEach(function(e){rows.push({t:e.addedAt,kind:'exp',e:e})});
  spState.settlements.forEach(function(s){rows.push({t:s.at,kind:'stl',s:s})});
  rows.sort(function(a,b){return b.t-a.t});
  document.getElementById('spEmpty').hidden=rows.length>0;
- spFeedEl.innerHTML=rows.map(function(r){
-   if(r.kind==='stl'){
-     var s=r.s;
-     return '<div class="sp-item" style="cursor:default"><span class="sp-glyph settle"><svg viewBox="0 0 24 24"><path d="M7 10l-3 3 3 3M4 13h13M17 6l3 3-3 3M20 9H7"/></svg></span>'
-       +'<span class="sp-item-main"><span class="sp-item-desc">'+esc(s.from)+' paid '+esc(s.to)+'</span>'
-       +'<span class="sp-item-sub" style="display:block">Settlement · '+spDate(s.at)+(s.addedBy?' · by '+esc(s.addedBy):'')+'</span></span>'
-       +'<span class="sp-item-amt">'+spFmt(s.amountCentsCAD)+'</span>'
-       +'<button type="button" class="sp-undo-btn" data-stl="'+s.id+'">Undo</button></div>';
-   }
-   var e=r.e,n=Object.keys(e.shares).length;
-   var sub=esc(e.payer)+' paid · split '+n+' way'+(n===1?'':'s')+' · '+spModeLabel(e.splitMode)+' · '+spDate(e.addedAt);
-   if(e.currency==='USD')sub+=' · '+spFmtOrig(e)+' · @ '+Number(e.fxRate).toFixed(3);
-   var thumb=e.receipt?('<img class="sp-thumb" src="'+spReceiptUrl(e)+'" alt="">')
-     :('<span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span>');
-   return '<button type="button" class="sp-item" data-exp="'+e.id+'">'+thumb
-     +'<span class="sp-item-main"><span class="sp-item-desc">'+esc(e.desc)+'</span>'
-     +'<span class="sp-item-sub" style="display:block">'+sub+'</span></span>'
-     +'<span class="sp-item-amt">'+spFmt(e.amountCentsCAD)+'</span></button>';
- }).join('');
- spFeedEl.querySelectorAll('[data-exp]').forEach(function(b){
-   b.addEventListener('click',function(){openSpDetail(b.getAttribute('data-exp'))});
- });
- spFeedEl.querySelectorAll('[data-stl]').forEach(function(b){
-   b.addEventListener('click',function(){
-     if(!confirm('Remove this settlement?')) return;
-     b.disabled=true;
-     fetch('/api/settlements/'+encodeURIComponent(b.getAttribute('data-stl')),{method:'DELETE'})
-       .then(function(r){
-         if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
-         if(!r.ok)throw new Error('del');
-         return spFetchLedger();
-       })
-       .catch(function(err){ if(err&&err.message==='auth')return; b.disabled=false; });
+ if(spExpEl){
+   spExpEl.innerHTML=rows.map(function(r){
+     if(r.kind==='stl'){
+       var s=r.s;
+       return '<div class="nb-exp-row"><span class="sp-glyph settle"><svg viewBox="0 0 24 24"><path d="M7 10l-3 3 3 3M4 13h13M17 6l3 3-3 3M20 9H7"/></svg></span>'
+         +'<span class="nb-exp-main"><span class="nb-exp-desc">'+esc(s.from)+' paid '+esc(s.to)+'</span>'
+         +'<span class="nb-exp-sub">Settlement · '+spDate(s.at)+(s.addedBy?' · by '+esc(s.addedBy):'')+'</span></span>'
+         +'<span class="nb-exp-amt">'+spFmt(s.amountCentsCAD)+'</span>'
+         +'<button type="button" class="sp-undo-btn" data-stl="'+s.id+'">Undo</button></div>';
+     }
+     var e=r.e,n=Object.keys(e.shares).length;
+     var sub=esc(e.payer)+' paid · split '+n+' way'+(n===1?'':'s')+' · '+spModeLabel(e.splitMode)+' · '+spDate(e.addedAt);
+     if(e.currency==='USD')sub+=' · '+spFmtOrig(e)+' · @ '+Number(e.fxRate).toFixed(3);
+     var thumb=e.receipt?('<img class="sp-thumb" src="'+spReceiptUrl(e)+'" alt="">')
+       :('<span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span>');
+     return '<button type="button" class="nb-exp-row" data-exp="'+e.id+'">'+thumb
+       +'<span class="nb-exp-main"><span class="nb-exp-desc">'+esc(e.desc)+'</span>'
+       +'<span class="nb-exp-sub">'+sub+'</span></span>'
+       +'<span class="nb-exp-amt">'+spFmt(e.amountCentsCAD)+'</span></button>';
+   }).join('');
+   spExpEl.querySelectorAll('[data-exp]').forEach(function(b){
+     b.addEventListener('click',function(){openSpDetail(b.getAttribute('data-exp'))});
    });
- });
- var netEl=document.getElementById('spNet'),netMeta=document.getElementById('spNetMeta');
-  if(netEl){
-    var myBal=spMePerson?(bal[spMePerson]||0):null;
-    netEl.textContent=myBal===null?(transfers.length?(transfers.length+' payment'+(transfers.length===1?'':'s')+' to square up'):'All settled'):(myBal>0?('You’re owed '+spFmt(myBal)):(myBal<0?('You owe '+spFmt(-myBal)):'All settled'));
-    if(netMeta)netMeta.textContent='Trip total '+spFmt(total)+' · '+spState.expenses.length+' expense'+(spState.expenses.length===1?'':'s')+(transfers.length?(' · '+transfers.length+' payment'+(transfers.length===1?'':'s')+' to square up'):' · nobody owes anybody');
-  }
+   spExpEl.querySelectorAll('[data-stl]').forEach(function(b){
+     b.addEventListener('click',function(){
+       if(!confirm('Remove this settlement?')) return;
+       b.disabled=true;
+       fetch('/api/settlements/'+encodeURIComponent(b.getAttribute('data-stl')),{method:'DELETE'})
+         .then(function(r){
+           if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
+           if(!r.ok)throw new Error('del');
+           return spFetchLedger();
+         })
+         .catch(function(err){ if(err&&err.message==='auth')return; b.disabled=false; });
+     });
+   });
+ }
  var prev=document.getElementById('splitPrevLine');
   if(prev){
     if(transfers.length){ var big=transfers.slice().sort(function(a,b){return b.amountCentsCAD-a.amountCentsCAD})[0]; prev.textContent=big.from+' owes '+big.to+' '+spFmt(big.amountCentsCAD); }
@@ -3429,7 +3482,7 @@ function renderSplit(){
   }
 }
 document.querySelectorAll('#spCurSeg button').forEach(function(b){
- b.addEventListener('click',function(){spState.viewCur=b.getAttribute('data-cur');spSave();renderSplit();});
+ b.addEventListener('click',function(){spState.viewCur=b.getAttribute('data-cur');spSaveViewCur();renderSplit();});
 });
 /* ---------- expense detail sheet ---------- */
 var spDetailEl=document.getElementById('spDetail');
