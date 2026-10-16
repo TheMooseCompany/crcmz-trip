@@ -85,6 +85,9 @@ nav>*{pointer-events:auto}
 .hero-sub{margin:20px auto 0;color:var(--cream);font-size:clamp(15px,2.2vw,19px);font-weight:500}
 .hero-dates{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.2em;color:var(--muted);margin-top:32px;text-transform:uppercase;white-space:nowrap}
 .countdown{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+/* The Countdown label rides a tighter line box than the generic label
+   so the countdown head stack stays compact. */
+#cdBlock .label{line-height:1.2}
 .cd-block{text-align:center;margin-bottom:26px}
 #cd-msg{text-align:center}
 .cd{min-width:86px;padding:16px 10px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(16,22,58,.88)}
@@ -710,7 +713,13 @@ body:not(.reduced) #days .day-dots{display:none}
 body.reduced .days-visual{display:none}
 body.reduced .days-layout{display:block}
 /* --- trip progress readout --- */
-#tripProgress{padding-top:12px}
+/* Lead-in overlap (owner's gap report, round 2): the section is pulled
+   120px up over the cinematic track's tail, so the countdown head
+   enters across the last stretch of the flight and the tiles peek
+   above the dock in the landed frame instead of arriving a full
+   screen later. Pure layout: nothing resizes, nothing re-bases —
+   the seam stays a continuous 1:1 scrub (rig-verified). */
+#tripProgress{padding-top:6px;margin-top:-120px}
 /* Effectively opaque for the same reason as the NEXT UP card below:
    the old 45%/55% alpha stops let lower-layer text ghost through the
    card mid-scroll. The stops here are that gradient composited over
@@ -979,7 +988,7 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 .nu-att{color:var(--amber2);border:1px solid var(--line-amber);background:rgba(242,179,61,.1)}
 .nu-ok{color:var(--peri);border:1px solid rgba(165,180,255,.5);background:rgba(165,180,255,.08)}
 /* ---------- Home: countdown as one tabular stat strip ---------- */
-.cd-strip{display:flex;align-items:flex-start;justify-content:center;gap:12px;margin-top:8px;flex-wrap:nowrap}
+.cd-strip{display:flex;align-items:flex-start;justify-content:center;gap:12px;margin-top:4px;flex-wrap:nowrap}
 .cd-cell{text-align:center;min-width:62px}
 .cd-cell b{display:block;font-size:40px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
 .cd-cell span{display:block;margin-top:4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -2142,14 +2151,17 @@ function renderProgress(p){
     hero stack is top-anchored, so the final frame ended at ~47% of the
     stage — ~445px of empty blurred scene sat under the CTA row before
     the countdown block. Across the same landing stretch the whole
-    stack settles toward vertical centre, shrinking that void to
-    ~280px. A pure function of p like everything else in this driver —
-    the seam stays a continuous 1:1 scrub: no snap, no rebase, no
-    compaction, and frames before p .80 are untouched. The settle is
-    capped and scaled down on short viewports, and the reduced-motion
-    frame (landed-fit, auto height) keeps its static layout. */
+    stack settles toward vertical centre; deepened in round 2 (cap
+    248px) so ~198px of scene remains under the CTA row at an 844px
+    stage, and together with the countdown section's lead-in overlap
+    the tiles peek above the dock in the landed frame. A pure function
+    of p like everything else in this driver — the seam stays a
+    continuous 1:1 scrub: no snap, no rebase, no compaction, and
+    frames before p .80 are untouched. The settle is capped and
+    scaled down on short viewports, and the reduced-motion frame
+    (landed-fit, auto height) keeps its static layout. */
  if(!REDUCED){
-   var settle=Math.max(0,Math.min(165,(window.innerHeight-580)*0.62))*landE;
+   var settle=Math.max(0,Math.min(248,(window.innerHeight-500)*0.72))*landE;
    heroLayer.style.transform=settle>0.05?('translateY('+settle.toFixed(1)+'px)'):'';
  }
  /* V5 layered scrub: depth rates + draw-on arcs + playhead rail.
