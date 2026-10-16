@@ -1203,6 +1203,16 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-add{flex:1;justify-content:center}
 .nm-photo{position:relative}
 .nm-credit{position:absolute;left:8px;bottom:8px;z-index:2;font-size:11px;line-height:1.3;color:var(--cream);background:rgba(6,8,24,.62);padding:3px 7px;border-radius:6px;text-decoration:none;backdrop-filter:blur(4px)}
+/* Places gallery: horizontal scroll-snap strip inside .nm-photo.
+   Built only after the venue's first Places photo loads; until then
+   the card keeps its baked category photo untouched. */
+.nm-strip{position:absolute;inset:0;z-index:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.nm-strip::-webkit-scrollbar{display:none}
+.nm-slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:linear-gradient(150deg,#262F66,#10163A)}
+.nm-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.nm-dots{position:absolute;right:8px;bottom:8px;z-index:2;display:flex;gap:5px;align-items:center;background:rgba(6,8,24,.62);padding:5px 8px;border-radius:999px;backdrop-filter:blur(4px);pointer-events:none}
+.nm-dots i{width:6px;height:6px;border-radius:50%;background:rgba(245,239,224,.45)}
+.nm-dots i.on{background:var(--cream)}
 .nm-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .nm-day{border:1px solid var(--line);background:rgba(6,8,24,.5);color:var(--cream);border-radius:999px;padding:9px 13px;min-height:40px;font-family:"Space Grotesk",sans-serif;font-size:14px;font-weight:500;cursor:pointer}
 .nm-day.on{background:var(--amber);color:#221A04;border-color:transparent;font-weight:600}
@@ -4505,34 +4515,144 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 
 <script>
 /* Places photos: swap each Food card's category photo for the venue's
-   own Google photo via the server proxy. Silent no-op on any error -
-   the category photo is the permanent fallback. */
+   own Google photos via the server proxy. When meta reports more than
+   one photo, the card's photo band becomes a scroll-snap gallery of
+   up to 5 slides; a single photo keeps the original one-image swap.
+   Silent no-op on any error - the category photo is the permanent
+   fallback, and the gallery is only committed after the first Places
+   photo has actually loaded, so a dead pipeline changes nothing. */
 (function(){
  var done=new WeakSet();
+ function photoUrl(slug,n){return '/api/places/photo?venue='+encodeURIComponent(slug)+(n==null?'':'&n='+n)}
  function wire(card){
   if(done.has(card))return; done.add(card);
   var slug=card.getAttribute('data-place-slug'); if(!slug)return;
-  var img=card.querySelector('.nm-photo img'); if(!img)return;
+  var photoEl=card.querySelector('.nm-photo'); if(!photoEl)return;
+  var img=photoEl.querySelector('img'); if(!img)return;
   fetch('/api/places/meta?venue='+encodeURIComponent(slug))
    .then(function(r){return r.ok?r.json():null})
    .then(function(meta){
     if(!meta)return;
+    var count=meta.photoCount>0?Math.min(meta.photoCount,5):1;
     var probe=new Image();
     probe.onload=function(){
-     img.src=probe.src;
      var dir=card.querySelector('a.nm-dir');
      if(dir&&meta.googleMapsUri)dir.href=meta.googleMapsUri;
-     var at=meta.attributions&&meta.attributions[0];
-     if(at&&at.author){
-      var c=document.createElement('a');
-      c.className='nm-credit'; c.textContent='Photo: '+at.author;
-      if(at.authorUri){c.href=at.authorUri;c.target='_blank';c.rel='noopener'}
-      card.querySelector('.nm-photo').appendChild(c);
+     if(count<=1){ // original single-photo swap, unchanged
+      img.src=probe.src;
+      addCredit(photoEl,meta,(meta.attributions||[])[0]||null);
+      return;
      }
+     buildGallery(card,photoEl,img,meta,slug,count,probe);
     };
-    probe.src='/api/places/photo?venue='+encodeURIComponent(slug);
+    probe.onerror=function(){};
+    probe.src=photoUrl(slug,null); // the venue's default photo, as before
    })
    .catch(function(){});
+ }
+ function creditFor(meta,n){
+  var list=meta.photoAttributions;
+  if(list&&list[n]&&list[n][0])return list[n][0];
+  return null;
+ }
+ // One credit chip per card, re-pointed at the visible slide's author.
+ function addCredit(photoEl,meta,at){
+  var c=photoEl.querySelector('.nm-credit');
+  if(!at||!at.author){ if(c)c.remove(); return; }
+  if(!c){
+   c=document.createElement('a'); c.className='nm-credit';
+   photoEl.appendChild(c);
+  }
+  c.textContent='Photo: '+at.author;
+  if(at.authorUri){c.href=at.authorUri;c.target='_blank';c.rel='noopener'}
+  else{c.removeAttribute('href')}
+ }
+ function buildGallery(card,photoEl,fallbackImg,meta,slug,count,probe){
+  var start=(meta.photoIndex>=0&&meta.photoIndex<count)?meta.photoIndex:0;
+  var order=[]; for(var k=0;k<count;k++)order.push((start+k)%count);
+  var strip=document.createElement('div');
+  strip.className='nm-strip';
+  strip.setAttribute('aria-label','Photos');
+  var slides=[];
+  order.forEach(function(n,pos){
+   var s=document.createElement('div'); s.className='nm-slide';
+   var im;
+   if(pos===0){ im=probe; }
+   else{
+    im=new Image(); im.alt='';
+    im.setAttribute('data-src',photoUrl(slug,n));
+    im.addEventListener('error',function(){ dropSlide(n); });
+   }
+   s.appendChild(im); strip.appendChild(s);
+   slides.push({n:n,el:s,img:im,loaded:pos===0});
+  });
+  var dots=null;
+  function liveSlides(){return slides.filter(function(s){return s.el.parentNode===strip})}
+  function activePos(){
+   var w=strip.clientWidth||1;
+   return Math.max(0,Math.min(liveSlides().length-1,Math.round(strip.scrollLeft/w)));
+  }
+  function syncUI(){
+   var live=liveSlides(); if(!live.length)return;
+   var pos=activePos();
+   if(dots){
+    var kids=dots.children;
+    for(var i=0;i<kids.length;i++)kids[i].className=(i===pos?'on':'');
+   }
+   var at=creditFor(meta,live[pos].n);
+   if(!at&&live[pos].n===start)at=(meta.attributions||[])[0]||null;
+   addCredit(photoEl,meta,at);
+  }
+  function rebuildDots(){
+   if(dots)dots.remove();
+   dots=null;
+   var live=liveSlides();
+   if(live.length<2)return;
+   dots=document.createElement('div'); dots.className='nm-dots';
+   dots.setAttribute('aria-hidden','true');
+   live.forEach(function(){dots.appendChild(document.createElement('i'))});
+   photoEl.appendChild(dots);
+  }
+  function dropSlide(n){
+   var s=slides.filter(function(x){return x.n===n})[0];
+   if(!s||s.el.parentNode!==strip)return;
+   s.el.remove();
+   if(!liveSlides().length){ // every slide died: restore the baked photo
+    strip.remove(); if(dots)dots.remove();
+    var c=photoEl.querySelector('.nm-credit'); if(c)c.remove();
+    fallbackImg.style.display='';
+    return;
+   }
+   rebuildDots(); syncUI();
+  }
+  probe.addEventListener('error',function(){ dropSlide(order[0]); });
+  // Lazy-load the rest: a slide's bytes are fetched only when it nears
+  // the strip's viewport (or immediately when IO is unavailable).
+  function loadSlide(s){
+   if(!s||s.loaded)return; s.loaded=true;
+   var src=s.img.getAttribute('data-src'); if(src)s.img.src=src;
+  }
+  var io=null;
+  if('IntersectionObserver' in window){
+   io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ loadSlide(slides.filter(function(x){return x.el===e.target})[0]); } });
+   },{root:strip,rootMargin:'0px 160px 0px 160px'});
+   slides.slice(1).forEach(function(s){ io.observe(s.el); });
+  }else{
+   slides.slice(1).forEach(loadSlide);
+  }
+  var raf=0;
+  strip.addEventListener('scroll',function(){
+   if(raf)return;
+   raf=requestAnimationFrame(function(){
+    raf=0; syncUI();
+    var live=liveSlides(); var pos=activePos();
+    loadSlide(live[pos+1]); // keep one ahead of the swipe
+   });
+  },{passive:true});
+  fallbackImg.style.display='none';
+  photoEl.insertBefore(strip,photoEl.firstChild);
+  rebuildDots(); syncUI();
  }
  function wireAll(){document.querySelectorAll('#foodList article.nm-card[data-place-slug]').forEach(wire)}
  // renderFood() rebuilds #foodList on every filter change - re-wire then.

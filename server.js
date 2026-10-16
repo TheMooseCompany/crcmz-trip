@@ -1230,6 +1230,10 @@ document.addEventListener('keydown', function(e) {
   // enough that a stale photo name is re-resolved the same day.
   // The API key lives only in the GOOGLE_PLACES_KEY env var; it is
   // never logged and never sent to the client.
+  // Gallery extension: meta also reports photoCount (cap 5), the
+  // default photoIndex and per-index attributions; /photo?n=<i>
+  // serves slide i from the same cached Details. Only place_id is
+  // persisted — photo names for every index stay memory-only.
   const PLACES_KEY = process.env.GOOGLE_PLACES_KEY || '';
   const PLACES_VENUES = require('./places-venues.js');
   const PLACES_BY_SLUG = new Map(PLACES_VENUES.map((v) => [v.slug, v]));
@@ -1320,16 +1324,24 @@ document.addEventListener('keydown', function(e) {
         },
       });
       const j = await r.json();
-      const photos = (j && j.photos) || [];
+      const rawPhotos = ((j && j.photos) || []).filter((p) => p && p.name).slice(0, 5);
+      // Up to 5 photos ride the same 1h Details cache — one upstream
+      // Details call per venue per hour no matter how many indexes the
+      // page fetches. Names stay memory-only, like the default photo's.
+      const mapAttr = (p) => (p.authorAttributions
+        ? p.authorAttributions.map((a) => ({ author: a.displayName || '', authorUri: a.uri || '' }))
+        : []);
+      const photos = rawPhotos.map((p) => ({ name: p.name, attributions: mapAttr(p) }));
       const idx = venue.photoIndex < photos.length ? venue.photoIndex : 0;
       const photo = photos[idx] || null;
       const details = {
         placeId,
         googleMapsUri: (j && j.googleMapsUri) || '',
         photoName: photo ? photo.name : '',
-        attributions: photo && photo.authorAttributions
-          ? photo.authorAttributions.map((a) => ({ author: a.displayName || '', authorUri: a.uri || '' }))
-          : [],
+        attributions: photo ? photo.attributions : [],
+        photoCount: photos.length,
+        photoIndex: idx,
+        photos,
       };
       placesMem.set(venue.slug, { details, at: Date.now() });
       return details;
@@ -1348,33 +1360,59 @@ document.addEventListener('keydown', function(e) {
     if (!venue) return;
     try {
       const d = await placeDetails(venue);
-      res.json({ placeId: d.placeId, googleMapsUri: d.googleMapsUri, attributions: d.attributions });
+      res.json({
+        placeId: d.placeId,
+        googleMapsUri: d.googleMapsUri,
+        attributions: d.attributions,
+        // Gallery extensions (additive; older consumers ignore them):
+        // how many photos the gallery may serve (cap 5), which index is
+        // the venue's default photo, and per-index author attributions
+        // aligned with the ?n= indexes of /api/places/photo.
+        photoCount: d.photoCount,
+        photoIndex: d.photoIndex,
+        photoAttributions: d.photos.map((p) => p.attributions),
+      });
     } catch (e) {
       console.error('[crcmz-trip] places meta failed:', venue.slug, e.code || e.status || e.message);
       res.status(502).json({ error: e.code === 'verify' ? 'places-verify-failed' : 'places-upstream' });
     }
   });
+  // Streams one photo's bytes. photoName comes only from the in-memory
+  // Details cache — never from the client, never from disk.
+  async function streamPlacePhoto(res, d, photoName) {
+    const media = await placesFetch(
+      `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=800&skipHttpRedirect=true`,
+      { headers: { 'X-Goog-Api-Key': PLACES_KEY } });
+    const ct = media.headers.get('content-type') || '';
+    res.set('X-Place-Id', d.placeId);
+    res.set('Cache-Control', 'private, max-age=3600');
+    if (ct.startsWith('image/')) {
+      res.set('Content-Type', ct);
+      return res.send(Buffer.from(await media.arrayBuffer()));
+    }
+    const mj = await media.json();
+    if (!mj || !mj.photoUri) return res.status(502).json({ error: 'places-upstream' });
+    const img = await placesFetch(mj.photoUri, {});
+    res.set('Content-Type', img.headers.get('content-type') || 'image/jpeg');
+    return res.send(Buffer.from(await img.arrayBuffer()));
+  }
   app.get('/api/places/photo', requireAuth, async (req, res) => {
     const venue = placesVenueOrError(req, res);
     if (!venue) return;
     try {
       const d = await placeDetails(venue);
       if (!d.photoName) return res.status(502).json({ error: 'places-no-photo' });
-      const media = await placesFetch(
-        `https://places.googleapis.com/v1/${d.photoName}/media?maxWidthPx=800&skipHttpRedirect=true`,
-        { headers: { 'X-Goog-Api-Key': PLACES_KEY } });
-      const ct = media.headers.get('content-type') || '';
-      res.set('X-Place-Id', d.placeId);
-      res.set('Cache-Control', 'private, max-age=3600');
-      if (ct.startsWith('image/')) {
-        res.set('Content-Type', ct);
-        return res.send(Buffer.from(await media.arrayBuffer()));
+      // ?n=<index> serves gallery slide n (0-based, meta order). No n =
+      // the venue's default photo, exactly as before. A malformed or
+      // out-of-range n is a clean 404 in the existing error vocabulary.
+      if (req.query.n !== undefined) {
+        const n = Number(req.query.n);
+        if (!Number.isInteger(n) || n < 0 || n >= d.photos.length || !d.photos[n].name) {
+          return res.status(404).json({ error: 'places-no-photo' });
+        }
+        return await streamPlacePhoto(res, d, d.photos[n].name);
       }
-      const mj = await media.json();
-      if (!mj || !mj.photoUri) return res.status(502).json({ error: 'places-upstream' });
-      const img = await placesFetch(mj.photoUri, {});
-      res.set('Content-Type', img.headers.get('content-type') || 'image/jpeg');
-      return res.send(Buffer.from(await img.arrayBuffer()));
+      return await streamPlacePhoto(res, d, d.photoName);
     } catch (e) {
       console.error('[crcmz-trip] places photo failed:', venue.slug, e.code || e.status || e.message);
       if (!res.headersSent) {
