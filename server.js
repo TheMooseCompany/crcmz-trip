@@ -582,30 +582,31 @@ async function main() {
 
     if (IMMICH_URL && IMMICH_API_KEY && IMMICH_ALBUM_ID) {
       try {
-        // Immich v1.100+ no longer inlines assets in GET /api/albums/:id;
-        // use POST /api/search/metadata with albumId instead.
-        let page = 1, done = false;
-        while (!done) {
-          const r = await fetch(`${IMMICH_URL}/api/search/metadata`, {
-            method: 'POST',
-            headers: { 'x-api-key': IMMICH_API_KEY, 'content-type': 'application/json' },
-            body: JSON.stringify({ albumId: IMMICH_ALBUM_ID, size: 100, page }),
-          });
-          if (!r.ok) break;
-          const j = await r.json();
-          const batch = j.assets?.items || j.items || [];
-          batch.forEach((a) => items.push({
-            id: a.id,
-            url: `/album/asset/${a.id}/original`,
-            thumb: `/album/asset/${a.id}/thumbnail`,
-            originalName: a.originalFileName || a.id,
-            uploadedBy: a.exifInfo?.description || 'crew',
-            uploadedAt: a.fileCreatedAt || a.createdAt || '',
-            kind: (a.type || '').toLowerCase() === 'video' ? 'video' : 'image',
-          }));
-          const total = j.assets?.total ?? j.total ?? 0;
-          done = items.length >= total || batch.length === 0;
-          page++;
+        // Use timeline bucket API — the only Immich v1.100+ endpoint that
+        // correctly filters assets to a specific album.
+        const qp = `albumId=${encodeURIComponent(IMMICH_ALBUM_ID)}&size=MONTH&withPartners=false&withStacked=false`;
+        const bucketsR = await fetch(`${IMMICH_URL}/api/timeline/buckets?${qp}`, {
+          headers: { 'x-api-key': IMMICH_API_KEY },
+        });
+        if (bucketsR.ok) {
+          const buckets = await bucketsR.json();
+          for (const bucket of (Array.isArray(buckets) ? buckets : [])) {
+            const bR = await fetch(`${IMMICH_URL}/api/timeline/bucket?${qp}&timeBucket=${encodeURIComponent(bucket.timeBucket)}`, {
+              headers: { 'x-api-key': IMMICH_API_KEY },
+            });
+            if (!bR.ok) continue;
+            const col = await bR.json(); // columnar: { id: [...], isImage: [...], ... }
+            const ids = col.id || [];
+            ids.forEach((id, i) => items.push({
+              id,
+              url: `/album/asset/${id}/original`,
+              thumb: `/album/asset/${id}/thumbnail`,
+              originalName: id,
+              uploadedBy: 'crew',
+              uploadedAt: (col.fileCreatedAt || [])[i] || (col.createdAt || [])[i] || '',
+              kind: (col.isImage || [])[i] !== false ? 'image' : 'video',
+            }));
+          }
         }
         if (items.length > 0) {
           items.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
