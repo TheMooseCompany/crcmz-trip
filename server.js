@@ -624,6 +624,15 @@ async function passkeyLogin(){
     res.status(201).json({ ok: true, settlement: record });
   });
 
+  app.delete('/api/settlements/:id', requireAuth, (req, res) => {
+    const ledger = readLedger();
+    const idx = ledger.settlements.findIndex(s => s.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Settlement not found.' });
+    ledger.settlements.splice(idx, 1);
+    writeLedger(ledger);
+    res.json({ ok: true });
+  });
+
   // Receipt uploads: images only, registered in the photo index as hidden
   // so /uploads serves them but they stay off the Photo Wall.
   const receiptUpload = multer({
