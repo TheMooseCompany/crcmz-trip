@@ -130,8 +130,9 @@ nav>*{pointer-events:auto}
 @media(hover:none){.pv-nav{display:none}}
 .pv-meta{padding:10px 16px calc(12px + env(safe-area-inset-bottom));color:#fff;font-size:13.5px;text-align:center}
 .pv-meta small{display:block;color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
-.pv.chrome-off .pv-top,.pv.chrome-off .pv-meta,.pv.chrome-off .pv-nav{opacity:0;pointer-events:none}
+.pv.chrome-off .pv-count,.pv.chrome-off .pv-spacer,.pv.chrome-off .pv-save,.pv.chrome-off .pv-meta,.pv.chrome-off .pv-nav{opacity:0;pointer-events:none}
 .pv-top,.pv-meta,.pv-nav{transition:opacity .25s ease}
+#pvClose{background:rgba(255,255,255,.25);font-size:18px;width:44px;height:44px;flex-shrink:0}
 /* ---------- Sections ---------- */
 main{position:relative;background:linear-gradient(180deg,var(--deep),var(--sky) 240px)}
 section{padding:72px 0 8px}
