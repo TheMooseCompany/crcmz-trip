@@ -915,30 +915,49 @@ body.reduced .days-layout{display:block}
 .poll-create-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .poll-btn-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 18px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer}
 .poll-btn-close,.poll-btn-cancel{background:rgba(255,255,255,.08);border:none;border-radius:10px;padding:9px 16px;color:var(--cream);font-weight:600;font-size:13px;cursor:pointer}
-/* --- flight cards --- */
+/* --- flight cards: condensed stack ---
+   The flight board borrows the boarding-pass system whole: condensed
+   cards (critical info only — person, flight + airline, route, date,
+   dep/arr times, status, terminal, track link; aircraft / cabin /
+   Wi-Fi / duration / notes stay in the data, off the face) that pile
+   up with position:sticky in pure document flow. Each card sticks at
+   an incremental offset so a covered card leaves its top strip —
+   flight number, route, status — showing as a sliver. The tall
+   inter-card gap is the travel: a card starts hidden (driver-armed
+   .fl-wait) and pops (rise + fade on its inner wrapper) only at its
+   scroll moment, so an upcoming card never sits visibly under the
+   pile. A small driver recedes covered cards (scale ~.95 + dim),
+   gated to the section in view + Home active. Reduced motion: a
+   plain condensed list, everything visible. */
 .fl-sec{padding-top:0}
-.fl-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#0D1533,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
-.fl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.fl-airline{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.fl-number{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--amber2)}
-.fl-person-chip{font-family:"IBM Plex Mono",monospace;font-size:10px;background:rgba(165,180,255,.15);color:var(--peri);border-radius:4px;padding:2px 8px}
-.fl-route{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
-.fl-code{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1}
-.fl-route-mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.fl-arrow-line{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,239,224,.2),transparent);position:relative}
-.fl-arrow-line::after{content:'›';position:absolute;right:-4px;top:-9px;font-size:16px;color:rgba(245,239,224,.3)}
-.fl-duration{font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--muted2);letter-spacing:.12em}
-.fl-times{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px}
-.fl-time-col{display:flex;flex-direction:column;gap:2px}
-.fl-time-col:last-child{text-align:right;align-items:flex-end}
-.fl-time{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:700;color:var(--cream);line-height:1}
-.fl-airport{font-size:11px;color:var(--muted);margin-top:1px}
-.fl-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.fl-tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--muted)}
-.fl-wifi{color:#60A5FA}
-.fl-gate-row{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--amber2);margin-bottom:8px}
-.fl-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.fl-status{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:5px 12px;border-radius:99px}
+.fl-stack{display:flex;flex-direction:column;gap:40vh;--fl-peek:46px}
+.fl-stack.fl-armed .fl-card.fl-wait{opacity:0}
+.fl-card.fl-pop .fl-in{animation:bpPop .6s var(--ease) both}
+.fl-card{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--fl-peek));z-index:calc(2 + var(--i,0));
+  border:1px solid var(--line);border-radius:16px;color:var(--cream);
+  background:linear-gradient(165deg,#0D1533,#0A0D23);box-shadow:var(--shadow-card);
+  transform-origin:50% 0;will-change:transform,filter;overflow:hidden}
+.fl-in{padding:11px 14px 10px;position:relative}
+.fl-top{display:flex;align-items:center;gap:8px;min-height:20px}
+.fl-id{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;color:var(--cream);white-space:nowrap}
+.fl-id .fl-air{font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.fl-route-codes{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;color:var(--amber2);white-space:nowrap}
+.fl-route-codes span{color:var(--muted2);font-weight:500;padding:0 2px}
+.fl-top .fl-status{margin-left:auto}
+.fl-main{display:flex;align-items:flex-end;gap:10px;margin-top:7px}
+.fl-leg{display:flex;flex-direction:column;gap:1px;min-width:0}
+.fl-leg.r{text-align:right;align-items:flex-end}
+.fl-time{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:700;color:var(--cream);line-height:1;font-variant-numeric:tabular-nums}
+.fl-city{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.fl-arrow{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(245,239,224,.22),transparent);position:relative;margin-bottom:12px}
+.fl-arrow::after{content:'›';position:absolute;right:-4px;top:-10px;font-size:16px;color:rgba(245,239,224,.3)}
+.fl-sub{display:flex;align-items:center;gap:7px;margin-top:8px;min-height:20px}
+.fl-person{font-family:"IBM Plex Mono",monospace;font-size:10px;background:rgba(165,180,255,.15);color:var(--peri);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.fl-date{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.fl-term{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;color:var(--amber2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fl-track{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--peri);text-decoration:none;padding:4px 11px;border:1px solid rgba(165,180,255,.25);border-radius:99px;transition:background .15s;white-space:nowrap}
+.fl-track:hover{background:rgba(165,180,255,.1)}
+.fl-status{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap}
 .fl-status.scheduled{background:rgba(165,180,255,.12);color:var(--peri)}
 .fl-status.on-time{background:rgba(74,222,128,.12);color:#4ade80}
 .fl-status.delayed{background:rgba(251,146,60,.12);color:#fb923c}
@@ -946,10 +965,15 @@ body.reduced .days-layout{display:block}
 .fl-status.departed{background:rgba(192,132,252,.12);color:#c084fc}
 .fl-status.landed{background:rgba(74,222,128,.18);color:#4ade80}
 .fl-status.cancelled{background:rgba(248,113,113,.12);color:#f87171}
-.fl-status-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
-.fl-track{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--peri);text-decoration:none;padding:5px 12px;border:1px solid rgba(165,180,255,.25);border-radius:99px;transition:background .15s}
-.fl-track:hover{background:rgba(165,180,255,.1)}
-.fl-notes{font-size:13px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid rgba(245,239,224,.07)}
+.fl-status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:0 0 auto}
+@media (prefers-reduced-motion: reduce){
+  .fl-stack{gap:14px}
+  .fl-card{position:static}
+}
+body.reduced .fl-stack{gap:14px}
+body.reduced .fl-card{position:static}
+body.reduced .fl-stack .fl-card.fl-wait{opacity:1}
+body.reduced .fl-card.fl-pop .fl-in{animation:none}
 /* poll history */
 .poll-history{margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,239,224,.07)}
 .poll-hist-label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:6px}
@@ -4229,6 +4253,13 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     'boarding':'Boarding','departed':'Departed','landed':'Landed','cancelled':'Cancelled'
   };
   var _flights=[];
+  var FL_DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var FL_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function flDateLabel(iso){
+    var d=new Date((iso||'')+'T12:00:00');
+    if(isNaN(d.getTime()))return iso||'';
+    return FL_DOW[d.getDay()]+' · '+FL_MON[d.getMonth()]+' '+d.getDate();
+  }
   function flTrackUrl(fn){
     var code=fn.replace(/\s+/g,'').toUpperCase();
     return 'https://www.flightradar24.com/data/flights/'+code.toLowerCase();
@@ -4244,53 +4275,38 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
       return (a.departureTime||'').localeCompare(b.departureTime||'');
     });
     if(!visible.length){container.innerHTML='';return;}
-    container.innerHTML=visible.map(function(f){
+    container.innerHTML='<div class="fl-stack" id="flightsStack">'+visible.map(function(f,i){
       var st=f.status||'scheduled';
       var stLabel=FL_STATUS_LABELS[st]||st;
       var trackUrl=flTrackUrl(f.flightNumber);
-      var gateHtml=f.gate?'<div class="fl-gate-row">Gate '+escH(f.gate)+(f.terminal?' · '+escH(f.terminal):'')+'</div>'
-        :(f.terminal?'<div class="fl-gate-row">'+escH(f.terminal)+'</div>':'');
-      var metaParts=[];
-      if(f.aircraft)metaParts.push('<span class="fl-tag">'+escH(f.aircraft)+'</span>');
-      if(f.cabin)metaParts.push('<span class="fl-tag">'+escH(f.cabin)+'</span>');
-      if(f.hasWifi)metaParts.push('<span class="fl-tag fl-wifi">Wi-Fi</span>');
-      var metaTags=metaParts.join('');
-      var notesHtml=f.notes?'<p class="fl-notes">'+escH(f.notes)+'</p>':'';
-      return '<div class="fl-card">'
-        +'<div class="fl-header">'
-          +'<div><div class="fl-airline">'+escH(f.airline||f.flightNumber)+'</div>'
-            +'<div class="fl-number">'+escH(f.flightNumber)+'</div></div>'
-          +'<span class="fl-person-chip">'+escH(f.person)+'</span>'
+      /* Face = critical info only (the owner's call): flight + airline,
+         route, status on the top strip (which is also the sticky
+         sliver), dep/arr times, then person / date / terminal and the
+         track link. Aircraft, cabin, Wi-Fi, duration and notes remain
+         in the store/API and are simply not rendered on the face. */
+      var termTxt=f.terminal?(escH(f.terminal)+(f.gate?' · Gate '+escH(f.gate):'')):(f.gate?'Gate '+escH(f.gate):'');
+      return '<article class="fl-card" style="--i:'+i+'">'
+        +'<div class="fl-in">'
+        +'<div class="fl-top">'
+          +'<span class="fl-id">'+escH(f.flightNumber)+(f.airline?' <span class="fl-air">'+escH(f.airline)+'</span>':'')+'</span>'
+          +'<span class="fl-route-codes">'+escH(f.originCode)+'<span>→</span>'+escH(f.destinationCode)+'</span>'
+          +'<span class="fl-status '+escH(st)+'"><span class="fl-status-dot"></span>'+escH(stLabel)+'</span>'
         +'</div>'
-        +'<div class="fl-route">'
-          +'<span class="fl-code">'+escH(f.originCode)+'</span>'
-          +'<div class="fl-route-mid">'
-            +'<div class="fl-arrow-line"></div>'
-            +'<div class="fl-duration">'+escH(f.duration)+'</div>'
-          +'</div>'
-          +'<span class="fl-code">'+escH(f.destinationCode)+'</span>'
+        +'<div class="fl-main">'
+          +'<div class="fl-leg"><span class="fl-time">'+escH(f.departureTime||'—')+'</span><span class="fl-city">'+escH(f.origin||f.originCode)+'</span></div>'
+          +'<div class="fl-arrow"></div>'
+          +'<div class="fl-leg r"><span class="fl-time">'+escH(f.arrivalTime||'—')+'</span><span class="fl-city">'+escH(f.destination||f.destinationCode)+'</span></div>'
         +'</div>'
-        +'<div class="fl-times">'
-          +'<div class="fl-time-col">'
-            +'<div class="fl-time">'+escH(f.departureTime||'—')+'</div>'
-            +'<div class="fl-airport">'+escH(f.origin||f.originCode)+'</div>'
-          +'</div>'
-          +'<div class="fl-time-col">'
-            +'<div class="fl-time">'+escH(f.arrivalTime||'—')+'</div>'
-            +'<div class="fl-airport">'+escH(f.destination||f.destinationCode)+'</div>'
-          +'</div>'
-        +'</div>'
-        +(metaTags?'<div class="fl-meta">'+metaTags+'</div>':'')
-        +gateHtml
-        +'<div class="fl-footer">'
-          +'<span class="fl-status '+escH(st)+'">'
-            +'<span class="fl-status-dot"></span>'+escH(stLabel)
-          +'</span>'
+        +'<div class="fl-sub">'
+          +'<span class="fl-person">'+escH(f.person)+'</span>'
+          +'<span class="fl-date">'+escH(flDateLabel(f.departureDate))+'</span>'
+          +(termTxt?'<span class="fl-term">'+termTxt+'</span>':'')
           +'<a class="fl-track" href="'+escH(trackUrl)+'" target="_blank" rel="noopener">Track ›</a>'
         +'</div>'
-        +notesHtml
-        +'</div>';
-    }).join('');
+        +'</div>'
+        +'</article>';
+    }).join('')+'</div>';
+    if(window.__flRefresh)window.__flRefresh();
   }
   var flSig=null;
   function fetchFlights(){
@@ -4309,6 +4325,94 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   fetchFlights();
   setInterval(fetchFlights,60000);
   window._getFlights=function(){return _flights;};
+})();
+
+/* ================= Flight stack driver =================
+   The flight cards pile up exactly like the boarding passes: sticky
+   in normal flow does the stacking, this driver owns the pop-up
+   reveals and recedes a card as the next one covers it — scale
+   toward ~.95 plus a brightness dim, rotation relaxing to square.
+   Same discipline as the pass driver: transform/filter only, rAF
+   while the section is near the viewport and Home is the active
+   view, nothing at all under reduced motion (the cards then render
+   as a plain condensed list). The cards are rendered asynchronously
+   by the flights poll, so the stack is (re)collected through
+   __flRefresh after every render; a re-render arms fresh cards,
+   which pop as their scroll moment arrives — cards already at their
+   stick point pop immediately via the frame-loop retry. */
+(function(){
+ if(REDUCED)return;
+ var ROTS=[-0.7,0.55,-0.45];
+ var stack=null,cards=[],raf=0,lastY=-1,inView=false,observedEl=null;
+ var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){
+     if(e.target!==stack)return;
+     inView=e.isIntersecting;
+     stack.classList.toggle('fl-live',inView);
+     if(inView)kick();
+   });
+ },{rootMargin:'160px 0px 160px 0px'});
+ var rio=new IntersectionObserver(function(es){
+   es.forEach(function(e){
+     if(e.isIntersecting){ e.target.__flHot=true; tryPop(e.target); }
+   });
+ },{rootMargin:'0px 0px -15% 0px',threshold:0});
+ function stickTop(c){ return parseFloat(getComputedStyle(c).top)||0; }
+ function stuck(c){ return c.getBoundingClientRect().top<=stickTop(c)+2; }
+ function tryPop(c){
+   if(!c.classList.contains('fl-wait'))return;
+   var i=cards.indexOf(c);
+   if(i>0&&!stuck(cards[i-1])&&!stuck(c))return;
+   c.classList.remove('fl-wait');
+   c.classList.add('fl-pop');
+   rio.unobserve(c);
+ }
+ function homeOn(){ var v=document.getElementById('view-home'); return v&&!v.hidden; }
+ function frame(){
+   raf=0;
+   if(!stack||!inView||!homeOn())return;
+   for(var j=0;j<cards.length;j++){
+     var cc=cards[j];
+     if(cc.classList.contains('fl-wait')&&(cc.__flHot||stuck(cc)))tryPop(cc);
+   }
+   for(var i=0;i<cards.length-1;i++){
+     var a=cards[i],b=cards[i+1];
+     var ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+     if(!ar.height)continue;
+     var cov=(a.classList.contains('fl-wait')||b.classList.contains('fl-wait'))?0:(ar.bottom-br.top)/ar.height;
+     cov=cov<0?0:(cov>1?1:cov);
+     if(Math.abs(cov-(a.__cov||0))>0.002){
+       a.__cov=cov;
+       var rot=(a.__rot||0)*(1-cov);
+       a.style.transform='rotate('+rot.toFixed(3)+'deg) scale('+(1-0.05*cov).toFixed(4)+')';
+       a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')';
+     }
+   }
+   if(window.scrollY!==lastY){ lastY=window.scrollY; raf=requestAnimationFrame(frame); }
+ }
+ function kick(){ if(!raf)raf=requestAnimationFrame(frame); }
+ window.addEventListener('scroll',kick,{passive:true});
+ window.addEventListener('resize',kick);
+ window.__flRefresh=function(){
+   var el=document.getElementById('flightsStack');
+   if(!el){ stack=null; cards=[]; return; }
+   if(el!==observedEl){
+     if(observedEl)io.unobserve(observedEl);
+     observedEl=el; inView=false;
+     io.observe(el);
+   }
+   stack=el;
+   cards=Array.prototype.slice.call(stack.querySelectorAll('.fl-card'));
+   stack.classList.add('fl-armed');
+   cards.forEach(function(c,i){
+     c.__rot=ROTS[i%ROTS.length]; c.__cov=-1;
+     if(!c.classList.contains('fl-pop')){
+       c.classList.add('fl-wait');
+       rio.observe(c);
+     }
+   });
+   kick();
+ };
 })();
 
 /* ================= V5 · ambient pause + list reveals =================
