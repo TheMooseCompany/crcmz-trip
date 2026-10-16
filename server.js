@@ -245,14 +245,14 @@ async function main() {
     if (keys.length === 0) return false;
     let sum = 0;
     for (const k of keys) {
-      if (!PEOPLE.includes(k) || !isCents(shares[k])) return false;
+      if (!activePeople().includes(k) || !isCents(shares[k])) return false;
       sum += shares[k];
     }
     return sum === total;
   }
   function validExpense(e) {
     if (!e || typeof e !== 'object') return false;
-    if (!PEOPLE.includes(e.payer)) return false;
+    if (!activePeople().includes(e.payer)) return false;
     if (!isCents(e.amountCentsCAD)) return false;
     if (!validShares(e.shares, e.amountCentsCAD)) return false;
     if (e.currency !== 'CAD' && e.currency !== 'USD') return false;
@@ -304,7 +304,8 @@ async function main() {
 
   app.post('/api/settlements', requireAuth, (req, res) => {
     const s = req.body || {};
-    if (!PEOPLE.includes(s.from) || !PEOPLE.includes(s.to) || s.from === s.to || !isCents(s.amountCentsCAD)) {
+    const ppl = activePeople();
+    if (!ppl.includes(s.from) || !ppl.includes(s.to) || s.from === s.to || !isCents(s.amountCentsCAD)) {
       return res.status(400).json({ error: 'Invalid settlement.' });
     }
     const ledger = readLedger();
@@ -395,7 +396,65 @@ async function main() {
     return null;
   }
   app.get('/api/me', requireAuth, (req, res) => {
-    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user) });
+    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user), isAdmin: isAdminUser(req.session.user) });
+  });
+
+  // ---------- Editable site content (admin-gated) ----------
+  // The whole page renders from one content object. The server copy in
+  // data/content.json is the source of truth; the client boots from its
+  // local mirror, then syncs from GET /api/content. Writes are restricted
+  // to the two test admins (Mutasif and Moiz, matched through the same
+  // alias table as /api/me); everyone signed in may read.
+  const CONTENT_PATH = process.env.CONTENT_PATH || path.join(__dirname, 'data', 'content.json');
+  const ADMIN_PEOPLE = ['Mutasif', 'Moiz'];
+  function isAdminUser(user) {
+    const p = matchPerson(user);
+    return !!p && ADMIN_PEOPLE.includes(p);
+  }
+  function readContent() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(CONTENT_PATH, 'utf8'));
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch { /* no content stored yet */ }
+    return null;
+  }
+  function writeContent(content) {
+    fs.mkdirSync(path.dirname(CONTENT_PATH), { recursive: true });
+    const tmp = `${CONTENT_PATH}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(content, null, 2));
+    fs.renameSync(tmp, CONTENT_PATH);
+  }
+  function contentPeople(content) {
+    if (content && Array.isArray(content.splitPeople) && content.splitPeople.length > 0) {
+      const names = content.splitPeople.map((p) => p && p.name).filter((n) => typeof n === 'string' && n.trim().length > 0);
+      if (names.length === content.splitPeople.length && new Set(names).size === names.length) return names;
+    }
+    return null;
+  }
+  function activePeople() {
+    return contentPeople(readContent()) || PEOPLE;
+  }
+
+  app.get('/api/content', requireAuth, (req, res) => {
+    res.json({ content: readContent() });
+  });
+
+  app.put('/api/content', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) {
+      return res.status(403).json({ error: 'Only Mutasif and Moiz can edit site content.' });
+    }
+    const c = req.body;
+    if (!c || typeof c !== 'object' || Array.isArray(c)) {
+      return res.status(400).json({ error: 'Invalid content.' });
+    }
+    for (const k of ['trip', 'days', 'stay', 'food', 'buds', 'fifaTeams', 'splitPeople']) {
+      if (!(k in c)) return res.status(400).json({ error: `Missing content section: ${k}` });
+    }
+    if (!Array.isArray(c.days) || !Array.isArray(c.food) || !Array.isArray(c.buds) || !Array.isArray(c.splitPeople)) {
+      return res.status(400).json({ error: 'Content sections days/food/buds/splitPeople must be arrays.' });
+    }
+    writeContent(c);
+    res.json({ ok: true });
   });
 
   // Link previews: chat/social crawlers (WhatsApp, iMessage, Telegram,
