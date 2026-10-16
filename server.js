@@ -541,12 +541,204 @@ async function main() {
     next();
   });
 
-  // ---------- Album ----------
-  // Redirect /album to the Immich shared album (IMMICH_SHARE_URL env var).
-  // Auth-gated so the share URL stays off public crawlers.
-  app.get('/album', requireAuth, (req, res) => {
-    if (IMMICH_SHARE_URL) return res.redirect(IMMICH_SHARE_URL);
-    res.type('text/plain').send('No album configured (set IMMICH_SHARE_URL).');
+  // ---------- Album gallery ----------
+  // Fetches assets from Immich when configured; falls back to local index.json.
+  app.get('/album', requireAuth, async (req, res) => {
+    let items = [];
+    let source = 'local';
+
+    if (IMMICH_URL && IMMICH_API_KEY && IMMICH_ALBUM_ID) {
+      try {
+        const { fetch } = await import('undici');
+        const r = await fetch(`${IMMICH_URL}/api/albums/${encodeURIComponent(IMMICH_ALBUM_ID)}?withoutAssets=false`, {
+          headers: { 'x-api-key': IMMICH_API_KEY },
+        });
+        if (r.ok) {
+          const j = await r.json();
+          const assets = Array.isArray(j.assets) ? j.assets : [];
+          items = assets.map((a) => ({
+            id: a.id,
+            url: `${IMMICH_URL}/api/assets/${a.id}/original`,
+            thumb: `${IMMICH_URL}/api/assets/${a.id}/thumbnail?size=preview`,
+            originalName: a.originalFileName || a.id,
+            uploadedBy: (a.owner && (a.owner.name || a.owner.email)) || 'Unknown',
+            uploadedAt: a.fileCreatedAt || a.createdAt || '',
+            kind: (a.type || '').toLowerCase() === 'video' ? 'video' : 'image',
+          })).sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
+          source = 'immich';
+        }
+      } catch (e) {
+        console.error('[crcmz-trip] Immich album fetch failed:', e.message);
+      }
+    }
+
+    if (source === 'local') {
+      const index = readIndex();
+      items = Object.values(index)
+        .filter((m) => !m.hidden)
+        .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
+        .map((m) => ({
+          id: m.name,
+          url: `/uploads/${encodeURIComponent(m.name)}`,
+          thumb: `/uploads/${encodeURIComponent(m.name)}`,
+          originalName: m.originalName || m.name,
+          uploadedBy: m.uploadedBy || '',
+          uploadedAt: m.uploadedAt || '',
+          kind: IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video',
+        }));
+    }
+
+    const count = items.length;
+    const shareHref = IMMICH_SHARE_URL ? ` <a href="${IMMICH_SHARE_URL}" target="_blank" rel="noopener" class="share-link">Open in Immich ↗</a>` : '';
+
+    const tiles = items.map((item, i) => {
+      const dt = item.uploadedAt ? new Date(item.uploadedAt) : null;
+      const dateStr = dt ? dt.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '';
+      const byEsc = item.uploadedBy.replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      const nameEsc = item.originalName.replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      const thumbEsc = item.thumb.replace(/"/g, '&quot;');
+      const urlEsc = item.url.replace(/"/g, '&quot;');
+
+      if (item.kind === 'video') {
+        return `<div class="tile" data-i="${i}">
+  <div class="tile-media" onclick="openLb(${i})">
+    <video src="${urlEsc}" muted playsinline preload="metadata" class="tile-vid"></video>
+    <div class="play-badge">▶</div>
+  </div>
+  <div class="tile-info"><span class="tile-by">${byEsc}</span><span class="tile-date">${dateStr}</span></div>
+</div>`;
+      }
+      return `<div class="tile" data-i="${i}">
+  <div class="tile-media" onclick="openLb(${i})">
+    <img src="${thumbEsc}" loading="lazy" alt="${nameEsc}" decoding="async">
+  </div>
+  <div class="tile-info"><span class="tile-by">${byEsc}</span><span class="tile-date">${dateStr}</span></div>
+</div>`;
+    }).join('\n');
+
+    const photosJson = JSON.stringify(items.map((item) => ({
+      url: item.url,
+      kind: item.kind,
+      by: item.uploadedBy,
+      name: item.originalName,
+    })));
+
+    res.type('html').send(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="color-scheme" content="dark"/>
+<link rel="icon" href="data:,">
+<title>Trip Album · CRCMZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E27;--panel:#10163A;--line:rgba(245,239,224,.12);
+  --line-amber:rgba(242,179,61,.45);--amber:#F2B33D;--amber2:#FFC65C;
+  --cream:#F5EFE0;--muted:#A9A5C6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;min-height:100dvh;-webkit-font-smoothing:antialiased}
+a{color:var(--amber2);text-decoration:none}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hdr-left{display:flex;flex-direction:column;gap:4px}
+.label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.hdr h1{font-size:clamp(22px,4vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.hdr-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.back{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:7px 14px;transition:border-color .18s,color .18s;white-space:nowrap}
+.back:hover{color:var(--amber2);border-color:var(--line-amber)}
+.share-link{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.share-link:hover{color:var(--amber2)}
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding-bottom:60px}
+@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
+.tile{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tile-media{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;background:#06080f}
+.tile-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.tile-media:hover img{transform:scale(1.04)}
+.tile-vid{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;color:rgba(255,255,255,.85);text-shadow:0 2px 12px rgba(0,0,0,.6);pointer-events:none}
+.tile-info{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;gap:6px;min-height:32px}
+.tile-by{font-size:12px;font-weight:600;color:var(--amber2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-date{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.empty{padding:60px 0;text-align:center;color:var(--muted);font-size:15px}
+/* Lightbox */
+#lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px}
+#lb.on{display:flex}
+#lb-media{max-width:min(92vw,1200px);max-height:82dvh;display:flex;align-items:center;justify-content:center}
+#lb-media img,#lb-media video{max-width:100%;max-height:82dvh;border-radius:8px;object-fit:contain;display:block}
+#lb-caption{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-align:center}
+.lb-close{position:fixed;top:14px;right:16px;background:rgba(4,6,18,.85);border:1px solid var(--line);color:var(--cream);font-size:18px;border-radius:99px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
+.lb-close:hover{border-color:var(--line-amber);color:var(--amber2)}
+.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(4,6,18,.75);border:1px solid var(--line);color:var(--cream);font-size:24px;border-radius:99px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
+.lb-nav:hover{border-color:var(--line-amber);color:var(--amber2)}
+.lb-prev{left:10px}
+.lb-next{right:10px}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="hdr">
+  <div class="hdr-left">
+    <div class="label">CRCMZ Trip 2.0 · Album</div>
+    <h1>TX/CA — YYC 2.0</h1>
+    <div class="hdr-meta">${count} item${count !== 1 ? 's' : ''}${IMMICH_SHARE_URL ? ' &nbsp;·&nbsp; <a href="' + IMMICH_SHARE_URL + '" target="_blank" rel="noopener" class="share-link">Open in Immich ↗</a>' : ''}</div>
+  </div>
+  <a class="back" href="/?tab=photos">← Back</a>
+</div></div></header>
+
+<div class="wrap">
+${count === 0
+  ? '<p class="empty">No photos yet — upload some from the Photo Wall.</p>'
+  : `<div class="grid">\n${tiles}\n</div>`}
+</div>
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lb-close" onclick="closeLb()" aria-label="Close">✕</button>
+  <button class="lb-nav lb-prev" onclick="lbStep(-1)" aria-label="Previous">‹</button>
+  <div id="lb-media"></div>
+  <div id="lb-caption" class="lb-caption"></div>
+  <button class="lb-nav lb-next" onclick="lbStep(1)" aria-label="Next">›</button>
+</div>
+
+<script>
+var ITEMS = ${photosJson};
+var idx = 0;
+function openLb(i) {
+  idx = i; renderLb();
+  document.getElementById('lb').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeLb() {
+  document.getElementById('lb').classList.remove('on');
+  document.body.style.overflow = '';
+  document.getElementById('lb-media').innerHTML = '';
+}
+function lbStep(d) { idx = (idx + d + ITEMS.length) % ITEMS.length; renderLb(); }
+function renderLb() {
+  var p = ITEMS[idx], m = document.getElementById('lb-media');
+  if (p.kind === 'video') {
+    m.innerHTML = '<video src="' + esc(p.url) + '" controls autoplay muted playsinline></video>';
+  } else {
+    m.innerHTML = '<img src="' + esc(p.url) + '" alt="' + esc(p.name) + '">';
+  }
+  document.getElementById('lb-caption').textContent = p.by + (p.by ? '  ·  ' : '') + (idx+1) + ' / ' + ITEMS.length;
+}
+function esc(s) { return s.replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+document.getElementById('lb').addEventListener('click', function(e) { if (e.target===this) closeLb(); });
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lb').classList.contains('on')) return;
+  if (e.key==='Escape') closeLb();
+  if (e.key==='ArrowLeft') lbStep(-1);
+  if (e.key==='ArrowRight') lbStep(1);
+});
+</script>
+</body>
+</html>`);
   });
 
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
