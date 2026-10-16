@@ -1067,6 +1067,8 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-actions{display:flex;gap:8px;margin-top:14px}
 .nm-dir{flex:none}
 .nm-add{flex:1;justify-content:center}
+.nm-photo{position:relative}
+.nm-credit{position:absolute;left:8px;bottom:8px;z-index:2;font-size:11px;line-height:1.3;color:var(--cream);background:rgba(6,8,24,.62);padding:3px 7px;border-radius:6px;text-decoration:none;backdrop-filter:blur(4px)}
 .nm-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .nm-day{border:1px solid var(--line);background:rgba(6,8,24,.5);color:var(--cream);border-radius:999px;padding:9px 13px;min-height:40px;font-family:"Space Grotesk",sans-serif;font-size:14px;font-weight:500;cursor:pointer}
 .nm-day.on{background:var(--amber);color:#221A04;border-color:transparent;font-weight:600}
@@ -2460,6 +2462,7 @@ function foodSavePlan(){ try{localStorage.setItem(FOOD_PLAN_KEY,JSON.stringify(f
 function foodHas(f,id){return (f.cats||[]).indexOf(id)>=0}
 function foodCount(id){return FOOD.filter(function(f){return foodHas(f,id)}).length}
 function foodEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function placeSlug(n){var s=String(n||'').toLowerCase().replace(/\u2019/g,"'").replace(/[\u2013\u2014]/g,'-');s=s.replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');return s.replace(/-+/g,'-')}
 function foodRate(f){
  if(f.stars||f.reviews)return (f.stars?('\u2605 '+f.stars):'')+((f.stars&&f.reviews)?' \u00b7 ':'')+(f.reviews?(f.reviews+' reviews'):'');
  return 'Rating not verified';
@@ -2487,7 +2490,7 @@ function foodPickerHTML(name){
 function foodCard(f){
  var img=FOOD_IMG[(f.cats||[])[0]]||'';
  var plan=foodPlan[f.name];
- return '<article class="nm-card rv">'
+ return '<article class="nm-card rv" data-place-slug="'+foodEsc(placeSlug(f.name))+'">'
   +'<div class="nm-photo">'+(img?'<img src="'+img+'" alt="" loading="lazy">':foodGlyph())
   +'<span class="nm-badge">'+foodEsc(halalBadge(f))+'</span>'
   +(plan?'<span class="nm-plan-chip">\u2713 '+foodEsc(plan)+'</span>':'')
@@ -4173,6 +4176,46 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     el.textContent=n>0?(n+' shot'+(n===1?'':'s')+' on the wall'):'No shots yet \u2014 first one lands Thu';
   };
   v6Tick(); setInterval(v6Tick,1000);
+})();
+</script>
+
+
+
+<script>
+/* Places photos: swap each Food card's category photo for the venue's
+   own Google photo via the server proxy. Silent no-op on any error -
+   the category photo is the permanent fallback. */
+(function(){
+ var done=new WeakSet();
+ function wire(card){
+  if(done.has(card))return; done.add(card);
+  var slug=card.getAttribute('data-place-slug'); if(!slug)return;
+  var img=card.querySelector('.nm-photo img'); if(!img)return;
+  fetch('/api/places/meta?venue='+encodeURIComponent(slug))
+   .then(function(r){return r.ok?r.json():null})
+   .then(function(meta){
+    if(!meta)return;
+    var probe=new Image();
+    probe.onload=function(){
+     img.src=probe.src;
+     var dir=card.querySelector('a.nm-dir');
+     if(dir&&meta.googleMapsUri)dir.href=meta.googleMapsUri;
+     var at=meta.attributions&&meta.attributions[0];
+     if(at&&at.author){
+      var c=document.createElement('a');
+      c.className='nm-credit'; c.textContent='Photo: '+at.author;
+      if(at.authorUri){c.href=at.authorUri;c.target='_blank';c.rel='noopener'}
+      card.querySelector('.nm-photo').appendChild(c);
+     }
+    };
+    probe.src='/api/places/photo?venue='+encodeURIComponent(slug);
+   })
+   .catch(function(){});
+ }
+ function wireAll(){document.querySelectorAll('#foodList article.nm-card[data-place-slug]').forEach(wire)}
+ // renderFood() rebuilds #foodList on every filter change - re-wire then.
+ new MutationObserver(wireAll).observe(document.getElementById('foodList'),{childList:true});
+ wireAll();
 })();
 </script>
 
