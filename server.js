@@ -27,9 +27,12 @@ const ISSUER = process.env.ZITADEL_ISSUER.replace(/\/$/, '');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, 'data', 'uploads');
 const INDEX_PATH = path.join(UPLOADS_DIR, 'index.json');
 const DATA_DIR = path.join(__dirname, 'data');
-const ACTIVE_ALBUM_PATH = path.join(DATA_DIR, 'active-album.json');
 const MAX_FILE_MB = parseInt(process.env.MAX_FILE_MB || '50', 10);
-const ADMIN_SUB = process.env.ADMIN_SUB || '';
+// Immich integration (optional — falls back to local-only if unset)
+const IMMICH_URL = (process.env.IMMICH_URL || '').replace(/\/$/, '');
+const IMMICH_API_KEY = process.env.IMMICH_API_KEY || '';
+const IMMICH_ALBUM_ID = process.env.IMMICH_ALBUM_ID || '';
+const IMMICH_SHARE_URL = process.env.IMMICH_SHARE_URL || '';
 const ALLOWED_EXT = new Set([
   '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif', '.avif',
   '.mp4', '.mov', '.webm', '.m4v',
@@ -39,19 +42,42 @@ const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
-function readActiveAlbum() {
+// Upload a local file to Immich and add it to the album.
+// Returns the Immich asset id, or null on any failure.
+async function uploadToImmich(filePath, originalName, mtime) {
+  if (!IMMICH_URL || !IMMICH_API_KEY) return null;
   try {
-    const a = JSON.parse(fs.readFileSync(ACTIVE_ALBUM_PATH, 'utf8'));
-    return a && a.id ? a : null;
-  } catch { return null; }
-}
-function writeActiveAlbum(album) {
-  fs.writeFileSync(ACTIVE_ALBUM_PATH, JSON.stringify(album, null, 2));
-}
-function isAdmin(req) {
-  if (!req.session.user) return false;
-  if (ADMIN_SUB && req.session.user.sub === ADMIN_SUB) return true;
-  return false;
+    const { FormData, File } = await import('undici');
+    const fileData = fs.readFileSync(filePath);
+    const form = new FormData();
+    form.append('assetData', new File([fileData], originalName));
+    form.append('deviceId', 'crcmz-trip');
+    form.append('deviceAssetId', `trip-${path.basename(filePath)}`);
+    form.append('fileCreatedAt', mtime || new Date().toISOString());
+    form.append('fileModifiedAt', mtime || new Date().toISOString());
+    form.append('isFavorite', 'false');
+    const { fetch } = await import('undici');
+    const r = await fetch(`${IMMICH_URL}/api/assets`, {
+      method: 'POST',
+      headers: { 'x-api-key': IMMICH_API_KEY },
+      body: form,
+    });
+    if (!r.ok) { console.error('[crcmz-trip] Immich upload failed:', r.status, await r.text()); return null; }
+    const j = await r.json();
+    const assetId = j && (j.id || j.assetId);
+    if (assetId && IMMICH_ALBUM_ID) {
+      const ar = await fetch(`${IMMICH_URL}/api/albums/${IMMICH_ALBUM_ID}/assets`, {
+        method: 'PUT',
+        headers: { 'x-api-key': IMMICH_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ ids: [assetId] }),
+      });
+      if (!ar.ok) console.error('[crcmz-trip] Immich add-to-album failed:', ar.status, await ar.text());
+    }
+    return assetId || null;
+  } catch (e) {
+    console.error('[crcmz-trip] Immich error:', e.message);
+    return null;
+  }
 }
 
 function readIndex() {
@@ -210,21 +236,26 @@ async function main() {
       if (files.length === 0) return res.status(400).json({ error: 'No files received.' });
       const index = readIndex();
       const by = displayName(req.session.user);
-      const activeAlbum = readActiveAlbum();
+      const now = new Date().toISOString();
       const added = files.map((f) => {
         const meta = {
           name: f.filename,
           originalName: f.originalname,
           uploadedBy: by,
-          uploadedAt: new Date().toISOString(),
+          uploadedAt: now,
           size: f.size,
         };
-        if (activeAlbum) meta.albumId = activeAlbum.id;
         index[f.filename] = meta;
         return meta;
       });
       writeIndex(index);
-      res.status(201).json({ ok: true, added: added.map((m) => m.name), albumId: activeAlbum ? activeAlbum.id : null });
+      // Fire Immich uploads in the background — don't block the response.
+      if (IMMICH_URL && IMMICH_API_KEY) {
+        Promise.all(files.map((f) => uploadToImmich(
+          path.join(UPLOADS_DIR, f.filename), f.originalname, now,
+        ))).catch(() => {});
+      }
+      res.status(201).json({ ok: true, added: added.map((m) => m.name) });
     });
   });
 
@@ -510,184 +541,12 @@ async function main() {
     next();
   });
 
-  // ---------- Album API ----------
-  app.get('/api/albums/active', requireAuth, (req, res) => {
-    res.json({ album: readActiveAlbum() });
-  });
-
-  app.post('/api/albums', requireAuth, (req, res) => {
-    if (!isAdmin(req)) return res.status(403).json({ error: 'Admin only.' });
-    const { id, name } = req.body || {};
-    if (!id || typeof id !== 'string' || !/^[a-z0-9-]+$/.test(id)) {
-      return res.status(400).json({ error: 'id must be lowercase letters, numbers, hyphens.' });
-    }
-    const album = { id, name: name || id, createdAt: new Date().toISOString() };
-    writeActiveAlbum(album);
-    res.status(201).json({ album });
-  });
-
-  app.delete('/api/albums/active', requireAuth, (req, res) => {
-    if (!isAdmin(req)) return res.status(403).json({ error: 'Admin only.' });
-    try { fs.unlinkSync(ACTIVE_ALBUM_PATH); } catch {}
-    res.json({ ok: true });
-  });
-
-  app.get('/api/albums/:id/photos', requireAuth, (req, res) => {
-    const albumId = req.params.id;
-    const index = readIndex();
-    const items = Object.values(index)
-      .filter((m) => m.albumId === albumId)
-      .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
-      .map((m) => ({
-        name: m.name,
-        originalName: m.originalName,
-        url: `/uploads/${encodeURIComponent(m.name)}`,
-        uploadedBy: m.uploadedBy,
-        uploadedAt: m.uploadedAt,
-        size: m.size,
-        kind: IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video',
-      }));
-    res.json({ albumId, photos: items, total: items.length });
-  });
-
-  // ---------- Album view page ----------
-  app.get('/album/:id', requireAuth, (req, res) => {
-    const albumId = req.params.id;
-    const index = readIndex();
-    const photos = Object.values(index)
-      .filter((m) => m.albumId === albumId)
-      .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
-    const count = photos.length;
-
-    // Try to read album name from active album file
-    const active = readActiveAlbum();
-    const albumName = (active && active.id === albumId) ? (active.name || albumId) : albumId;
-
-    res.type('html').send(`<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="color-scheme" content="dark"/>
-<link rel="icon" href="data:,">
-<title>${albumName} · CRCMZ Trip</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{--sky:#0A0E27;--deep:#060818;--panel:#10163A;--line:rgba(245,239,224,.12);--line-amber:rgba(242,179,61,.45);--amber:#F2B33D;--amber2:#FFC65C;--acid:#8CFF2B;--cream:#F5EFE0;--muted:#A9A5C6;--muted2:#8E89B8}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--sky);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-.mono{font-family:"IBM Plex Mono",monospace}
-.label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--amber);font-weight:600}
-.wrap{max-width:900px;margin:0 auto;padding:0 18px}
-header{padding:28px 0 22px;border-bottom:1px solid var(--line)}
-.header-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.back{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:7px 14px;transition:border-color .2s,color .2s}
-.back:hover{color:var(--amber2);border-color:var(--line-amber)}
-.album-title{font-size:clamp(24px,4vw,38px);font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
-.album-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:24px 0 60px}
-@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:7px}}
-@media(max-width:380px){.grid{grid-template-columns:1fr}}
-.tile{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.04);aspect-ratio:1;cursor:pointer;transition:transform .2s,border-color .2s}
-.tile:hover{transform:scale(1.02);border-color:var(--line-amber)}
-.tile img,.tile video{width:100%;height:100%;object-fit:cover;display:block}
-.tile .meta{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 7px;font-size:11px;color:#fff;background:linear-gradient(transparent,rgba(4,5,16,.88));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
-.tile .meta .by{font-weight:600;color:var(--amber2)}
-.tile .play-badge{position:absolute;top:7px;right:7px;background:rgba(4,5,16,.78);color:#fff;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;padding:3px 8px;border-radius:99px}
-.empty{padding:60px 0;text-align:center;color:var(--muted);font-size:16px}
-/* Lightbox */
-#lb{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,5,16,.96);align-items:center;justify-content:center;flex-direction:column;gap:12px}
-#lb.on{display:flex}
-#lb img,#lb video{max-width:92vw;max-height:82vh;border-radius:10px;object-fit:contain}
-#lb .lb-meta{font-size:13px;color:var(--muted);font-family:"IBM Plex Mono",monospace;letter-spacing:.06em}
-#lb .lb-close{position:fixed;top:18px;right:22px;background:rgba(4,5,16,.8);border:1px solid var(--line);color:var(--cream);font-size:18px;border-radius:99px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
-#lb .lb-close:hover{border-color:var(--line-amber);color:var(--amber2)}
-#lb .lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(4,5,16,.75);border:1px solid var(--line);color:var(--cream);font-size:22px;border-radius:99px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
-#lb .lb-prev{left:12px}
-#lb .lb-next{right:12px}
-#lb .lb-nav:hover{border-color:var(--line-amber);color:var(--amber2)}
-</style>
-</head>
-<body>
-<header><div class="wrap"><div class="header-inner">
-  <div>
-    <div class="label">CRCMZ Trip 2.0 · Album</div>
-    <div class="album-title">${albumName.replace(/</g,'&lt;')}</div>
-    <div class="album-meta">${count} item${count !== 1 ? 's' : ''}</div>
-  </div>
-  <a class="back" href="/?tab=photos">← Back to hub</a>
-</div></div></header>
-
-<div class="wrap">
-${count === 0
-  ? '<div class="empty">No photos yet — be the first to add one.</div>'
-  : `<div class="grid" id="grid">${photos.map((m, i) => {
-      const kind = IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video';
-      const url = `/uploads/${encodeURIComponent(m.name)}`;
-      const dt = new Date(m.uploadedAt);
-      const timeStr = dt.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      if (kind === 'image') {
-        return `<div class="tile" data-index="${i}" onclick="openLb(${i})"><img src="${url}" loading="lazy" alt="${m.originalName.replace(/"/g,'&quot;')}"><div class="meta"><span class="by">${m.uploadedBy.replace(/</g,'&lt;')}</span> · ${timeStr}</div></div>`;
-      } else {
-        return `<div class="tile" data-index="${i}" onclick="openLb(${i})"><video src="${url}" muted playsinline preload="metadata"></video><div class="play-badge">▶ Video</div><div class="meta"><span class="by">${m.uploadedBy.replace(/</g,'&lt;')}</span> · ${timeStr}</div></div>`;
-      }
-    }).join('')}</div>`
-}
-</div>
-
-<div id="lb">
-  <button class="lb-close" onclick="closeLb()" aria-label="Close">✕</button>
-  <button class="lb-nav lb-prev" onclick="lbStep(-1)" aria-label="Previous">‹</button>
-  <div id="lb-media"></div>
-  <div class="lb-meta" id="lb-meta"></div>
-  <button class="lb-nav lb-next" onclick="lbStep(1)" aria-label="Next">›</button>
-</div>
-
-<script>
-var PHOTOS = ${JSON.stringify(photos.map(m => ({
-  url: `/uploads/${encodeURIComponent(m.name)}`,
-  by: m.uploadedBy,
-  name: m.originalName,
-  kind: IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video',
-  at: new Date(m.uploadedAt).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-}))
-)};
-var lbIdx = 0;
-function openLb(i) {
-  lbIdx = i; renderLb(); document.getElementById('lb').classList.add('on');
-  document.body.style.overflow = 'hidden';
-}
-function closeLb() {
-  document.getElementById('lb').classList.remove('on');
-  document.body.style.overflow = '';
-  document.getElementById('lb-media').innerHTML = '';
-}
-function lbStep(d) {
-  lbIdx = (lbIdx + d + PHOTOS.length) % PHOTOS.length; renderLb();
-}
-function renderLb() {
-  var p = PHOTOS[lbIdx], m = document.getElementById('lb-media');
-  if (p.kind === 'image') {
-    m.innerHTML = '<img src="' + p.url + '" alt="' + p.name.replace(/"/g,'&quot;') + '">';
-  } else {
-    m.innerHTML = '<video src="' + p.url + '" controls autoplay muted playsinline style="max-width:92vw;max-height:82vh;border-radius:10px"></video>';
-  }
-  document.getElementById('lb-meta').textContent = p.by + ' · ' + p.at + ' · ' + (lbIdx+1) + ' / ' + PHOTOS.length;
-}
-document.getElementById('lb').addEventListener('click', function(e) {
-  if (e.target === this) closeLb();
-});
-document.addEventListener('keydown', function(e) {
-  if (!document.getElementById('lb').classList.contains('on')) return;
-  if (e.key === 'Escape') closeLb();
-  if (e.key === 'ArrowLeft') lbStep(-1);
-  if (e.key === 'ArrowRight') lbStep(1);
-});
-</script>
-</body>
-</html>`);
+  // ---------- Album ----------
+  // Redirect /album to the Immich shared album (IMMICH_SHARE_URL env var).
+  // Auth-gated so the share URL stays off public crawlers.
+  app.get('/album', requireAuth, (req, res) => {
+    if (IMMICH_SHARE_URL) return res.redirect(IMMICH_SHARE_URL);
+    res.type('text/plain').send('No album configured (set IMMICH_SHARE_URL).');
   });
 
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
