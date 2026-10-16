@@ -631,6 +631,8 @@ async function main() {
 
     if (IMMICH_URL && IMMICH_API_KEY && IMMICH_ALBUM_ID) {
       try {
+        // Always refresh the allowlist on gallery load so deletions take effect immediately.
+        await refreshAlbumAllowlist();
         // Use timeline bucket API — the only Immich v1.100+ endpoint that
         // correctly filters assets to a specific album.
         const qp = `albumId=${encodeURIComponent(IMMICH_ALBUM_ID)}&size=MONTH&withPartners=false&withStacked=false`;
@@ -684,10 +686,9 @@ async function main() {
             });
           });
         }
-        if (items.length > 0) {
-          items.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
-          source = 'immich';
-        }
+        // Mark as immich even with 0 results — album may be intentionally empty.
+        items.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
+        source = 'immich';
       } catch (e) {
         console.error('[crcmz-trip] Immich album fetch failed:', e.message);
       }
