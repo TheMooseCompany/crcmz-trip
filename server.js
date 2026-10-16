@@ -796,6 +796,13 @@ async function passkeyLogin(){
     res.set('Cache-Control', 'public, max-age=86400');
     res.sendFile(path.join(__dirname, 'public', 'og-image.jpg'));
   });
+  /* Browsers ask for /favicon.ico at the root regardless of the page's
+     (placeholder) icon link — serve the app icon there, publicly, so the
+     sign-in page gets it too. Long cache: the icon rarely changes. */
+  app.get('/favicon.ico', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=604800');
+    res.sendFile(path.join(__dirname, 'public', 'icon.webp'));
+  });
   app.use((req, res, next) => {
     const p = req.path || '';
     if (req.method === 'GET'
