@@ -429,6 +429,7 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
 .tabbar::-webkit-scrollbar{display:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
 .view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
+body.switching .reveal,body.switching .rv{transition:none!important;animation:none!important}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
    (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
    .tabbar (0-1-0) and repaint the bar translucent cream on Food and
@@ -496,9 +497,9 @@ body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgb
 .sp-item-desc{font-weight:600;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp-item-sub{color:var(--paper-mut);font-size:12.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp-item-amt{font-weight:700;font-size:16.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.sp-add-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(104px + env(safe-area-inset-bottom));z-index:110;display:none;align-items:center;gap:8px;background:var(--amber);color:#221A04;border:0;border-radius:999px;padding:15px 26px;min-height:52px;font-weight:700;font-size:15.5px;box-shadow:0 14px 34px rgba(138,94,16,.35);cursor:pointer;transition:transform .3s var(--ease)}
+.sp-add-btn{position:relative;display:none;margin:16px auto 2px;width:max-content;max-width:92%;align-items:center;gap:8px;background:var(--amber);color:#221A04;border:0;border-radius:999px;padding:15px 26px;min-height:52px;font-weight:700;font-size:15.5px;box-shadow:0 14px 34px rgba(138,94,16,.35);cursor:pointer;transition:transform .3s var(--ease)}
 body[data-view="split"] .sp-add-btn{display:inline-flex}
-.sp-add-btn:active{transform:translateX(-50%) scale(.96)}
+.sp-add-btn:active{transform:scale(.96)}
 /* iOS bottom sheets (Split) */
 .sheet-wrap{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center}
 .sheet-wrap[hidden]{display:none}
@@ -1003,7 +1004,7 @@ body[data-view="food"] footer a{color:var(--peri)}
 @keyframes kenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(1.09) translate(-1.5%,1.2%)}}
 .food-band-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,24,.45),rgba(6,8,24,.05) 42%,rgba(6,8,24,.88))}
 .food-band-copy{position:relative;width:100%;max-width:760px;margin:0 auto;padding:104px 18px 24px}
-.food-band-copy .label{color:var(--amber2)}
+.food-band-copy .label{color:var(--amber2);display:inline-block;background:rgba(6,8,24,.48);padding:5px 9px;border-radius:7px;text-shadow:0 1px 8px rgba(6,8,24,.85)}
 .food-band-copy h2{color:var(--cream);margin:10px 0 8px;text-shadow:0 2px 24px rgba(6,8,24,.65)}
 .food-band-copy p{color:rgba(245,239,224,.88);font-size:16px;line-height:1.5;margin:0;max-width:560px}
 .food-plan{border:1px solid var(--line-amber);border-radius:16px;background:rgba(242,179,61,.07);padding:14px 16px;margin:18px 0 4px}
@@ -1996,6 +1997,7 @@ function setPulses(on){
  });
 }
 skipBtn.addEventListener('click',function(){
+ if(window.__landNow){window.__landNow();return;}
  var top=cine.offsetTop+cine.offsetHeight-window.innerHeight;
  window.scrollTo({top:top,behavior:REDUCED?'auto':'smooth'});
 });
@@ -2027,9 +2029,11 @@ function cineProgress(){
  return p<0?0:p>1?1:p;
 }
 var curP=-1,pulsesOn=null;
+var LANDED_LOCK=false;
 /* smoothstep fade window: 0 at/below a, 1 at/above b */
 function fadeWin(p,a,b){var t=(p-a)/(b-a);t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
 function renderProgress(p){
+ if(LANDED_LOCK&&p<1)p=1;
  if(Math.abs(p-curP)<0.0004)return; curP=p;
  var seg=Math.min(3,Math.floor(p*4)),fr=p*4-seg;
  var A=STEPS[seg],B=STEPS[seg+1];
@@ -2125,7 +2129,14 @@ function renderProgress(p){
  }
  cityDots.forEach(function(g,di){
    var co=Math.max(0,Math.min(1,st.detail*1.6-di*0.07));
-   g.style.opacity=co.toFixed(2);
+   /* Frame fade: a label whose on-screen position leaves the visible
+      viewBox window fades out instead of clipping at the edge. */
+   var txp=parseFloat(g.style.getPropertyValue('--tx'))||0,typ=parseFloat(g.style.getPropertyValue('--ty'))||0;
+   var asp=window.innerWidth/Math.max(1,window.innerHeight),vbW2=asp<0.85?290:500,vbH2=asp<0.85?(580/asp)/2:310;
+   var sxp=view.cx+(txp-fx)*s,syp=view.cy+(typ-fy)*s;
+   var edge=Math.min((vbW2-Math.abs(sxp-view.cx))/70,(vbH2-Math.abs(syp-view.cy))/70);
+   var ff=edge<0?0:(edge>1?1:edge);
+   g.style.opacity=(co*ff).toFixed(2);
  });
  zoomVal.textContent='×'+s.toFixed(1);
  camVal.textContent=i<1?'NORTH AMERICA':i<2?'UNITED STATES':i<4?'ALBERTA · INBOUND':'YYC · CALGARY';
@@ -2148,6 +2159,7 @@ if(REDUCED){
     construction — the frame is still a pure function of progress. */
  var sprP={x:cineProgress(),v:0},sprT=performance.now();
  function driveCine(){
+   if(LANDED_LOCK)return;
    var target=cineProgress(),now=performance.now();
    var dt=Math.min(100,now-sprT); sprT=now;
    while(dt>0){var step=Math.min(8,dt),h=step/1000;
@@ -2159,37 +2171,42 @@ if(REDUCED){
  function queueDrive(){ if(driveQueued)return; driveQueued=true; requestAnimationFrame(function(){driveQueued=false;driveCine()}); }
  window.addEventListener('scroll',queueDrive,{passive:true});
  window.addEventListener('resize',function(){fitScene();curP=-1;sprP.x=cineProgress();sprP.v=0;sprT=performance.now();renderProgress(sprP.x)});
- setInterval(driveCine,150);
+ var driveInt=setInterval(driveCine,150);
  renderProgress(sprP.x);
- /* Landed compaction (owner's screenshot fix): the 200vh track is the
-    flight's scroll budget; once the landing has SETTLED — rendered
-    progress pinned at 1 and the scroll position resting at the end of
-    the track for a beat — the section closes up to its content
-    (.landed-fit) and scroll is re-based to the top of the section, so
-    the hero stays exactly where it was on screen and THE COUNTDOWN
-    follows it in the same screenful instead of arriving a full dead
-    viewport later. A fling past the landing never compacts mid-
-    gesture: the scroll position must be resting at the track's end.
-    One-shot for the session: the hub is the destination, and the
-    flight replays on the next page load (load already re-bases
-    scroll to the opening frame). */
- var fitDone=false,fitStillY=-1,fitStillT=0;
+ /* Landed latch (owner's recordings, 2026-10-16): the flight is a
+    once-per-load entry experience. The moment the spring settles at
+    progress 1 - at ANY scroll position, no standstill required - the
+    landing latches: the section compacts, scroll is re-based by the
+    exact height delta so the content under the reader does not jump,
+    and the driver disconnects for the session. After the latch the
+    flight can never re-render over the hub in either scroll
+    direction, and tab switches can never surface a flight frame.
+    The flight replays only on a full page load. */
+ var fitDone=false;
+ function landNow(){
+  if(fitDone)return; fitDone=true; LANDED_LOCK=true;
+  var y=window.scrollY,hBefore=cine.offsetHeight;
+  cine.classList.add('landed-fit');
+  void cine.offsetHeight;
+  var delta=hBefore-cine.offsetHeight;
+  heroLayer.classList.add('landed'); heroLayer.style.pointerEvents='auto';
+  skipBtn.style.display='none'; scrollCue.style.display='none';
+  renderProgress(1);
+  if(delta>0){
+   var landY=cine.offsetTop+hBefore-window.innerHeight;
+   if(y>landY+2)window.scrollTo(0,Math.max(cine.offsetTop,y-delta));
+   else window.scrollTo(0,cine.offsetTop);
+  }
+  if(driveInt){clearInterval(driveInt);driveInt=null;}
+  if(fitInt){clearInterval(fitInt);fitInt=null;}
+ }
+ window.__landNow=landNow;
  function fitCheck(){
   if(fitDone)return;
-  var y=window.scrollY,now=performance.now();
-  var landY=cine.offsetTop+cine.offsetHeight-window.innerHeight;
-  if(sprP.x>=0.999&&Math.abs(sprP.v)<0.004&&y>=landY-6&&y<=landY+2){
-   if(fitStillY<0||Math.abs(y-fitStillY)>1){fitStillY=y;fitStillT=now}
-   else if(now-fitStillT>=180){
-    fitDone=true;
-    cine.classList.add('landed-fit');
-    void cine.offsetHeight;
-    window.scrollTo(0,cine.offsetTop);
-   }
-  }else fitStillY=-1;
+  if(sprP.x>=0.999&&Math.abs(sprP.v)<0.004)landNow();
  }
  window.addEventListener('scroll',fitCheck,{passive:true});
- setInterval(fitCheck,200);
+ var fitInt=setInterval(fitCheck,200);
 }
 
 
@@ -2545,19 +2562,21 @@ updateFoodPreview();
 var V3_VIEWS=['home','food','photos','split','fifa','buds','poll','pack','admin'];
 var cineEl=document.getElementById('cinematic');
 function showView(name){
+ document.body.classList.add('switching');
+ requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(function(){document.body.classList.remove('switching')},60);});});
  V3_VIEWS.forEach(function(v){var el=document.getElementById('view-'+v); if(el)el.hidden=(v!==name);});
  document.querySelectorAll('.tabbar .tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-view')===name);});
  document.body.setAttribute('data-view',name);
  cineEl.style.display=(name==='home')?'':'none';
- if(name==='home')window.dispatchEvent(new Event('scroll'));
  if(window.revealCheck){requestAnimationFrame(revealCheck);setTimeout(revealCheck,140);}
 }
+function routeTop(){var de=document.documentElement,prev=de.style.scrollBehavior;de.style.scrollBehavior='auto';window.scrollTo(0,0);de.style.scrollBehavior=prev;}
 function applyRoute(){
  var h=(location.hash||'').replace(/^#/,'');
- if(V3_VIEWS.indexOf(h)>=0){showView(h);window.scrollTo(0,0);return;}
+ if(V3_VIEWS.indexOf(h)>=0){showView(h);routeTop();return;}
  showView('home');
  if(h&&h!=='top'){var el=document.getElementById(h); if(el)setTimeout(function(){el.scrollIntoView({block:'start'})},80);}
- else window.scrollTo(0,0);
+ else routeTop();
 }
 document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function(t){
  t.addEventListener('click',function(){
@@ -2565,6 +2584,9 @@ document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function
    if((location.hash||'')==='#'+v)applyRoute(); else location.hash=v;
  });
 });
+/* The Add expense button lives in the Split view's flow, directly
+   under the position card - never fixed over content. */
+(function(){var b=document.getElementById('spAddBtn'),h=document.querySelector('#view-split .sp-hero');if(b&&h)h.after(b);})();
 window.addEventListener('hashchange',applyRoute);
 applyRoute();
 </script>
