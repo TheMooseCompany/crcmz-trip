@@ -161,6 +161,74 @@ async function main() {
     if (req.query.returnTo && typeof req.query.returnTo === 'string' && req.query.returnTo.startsWith('/')) {
       req.session.returnTo = req.query.returnTo;
     }
+    // Show custom sign-in page unless ?proceed=1 (the button posts that).
+    if (!req.query.proceed) {
+      return res.type('html').send(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="color-scheme" content="dark"/>
+<title>Sign in · CRCMZ Trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#04060e;--surface:rgba(255,255,255,.04);--line:rgba(255,255,255,.09);--cream:#e9ecff;--muted:rgba(233,236,255,.45);--amber:#f2b33d;--amber-glow:rgba(242,179,61,.18)}
+html,body{height:100%;background:var(--bg);color:var(--cream);font-family:"IBM Plex Mono",monospace;-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);gap:0;position:relative;overflow:hidden}
+/* Background glow */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(242,179,61,.07),transparent 70%),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(100,120,255,.06),transparent 65%);pointer-events:none}
+.card{display:flex;flex-direction:column;align-items:center;gap:28px;width:100%;max-width:360px;padding:40px 32px 36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
+.logo{display:flex;flex-direction:column;align-items:center;gap:10px}
+.logo-mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1a1d2e 0%,#0d0f1a 100%);border:1px solid rgba(242,179,61,.25);display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:28px;height:28px}
+.logo-name{font-size:22px;font-weight:600;letter-spacing:.12em;color:var(--cream)}
+.logo-trip{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:-4px}
+.divider{width:100%;height:1px;background:var(--line)}
+.copy{text-align:center;display:flex;flex-direction:column;gap:8px}
+.copy h1{font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--cream)}
+.copy p{font-size:12.5px;color:var(--muted);line-height:1.6;letter-spacing:.02em}
+.btn-signin{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;background:var(--amber);color:#09090e;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:700;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;text-decoration:none;transition:opacity .15s,transform .1s}
+.btn-signin:active{opacity:.85;transform:scale(.98)}
+.btn-signin svg{width:18px;height:18px;flex-shrink:0}
+.footer{font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 4C8.477 4 4 8.477 4 14s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" stroke="#f2b33d" stroke-width="1.6"/>
+        <path d="M9.5 14a4.5 4.5 0 0 1 9 0" stroke="#f2b33d" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="1.8" fill="#f2b33d"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">CRCMZ</div>
+      <div class="logo-trip">Trip 2.0 &nbsp;·&nbsp; YYC</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="copy">
+    <h1>Welcome back</h1>
+    <p>Sign in with your CRCMZ account to&nbsp;access the trip hub.</p>
+  </div>
+  <a class="btn-signin" href="/auth/login?proceed=1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+      <polyline points="10 17 15 12 10 7"/>
+      <line x1="15" y1="12" x2="3" y2="12"/>
+    </svg>
+    Sign in with CRCMZ
+  </a>
+  <div class="footer">CRCMZ · auth.crcmz.me</div>
+</div>
+</body>
+</html>`);
+    }
     const state = generators.state();
     const codeVerifier = generators.codeVerifier();
     const codeChallenge = generators.codeChallenge(codeVerifier);
