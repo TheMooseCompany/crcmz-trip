@@ -7,6 +7,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY server.js ./
+COPY places-venues.js ./
 COPY public ./public
 COPY private ./private
 

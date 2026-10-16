@@ -1209,6 +1209,168 @@ document.addEventListener('keydown', function(e) {
     }
   });
 
+  // ---------- Google Places venue photos (Food guide) ----------
+  // Terms-compliant shape: only the place_id is ever persisted
+  // (data/places-cache.json, atomic writes like the ledger). Photo
+  // resource names expire, so they are resolved fresh from Place
+  // Details and held only in a short-lived in-memory cache (1h) -
+  // long enough to spare a Details call on every card view, short
+  // enough that a stale photo name is re-resolved the same day.
+  // The API key lives only in the GOOGLE_PLACES_KEY env var; it is
+  // never logged and never sent to the client.
+  const PLACES_KEY = process.env.GOOGLE_PLACES_KEY || '';
+  const PLACES_VENUES = require('./places-venues.js');
+  const PLACES_BY_SLUG = new Map(PLACES_VENUES.map((v) => [v.slug, v]));
+  const PLACES_CACHE_PATH =
+    process.env.PLACES_CACHE_PATH || path.join(__dirname, 'data', 'places-cache.json');
+  const PLACES_DETAILS_TTL = 60 * 60 * 1000;
+  const placesMem = new Map(); // slug -> { details, at } | { pending }
+
+  function readPlacesCache() {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(PLACES_CACHE_PATH, 'utf8'));
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch { return {}; }
+  }
+  function writePlacesCache(cache) {
+    fs.mkdirSync(path.dirname(PLACES_CACHE_PATH), { recursive: true });
+    const tmp = `${PLACES_CACHE_PATH}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(cache, null, 2));
+    fs.renameSync(tmp, PLACES_CACHE_PATH);
+  }
+  function placesNorm(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  // Card titles carry location suffixes the business itself does not
+  // use ("Tahini's Airdrie - Yankee Valley"); match on the core name.
+  function placesCoreName(name) {
+    let core = String(name || '').split(/[\u2013\u2014]/)[0].trim();
+    core = core.replace(/\s+(airdrie|calgary)$/i, '');
+    return core;
+  }
+  function placesNameMatches(venueName, displayName) {
+    const a = placesNorm(placesCoreName(venueName)).split(' ').filter((w) => w.length > 2);
+    const b = new Set(placesNorm(displayName).split(' '));
+    if (!a.length) return false;
+    if (a.every((w) => b.has(w))) return true;
+    const hits = a.filter((w) => b.has(w)).length;
+    return hits / a.length >= 0.5 && hits >= 1;
+  }
+  function placesLocalityOk(venue, formattedAddress) {
+    const fa = placesNorm(formattedAddress);
+    const num = (venue.searchQuery.match(/\b\d{2,5}\b/) || [])[0];
+    if (num) return fa.split(' ').includes(num);
+    return ['calgary', 'airdrie', 'rocky view'].some((c) => fa.includes(c));
+  }
+  async function placesFetch(url, opts) {
+    const r = await fetch(url, { ...(opts || {}), signal: AbortSignal.timeout(8000) });
+    if (!r.ok) { const e = new Error(`Places upstream ${r.status}`); e.status = r.status; throw e; }
+    return r;
+  }
+  async function resolvePlaceId(venue) {
+    const disk = readPlacesCache();
+    if (disk[venue.slug] && disk[venue.slug].placeId) return disk[venue.slug].placeId;
+    const r = await placesFetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': PLACES_KEY,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
+      },
+      body: JSON.stringify({ textQuery: venue.searchQuery, maxResultCount: 3, languageCode: 'en', regionCode: 'CA' }),
+    });
+    const j = await r.json();
+    const candidates = (j && j.places) || [];
+    const hit = candidates.find((p) => p.id && p.displayName
+      && placesNameMatches(venue.name, p.displayName.text || '')
+      && placesLocalityOk(venue, p.formattedAddress || ''));
+    if (!hit) { const e = new Error('Places verify failed'); e.code = 'verify'; throw e; }
+    disk[venue.slug] = {
+      placeId: hit.id,
+      displayName: (hit.displayName && hit.displayName.text) || '',
+      formattedAddress: hit.formattedAddress || '',
+      resolvedAt: new Date().toISOString(),
+    };
+    writePlacesCache(disk);
+    return hit.id;
+  }
+  async function placeDetails(venue) {
+    const now = Date.now();
+    const mem = placesMem.get(venue.slug);
+    if (mem && mem.details && now - mem.at < PLACES_DETAILS_TTL) return mem.details;
+    if (mem && mem.pending) return mem.pending;
+    const pending = (async () => {
+      const placeId = await resolvePlaceId(venue);
+      const r = await placesFetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+        headers: {
+          'X-Goog-Api-Key': PLACES_KEY,
+          'X-Goog-FieldMask': 'id,displayName,formattedAddress,googleMapsUri,photos',
+        },
+      });
+      const j = await r.json();
+      const photos = (j && j.photos) || [];
+      const idx = venue.photoIndex < photos.length ? venue.photoIndex : 0;
+      const photo = photos[idx] || null;
+      const details = {
+        placeId,
+        googleMapsUri: (j && j.googleMapsUri) || '',
+        photoName: photo ? photo.name : '',
+        attributions: photo && photo.authorAttributions
+          ? photo.authorAttributions.map((a) => ({ author: a.displayName || '', authorUri: a.uri || '' }))
+          : [],
+      };
+      placesMem.set(venue.slug, { details, at: Date.now() });
+      return details;
+    })();
+    placesMem.set(venue.slug, { pending });
+    try { return await pending; } catch (e) { placesMem.delete(venue.slug); throw e; }
+  }
+  function placesVenueOrError(req, res) {
+    const venue = PLACES_BY_SLUG.get(String(req.query.venue || ''));
+    if (!venue) { res.status(404).json({ error: 'unknown-venue' }); return null; }
+    if (!PLACES_KEY) { res.status(503).json({ error: 'places-key-missing' }); return null; }
+    return venue;
+  }
+  app.get('/api/places/meta', requireAuth, async (req, res) => {
+    const venue = placesVenueOrError(req, res);
+    if (!venue) return;
+    try {
+      const d = await placeDetails(venue);
+      res.json({ placeId: d.placeId, googleMapsUri: d.googleMapsUri, attributions: d.attributions });
+    } catch (e) {
+      console.error('[crcmz-trip] places meta failed:', venue.slug, e.code || e.status || e.message);
+      res.status(502).json({ error: e.code === 'verify' ? 'places-verify-failed' : 'places-upstream' });
+    }
+  });
+  app.get('/api/places/photo', requireAuth, async (req, res) => {
+    const venue = placesVenueOrError(req, res);
+    if (!venue) return;
+    try {
+      const d = await placeDetails(venue);
+      if (!d.photoName) return res.status(502).json({ error: 'places-no-photo' });
+      const media = await placesFetch(
+        `https://places.googleapis.com/v1/${d.photoName}/media?maxWidthPx=800&skipHttpRedirect=true`,
+        { headers: { 'X-Goog-Api-Key': PLACES_KEY } });
+      const ct = media.headers.get('content-type') || '';
+      res.set('X-Place-Id', d.placeId);
+      res.set('Cache-Control', 'private, max-age=3600');
+      if (ct.startsWith('image/')) {
+        res.set('Content-Type', ct);
+        return res.send(Buffer.from(await media.arrayBuffer()));
+      }
+      const mj = await media.json();
+      if (!mj || !mj.photoUri) return res.status(502).json({ error: 'places-upstream' });
+      const img = await placesFetch(mj.photoUri, {});
+      res.set('Content-Type', img.headers.get('content-type') || 'image/jpeg');
+      return res.send(Buffer.from(await img.arrayBuffer()));
+    } catch (e) {
+      console.error('[crcmz-trip] places photo failed:', venue.slug, e.code || e.status || e.message);
+      if (!res.headersSent) {
+        res.status(502).json({ error: e.code === 'verify' ? 'places-verify-failed' : 'places-upstream' });
+      }
+    }
+  });
+
   // ---------- Packing list ----------
   const PACK_PATH = path.join(__dirname, 'data', 'packing.json');
   const PACK_CATS = ['clothes', 'electronics', 'documents', 'buds', 'misc'];
