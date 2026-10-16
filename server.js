@@ -1162,6 +1162,11 @@ document.addEventListener('keydown', function(e) {
   });
 
   // ---------- Weather forecast (Calgary, Open-Meteo, 30-min cache) ----------
+  // ---------- Weather forecast (Calgary, Open-Meteo, 30-min cache) ----------
+  // Uses forecast_days=16 and filters server-side to trip dates.
+  // Nov 1 (the last trip day) falls outside the 16-day window until ~Oct 17;
+  // it renders as unavailable until it enters the forecast horizon.
+  const TRIP_DATES = ['2026-10-29', '2026-10-30', '2026-10-31', '2026-11-01'];
   let wxCache = { data: null, at: 0 };
   app.get('/api/weather', requireAuth, async (req, res) => {
     const now = Date.now();
@@ -1169,19 +1174,31 @@ document.addEventListener('keydown', function(e) {
     try {
       const url = 'https://api.open-meteo.com/v1/forecast'
         + '?latitude=51.0447&longitude=-114.0719'
-        + '&daily=weathercode,temperature_2m_max,temperature_2m_min'
+        + '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max'
         + '&temperature_unit=celsius&timezone=America%2FEdmonton'
-        + '&start_date=2026-10-29&end_date=2026-11-01';
+        + '&forecast_days=16';
       const r = await fetch(url);
       if (!r.ok) throw new Error(`Open-Meteo ${r.status}`);
       const j = await r.json();
       const d = j.daily || {};
-      const days = (d.time || []).map((date, i) => ({
-        date,
-        code: (d.weathercode || [])[i] ?? 0,
-        high: (d.temperature_2m_max || [])[i] ?? null,
-        low: (d.temperature_2m_min || [])[i] ?? null,
-      }));
+      const times = d.time || [];
+      const codes = d.weathercode || d.weather_code || [];
+      const highs = d.temperature_2m_max || [];
+      const lows = d.temperature_2m_min || [];
+      const precip = d.precipitation_probability_max || [];
+      const wind = d.windspeed_10m_max || [];
+      const days = TRIP_DATES.map((date) => {
+        const i = times.indexOf(date);
+        if (i === -1) return { date, unavailable: true };
+        return {
+          date,
+          code: codes[i] ?? 0,
+          high: highs[i] ?? null,
+          low: lows[i] ?? null,
+          precip: precip[i] ?? null,
+          wind: wind[i] != null ? Math.round(wind[i]) : null,
+        };
+      });
       wxCache = { data: { days }, at: now };
       res.json({ days });
     } catch (e) {
@@ -1193,6 +1210,7 @@ document.addEventListener('keydown', function(e) {
 
   // ---------- Packing list ----------
   const PACK_PATH = path.join(__dirname, 'data', 'packing.json');
+  const PACK_CATS = ['clothes', 'electronics', 'documents', 'buds', 'misc'];
   function readPacking() {
     try { return JSON.parse(fs.readFileSync(PACK_PATH, 'utf8')) || []; } catch { return []; }
   }
@@ -1203,10 +1221,14 @@ document.addEventListener('keydown', function(e) {
   }
   app.get('/api/packing', requireAuth, (req, res) => res.json({ items: readPacking() }));
   app.post('/api/packing', requireAuth, (req, res) => {
-    const text = ((req.body && req.body.text) || '').trim();
+    const b = req.body || {};
+    const text = (b.text || '').trim();
     if (!text || text.length > 120) return res.status(400).json({ error: 'Invalid item.' });
+    const category = PACK_CATS.includes(b.category) ? b.category : 'misc';
+    const validPeople = [...activePeople(), 'Everyone'];
+    const assignedTo = validPeople.includes(b.assignedTo) ? b.assignedTo : 'Everyone';
     const list = readPacking();
-    const item = { id: crypto.randomUUID(), text, addedBy: displayName(req.session.user), addedAt: new Date().toISOString(), checkedBy: null };
+    const item = { id: crypto.randomUUID(), text, category, assignedTo, addedBy: displayName(req.session.user), addedAt: new Date().toISOString(), checkedBy: null };
     list.push(item);
     writePacking(list);
     res.status(201).json({ ok: true, item });
@@ -1228,17 +1250,29 @@ document.addEventListener('keydown', function(e) {
     res.json({ ok: true });
   });
 
-  // ---------- Group poll (one active poll at a time, admin creates/closes) ----------
+  // ---------- Group poll (active + history) ----------
+  // Data: { active: <poll|null>, history: [...] }
+  // Migrates old single-object format on first read.
   const POLL_PATH = path.join(__dirname, 'data', 'poll.json');
-  function readPoll() {
-    try { return JSON.parse(fs.readFileSync(POLL_PATH, 'utf8')) || null; } catch { return null; }
+  function readPollStore() {
+    try {
+      const raw = JSON.parse(fs.readFileSync(POLL_PATH, 'utf8'));
+      if (raw && typeof raw === 'object') {
+        if ('active' in raw || 'history' in raw) return { active: raw.active || null, history: raw.history || [] };
+        if (raw.id) return { active: raw.open ? raw : null, history: raw.open ? [] : [raw] };
+      }
+    } catch { /* no file */ }
+    return { active: null, history: [] };
   }
-  function writePoll(p) {
+  function writePollStore(s) {
     const tmp = `${POLL_PATH}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(p, null, 2));
+    fs.writeFileSync(tmp, JSON.stringify(s, null, 2));
     fs.renameSync(tmp, POLL_PATH);
   }
-  app.get('/api/poll', requireAuth, (req, res) => res.json({ poll: readPoll() }));
+  app.get('/api/poll', requireAuth, (req, res) => {
+    const s = readPollStore();
+    res.json({ active: s.active, history: (s.history || []).slice().reverse().slice(0, 20) });
+  });
   app.post('/api/poll', requireAuth, (req, res) => {
     if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
     const { question, options } = req.body || {};
@@ -1252,28 +1286,32 @@ document.addEventListener('keydown', function(e) {
       if (typeof t !== 'string' || !t.trim()) throw Object.assign(new Error('bad option'), { status: 400 });
       return { id: `opt${i}`, text: t.trim(), voters: [] };
     });
+    const s = readPollStore();
+    const history = s.history || [];
+    if (s.active) { s.active.open = false; history.push(s.active); }
     const poll = { id: crypto.randomUUID(), question: question.trim(), options: opts, open: true, createdAt: new Date().toISOString(), createdBy: displayName(req.session.user) };
-    writePoll(poll);
-    res.status(201).json({ ok: true, poll });
+    writePollStore({ active: poll, history });
+    res.status(201).json({ ok: true, active: poll });
   });
   app.post('/api/poll/vote', requireAuth, (req, res) => {
     const { optionId } = req.body || {};
-    const poll = readPoll();
-    if (!poll || !poll.open) return res.status(404).json({ error: 'No active poll.' });
-    const opt = poll.options.find((o) => o.id === optionId);
+    const s = readPollStore();
+    if (!s.active || !s.active.open) return res.status(404).json({ error: 'No active poll.' });
+    const opt = s.active.options.find((o) => o.id === optionId);
     if (!opt) return res.status(400).json({ error: 'Invalid option.' });
     const voter = matchPerson(req.session.user) || displayName(req.session.user);
-    poll.options.forEach((o) => { o.voters = o.voters.filter((v) => v !== voter); });
+    s.active.options.forEach((o) => { o.voters = o.voters.filter((v) => v !== voter); });
     opt.voters.push(voter);
-    writePoll(poll);
-    res.json({ ok: true, poll });
+    writePollStore(s);
+    res.json({ ok: true, active: s.active });
   });
   app.delete('/api/poll', requireAuth, (req, res) => {
     if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
-    const poll = readPoll();
-    if (!poll) return res.status(404).json({ error: 'No poll.' });
-    poll.open = false;
-    writePoll(poll);
+    const s = readPollStore();
+    if (!s.active) return res.status(404).json({ error: 'No active poll.' });
+    s.active.open = false;
+    (s.history = s.history || []).push(s.active);
+    writePollStore({ active: null, history: s.history });
     res.json({ ok: true });
   });
 

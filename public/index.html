@@ -705,58 +705,101 @@ body.reduced .days-layout{display:block}
 /* --- weather strip --- */
 .wx-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 14px;box-shadow:var(--shadow-card);margin-top:14px}
 .wx-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
-.wx-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
-.wx-dow{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.wx-icon{font-size:22px;line-height:1}
-.wx-temps{font-size:12px;font-weight:600;color:var(--cream);font-variant-numeric:tabular-nums;white-space:nowrap}
-.wx-lo{color:var(--muted);font-weight:400}
+.wx-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.wx-dow{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:center}
+.wx-icon{font-size:24px;line-height:1;margin:2px 0}
+.wx-hi{font-size:14px;font-weight:700;color:var(--cream);font-variant-numeric:tabular-nums}
+.wx-lo{font-size:12px;font-weight:400;color:var(--muted2);font-variant-numeric:tabular-nums}
+.wx-precip{font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--peri);margin-top:1px}
+.wx-na{font-size:11px;color:var(--muted2);margin-top:4px}
 .wx-err{color:var(--muted);font-size:13px;margin-top:12px}
 /* --- packing list --- */
 .pack-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
-.pack-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pack-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .pack-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--amber2)}
+.pack-prog{height:3px;border-radius:99px;background:rgba(255,255,255,.08);margin:0 0 12px;overflow:hidden}
+.pack-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));transition:width .5s var(--ease)}
+.pack-cats{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.pack-cats::-webkit-scrollbar{display:none}
+.pack-cat-btn{flex:none;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s,color .15s}
+.pack-cat-btn.on{background:rgba(242,179,61,.18);border-color:var(--amber2);color:var(--amber2)}
 .pack-list{display:flex;flex-direction:column;gap:0}
 .pack-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(245,239,224,.07)}
 .pack-item:last-child{border-bottom:0}
-.pack-check{width:20px;height:20px;flex:none;border-radius:6px;border:2px solid rgba(245,239,224,.25);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s}
-.pack-check.on{background:var(--amber);border-color:var(--amber)}
-.pack-check.on::after{content:'✓';font-size:12px;color:#221A04;font-weight:700}
-.pack-text{flex:1;font-size:14.5px;color:var(--cream)}
+.pack-check{width:22px;height:22px;flex:none;border-radius:7px;border:2px solid rgba(245,239,224,.25);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;font-size:13px;color:transparent}
+.pack-check.on{background:var(--amber);border-color:var(--amber);color:#221A04}
+.pack-main{flex:1;min-width:0}
+.pack-text{font-size:14.5px;color:var(--cream);display:block}
 .pack-item.done .pack-text{text-decoration:line-through;color:var(--muted2)}
-.pack-by{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted2);white-space:nowrap}
-.pack-del{background:none;border:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:4px;line-height:1;opacity:.6}
+.pack-meta{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted2);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.pack-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.pack-badge-cat{background:rgba(165,180,255,.15);color:var(--peri)}
+.pack-badge-who{background:rgba(242,179,61,.15);color:var(--amber2)}
+.pack-del{background:none;border:none;color:var(--muted2);font-size:17px;cursor:pointer;padding:4px;line-height:1;opacity:.5;transition:opacity .15s}
 .pack-del:hover{opacity:1;color:#f87171}
-.pack-add{display:flex;gap:8px;margin-top:12px}
+.pack-add{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,239,224,.07)}
+.pack-add-row{display:flex;gap:8px}
 .pack-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none}
 .pack-input:focus{border-color:rgba(242,179,61,.5)}
 .pack-input::placeholder{color:rgba(245,239,224,.35)}
-.pack-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 14px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.pack-select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 10px;color:var(--cream);font-size:13px;font-family:inherit;outline:none;cursor:pointer}
+.pack-select option{background:#14193B;color:var(--cream)}
+.pack-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 16px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
 .pack-empty{color:var(--muted);font-size:13.5px;padding:8px 0}
 /* --- group poll --- */
 .poll-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
-.poll-q{font-size:17px;font-weight:600;line-height:1.35;color:var(--cream);margin:10px 0 14px}
+.poll-active-label{display:inline-flex;align-items:center;gap:5px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px}
+.poll-active-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pollPulse 1.4s ease-in-out infinite}
+@keyframes pollPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.poll-q{font-size:17px;font-weight:600;line-height:1.35;color:var(--cream);margin:0 0 14px}
 .poll-opts{display:flex;flex-direction:column;gap:8px}
-.poll-opt{position:relative;border:1px solid rgba(245,239,224,.12);border-radius:12px;padding:11px 14px;cursor:pointer;overflow:hidden;transition:border-color .18s}
+.poll-opt{position:relative;border:1px solid rgba(245,239,224,.12);border-radius:12px;padding:11px 14px;overflow:hidden;transition:border-color .18s,transform .12s}
+.poll-opt.open{cursor:pointer}
+.poll-opt.open:active{transform:scale(.98)}
 .poll-opt.voted{border-color:var(--amber2)}
-.poll-opt-bg{position:absolute;left:0;top:0;bottom:0;background:rgba(242,179,61,.12);border-radius:12px;transition:width .4s var(--ease)}
-.poll-opt-voted{position:absolute;left:0;top:0;bottom:0;background:rgba(242,179,61,.2);border-radius:12px;transition:width .4s var(--ease)}
+.poll-opt-fill{position:absolute;left:0;top:0;bottom:0;border-radius:12px;transition:width .45s var(--ease)}
+.poll-opt-fill.mine{background:rgba(242,179,61,.2)}
+.poll-opt-fill.other{background:rgba(242,179,61,.09)}
 .poll-opt-row{position:relative;display:flex;align-items:center;gap:8px}
 .poll-opt-text{flex:1;font-size:14.5px;color:var(--cream);font-weight:500}
-.poll-opt-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);white-space:nowrap}
-.poll-you{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--amber2);margin-left:6px}
-.poll-closed{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);border:1px solid rgba(245,239,224,.12);border-radius:99px;padding:3px 9px;margin-left:8px;vertical-align:middle}
-.poll-voters{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:10px}
+.poll-opt-pct{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--cream);min-width:36px;text-align:right}
+.poll-opt-n{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);margin-left:2px}
+.poll-you-chip{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--amber2);background:rgba(242,179,61,.15);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
+.poll-opt-voters{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted2);margin-top:4px;position:relative}
+.poll-footer{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.poll-total{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+.poll-closed-badge{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);border:1px solid rgba(245,239,224,.12);border-radius:99px;padding:3px 10px}
 .poll-none{color:var(--muted);font-size:13.5px;padding:4px 0}
-.poll-create{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-.poll-create-q{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none;resize:none}
-.poll-create-q:focus{border-color:rgba(242,179,61,.5)}
-.poll-create-q::placeholder,.poll-create-opt::placeholder{color:rgba(245,239,224,.35)}
-.poll-create-opt{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:13.5px;font-family:inherit;outline:none}
-.poll-create-opt:focus{border-color:rgba(242,179,61,.5)}
-.poll-create-actions{display:flex;gap:8px;flex-wrap:wrap}
-.poll-create-submit,.poll-close-btn{border:none;border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer}
-.poll-create-submit{background:var(--amber);color:#221A04}
-.poll-close-btn{background:rgba(255,255,255,.08);color:var(--cream)}
+/* poll create form */
+.poll-create{margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,239,224,.07);display:flex;flex-direction:column;gap:8px}
+.poll-create-label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
+.poll-field{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none;resize:none;box-sizing:border-box}
+.poll-field:focus{border-color:rgba(242,179,61,.5)}
+.poll-field::placeholder{color:rgba(245,239,224,.35)}
+.poll-opts-create{display:flex;flex-direction:column;gap:6px}
+.poll-opt-create-row{display:flex;gap:6px;align-items:center}
+.poll-opt-del{background:none;border:none;color:var(--muted2);font-size:17px;cursor:pointer;padding:4px;opacity:.6;transition:opacity .15s}
+.poll-opt-del:hover{opacity:1;color:#f87171}
+.poll-add-opt{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background .15s}
+.poll-add-opt:hover{background:rgba(255,255,255,.1)}
+.poll-create-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.poll-btn-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 18px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer}
+.poll-btn-close,.poll-btn-cancel{background:rgba(255,255,255,.08);border:none;border-radius:10px;padding:9px 16px;color:var(--cream);font-weight:600;font-size:13px;cursor:pointer}
+/* poll history */
+.poll-history{margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,239,224,.07)}
+.poll-hist-label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.poll-hist-toggle{font-size:12px;transition:transform .2s}
+.poll-hist-toggle.open{transform:rotate(90deg)}
+.poll-hist-list{display:flex;flex-direction:column;gap:12px}
+.poll-hist-item{border:1px solid rgba(245,239,224,.07);border-radius:12px;padding:12px 14px}
+.poll-hist-q{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:8px}
+.poll-hist-opt{display:flex;align-items:center;gap:8px;padding:5px 0}
+.poll-hist-bar-wrap{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.poll-hist-bar{height:100%;border-radius:99px;background:var(--amber);transition:width .4s var(--ease)}
+.poll-hist-bar.winner{background:linear-gradient(90deg,var(--amber),var(--peri))}
+.poll-hist-pct{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);min-width:30px;text-align:right}
+.poll-hist-text{font-size:13px;color:var(--cream);min-width:0;flex:2}
+.poll-hist-when{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted2);margin-top:6px}
 /* --- list reveals: CSS scroll-driven where supported, IO elsewhere --- */
 @supports (animation-timeline: view()){
   .rv{animation:rvIn linear both;animation-timeline:view();animation-range:entry 0% entry 55%}
@@ -1236,10 +1279,10 @@ img{max-width:100%}
     <div class="tp-card wx-card reveal" id="wxCard">
       <div class="tp-top"><span class="label">Calgary Forecast</span><span class="tp-phase mono" id="wxPhase">YYC · Oct 29–Nov 1</span></div>
       <div class="wx-strip" id="wxStrip">
-        <div class="wx-day"><span class="wx-dow">Thu 29</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
-        <div class="wx-day"><span class="wx-dow">Fri 30</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
-        <div class="wx-day"><span class="wx-dow">Sat 31</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
-        <div class="wx-day"><span class="wx-dow">Sun 1</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Thu 29</span><span class="wx-icon">⏳</span><span class="wx-hi">—</span><span class="wx-lo">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Fri 30</span><span class="wx-icon">⏳</span><span class="wx-hi">—</span><span class="wx-lo">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Sat 31</span><span class="wx-icon">⏳</span><span class="wx-hi">—</span><span class="wx-lo">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Sun 1</span><span class="wx-icon">⏳</span><span class="wx-hi">—</span><span class="wx-lo">—</span></div>
       </div>
     </div>
   </div></section>
@@ -1251,21 +1294,51 @@ img{max-width:100%}
   <section id="pollSec"><div class="wrap">
     <div class="poll-card reveal" id="pollCard">
       <div class="tp-top"><span class="label">Group Poll</span><span class="tp-phase mono" id="pollPhase">loading…</span></div>
-      <div id="pollBody"><p class="poll-none">No poll yet.</p></div>
+      <div id="pollActive"></div>
+      <div id="pollCreate"></div>
+      <div id="pollHistory"></div>
     </div>
   </div></section>
 <!-- ================= PACKING ================= -->
   <section id="packSec"><div class="wrap">
     <div class="pack-card reveal" id="packCard">
       <div class="pack-top"><span class="label">Packing List</span><span class="pack-count" id="packCount">—</span></div>
+      <div class="pack-prog"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div>
+      <div class="pack-cats" id="packCats">
+        <button class="pack-cat-btn on" data-cat="all">All</button>
+        <button class="pack-cat-btn" data-cat="clothes">Clothes</button>
+        <button class="pack-cat-btn" data-cat="electronics">Electronics</button>
+        <button class="pack-cat-btn" data-cat="documents">Documents</button>
+        <button class="pack-cat-btn" data-cat="buds">Buds</button>
+        <button class="pack-cat-btn" data-cat="misc">Misc</button>
+      </div>
       <div class="pack-list" id="packList"><p class="pack-empty">Nothing yet — add the first item.</p></div>
-      <div class="pack-add"><input class="pack-input" id="packInput" type="text" placeholder="Add an item…" maxlength="120"><button class="pack-submit" id="packSubmit">Add</button></div>
+      <div class="pack-add">
+        <div class="pack-add-row">
+          <input class="pack-input" id="packInput" type="text" placeholder="Add an item…" maxlength="120">
+          <button class="pack-submit" id="packSubmit">Add</button>
+        </div>
+        <div class="pack-add-row">
+          <select class="pack-select" id="packCat">
+            <option value="misc">Misc</option>
+            <option value="clothes">Clothes</option>
+            <option value="electronics">Electronics</option>
+            <option value="documents">Documents</option>
+            <option value="buds">Buds</option>
+          </select>
+          <select class="pack-select" id="packWho" style="flex:1">
+            <option value="Everyone">Everyone</option>
+          </select>
+        </div>
+      </div>
     </div>
   </div></section>
   <!-- ================= PREVIEWS (Home) ================= -->
   <section id="previews"><div class="wrap">
     <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
     <div class="prev-grid">
+      <a class="prev-card reveal" href="#weatherSec"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#0D1533,#14193B)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#A5B4FF;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span><span class="prev-main"><h3>WEATHER</h3><p id="wxPrevLine">Tap to see the 4-day forecast</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
+      <a class="prev-card reveal" href="#pollSec"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A1333,#0D0A22)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#C4B5FD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="prev-main"><h3>GROUP POLL</h3><p id="pollPrevLine">No active poll</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
       <a class="prev-card reveal" href="#food"><img class="prev-thumb" src="assets/prev-food.jpg" alt="" loading="lazy"><span class="prev-main"><h3>FOOD FINDER</h3><p id="foodPrevLine">50 spots · 9 breakfast</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
       <a class="prev-card reveal" href="#photos"><img class="prev-thumb" src="assets/prev-photos.jpg" alt="" loading="lazy"><span class="prev-main"><h3>PHOTO WALL</h3><p id="photoPrevLine">5 shots on the wall</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
       <a class="prev-card reveal" href="#split"><img class="prev-thumb" src="assets/prev-split.jpg" alt="" loading="lazy"><span class="prev-main"><h3>THE SPLIT</h3><p id="splitPrevLine">Brendan owes Mutasif $37.36</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
@@ -3480,67 +3553,112 @@ renderBuds();
 })();
 
 /* ================= Weather / Packing / Poll =================
-   Three live-data cards on the Home tab. Each fetches its own
-   endpoint on load and re-renders in-place. */
+   Three live-data cards. Single /api/me bootstraps all three. */
 (function(){
- /* ---------- weather ---------- */
+ /* ---------- shared state ---------- */
+ var _myName='', _myPerson='', _isAdmin=false, _meLoaded=false;
+ var _meCallbacks=[];
+ function onMe(fn){if(_meLoaded)fn();else _meCallbacks.push(fn);}
+
+ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+   _myName=j.name||''; _myPerson=j.person||j.name||''; _isAdmin=!!j.isAdmin;
+   _meLoaded=true;
+   // populate packWho selector
+   var whoSel=document.getElementById('packWho');
+   if(whoSel&&j.people&&j.people.length){
+     whoSel.innerHTML='<option value="Everyone">Everyone</option>'
+       +j.people.map(function(p){return '<option value="'+escH(p)+'">'+escH(p)+'</option>';}).join('');
+   }
+   _meCallbacks.forEach(function(fn){fn();});
+   _meCallbacks=[];
+   fetchPollData();
+ }).catch(function(){_meLoaded=true;_meCallbacks.forEach(function(fn){fn();});_meCallbacks=[];fetchPollData();});
+
+ /* ===================== WEATHER ===================== */
  var WX_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
    51:'🌦️',53:'🌦️',55:'🌦️',56:'🌧️',57:'🌧️',
    61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',
    71:'🌨️',73:'🌨️',75:'❄️',77:'🌨️',
    80:'🌦️',81:'🌦️',82:'🌦️',85:'🌨️',86:'🌨️',
    95:'⛈️',96:'⛈️',99:'⛈️'};
- var WX_DAYS=['Thu 29','Fri 30','Sat 31','Sun 1'];
+ var WX_LABELS=['Thu 29','Fri 30','Sat 31','Sun 1'];
  function wxIcon(code){
-   var k=+code;
-   if(k in WX_ICONS)return WX_ICONS[k];
-   // nearest bucket
-   if(k>=80)return '🌦️'; if(k>=71)return '🌨️'; if(k>=61)return '🌧️';
-   if(k>=51)return '🌦️'; if(k>=45)return '🌫️'; if(k>=3)return '☁️';
-   return '☀️';
+   var k=+code;if(k in WX_ICONS)return WX_ICONS[k];
+   if(k>=95)return '⛈️';if(k>=80)return '🌦️';if(k>=71)return '🌨️';
+   if(k>=61)return '🌧️';if(k>=51)return '🌦️';if(k>=45)return '🌫️';
+   if(k>=3)return '☁️';return '☀️';
  }
- function wxRound(n){return n==null?'—':Math.round(n)+'°';}
+ function wxT(n){return n==null?'—':Math.round(n)+'°';}
  function renderWx(days){
    var strip=document.getElementById('wxStrip');
-   if(!strip)return;
    var phase=document.getElementById('wxPhase');
+   var prev=document.getElementById('wxPrevLine');
+   if(!strip)return;
+   var availCount=days.filter(function(d){return !d.unavailable;}).length;
    strip.innerHTML=days.map(function(d,i){
+     if(d.unavailable){
+       return '<div class="wx-day">'
+         +'<span class="wx-dow">'+WX_LABELS[i]+'</span>'
+         +'<span class="wx-icon">🔮</span>'
+         +'<span class="wx-hi">—</span><span class="wx-lo">—</span>'
+         +'<span class="wx-na">Too far</span>'
+         +'</div>';
+     }
+     var precipStr=d.precip!=null?d.precip+'%':'';
+     var windStr=d.wind!=null?d.wind+'km/h':'';
+     var detail=(precipStr&&windStr)?precipStr+' · '+windStr:(precipStr||windStr);
      return '<div class="wx-day">'
-       +'<span class="wx-dow">'+WX_DAYS[i]+'</span>'
+       +'<span class="wx-dow">'+WX_LABELS[i]+'</span>'
        +'<span class="wx-icon">'+wxIcon(d.code)+'</span>'
-       +'<span class="wx-temps">'+wxRound(d.high)+' <span class="wx-lo">'+wxRound(d.low)+'</span></span>'
+       +'<span class="wx-hi">'+wxT(d.high)+'</span>'
+       +'<span class="wx-lo">'+wxT(d.low)+'</span>'
+       +(detail?'<span class="wx-precip">'+escH(detail)+'</span>':'')
        +'</div>';
    }).join('');
-   if(phase)phase.textContent='YYC · Calgary, AB';
+   if(phase)phase.textContent='YYC · Calgary, AB'+(availCount<4?' · '+availCount+'/4 days':'');
+   if(prev){
+     var icons=days.filter(function(d){return !d.unavailable;}).map(function(d){return wxIcon(d.code);}).join(' ');
+     prev.textContent=icons||'Tap to see the 4-day forecast';
+   }
  }
  fetch('/api/weather')
    .then(function(r){return r.json();})
    .then(function(j){if(j.days&&j.days.length)renderWx(j.days);})
    .catch(function(){
      var strip=document.getElementById('wxStrip');
-     if(strip)strip.innerHTML='<p class="wx-err">Forecast unavailable right now.</p>';
+     if(strip)strip.innerHTML='<p class="wx-err" style="grid-column:1/-1">Forecast unavailable right now.</p>';
    });
 
- /* ---------- packing list ---------- */
+ /* ===================== PACKING LIST ===================== */
  var _packItems=[];
- var _myName='';
- fetch('/api/me').then(function(r){return r.json();}).then(function(j){_myName=j.name||'';});
+ var _packCatFilter='all';
+ function packProgress(){
+   var total=_packItems.length, done=_packItems.filter(function(i){return i.checkedBy;}).length;
+   var fill=document.getElementById('packProgFill');
+   var count=document.getElementById('packCount');
+   if(count)count.textContent=done+' / '+total+' packed';
+   if(fill)fill.style.width=(total?Math.round(done/total*100):0)+'%';
+ }
  function renderPack(){
    var list=document.getElementById('packList');
-   var count=document.getElementById('packCount');
    if(!list)return;
-   var checked=_packItems.filter(function(i){return i.checkedBy;}).length;
-   if(count)count.textContent=checked+' / '+_packItems.length+' packed';
-   if(!_packItems.length){
-     list.innerHTML='<p class="pack-empty">Nothing yet — add the first item.</p>';
+   packProgress();
+   var visible=_packCatFilter==='all'?_packItems:_packItems.filter(function(i){return i.category===_packCatFilter;});
+   if(!visible.length){
+     list.innerHTML='<p class="pack-empty">'
+       +(_packCatFilter==='all'?'Nothing yet — add the first item.':'No '+_packCatFilter+' items.')+'</p>';
      return;
    }
-   list.innerHTML=_packItems.map(function(item){
+   list.innerHTML=visible.map(function(item){
      var done=!!item.checkedBy;
-     return '<div class="pack-item'+(done?' done':'')+'" data-pid="'+item.id+'">'
-       +'<button type="button" class="pack-check'+(done?' on':'')+'"></button>'
-       +'<span class="pack-text">'+escH(item.text)+'</span>'
-       +'<span class="pack-by">'+escH(item.addedBy)+'</span>'
+     var catBadge=item.category&&item.category!=='misc'?'<span class="pack-badge pack-badge-cat">'+escH(item.category)+'</span>':'';
+     var whoBadge=item.assignedTo&&item.assignedTo!=='Everyone'?'<span class="pack-badge pack-badge-who">'+escH(item.assignedTo)+'</span>':'';
+     return '<div class="pack-item'+(done?' done':'')+'" data-pid="'+escH(item.id)+'">'
+       +'<button type="button" class="pack-check'+(done?' on':'')+'">'+( done?'✓':'')+'</button>'
+       +'<span class="pack-main">'
+         +'<span class="pack-text">'+escH(item.text)+'</span>'
+         +'<span class="pack-meta">'+catBadge+whoBadge+'<span>'+escH(item.addedBy)+'</span></span>'
+       +'</span>'
        +'<button type="button" class="pack-del" aria-label="Remove">×</button>'
        +'</div>';
    }).join('');
@@ -3552,7 +3670,7 @@ renderBuds();
          .then(function(r){return r.json();})
          .then(function(j){
            var item=_packItems.find(function(i){return i.id===id;});
-           if(item)item.checkedBy=j.checkedBy;
+           if(item){item.checkedBy=j.checkedBy;if(j.checkedBy)btn.textContent='✓';else btn.textContent='';}
            renderPack();
          }).catch(function(){btn.disabled=false;});
      });
@@ -3567,6 +3685,15 @@ renderBuds();
      });
    });
  }
+ // category filter tabs
+ var catBtns=document.querySelectorAll('.pack-cat-btn');
+ catBtns.forEach(function(btn){
+   btn.addEventListener('click',function(){
+     _packCatFilter=btn.getAttribute('data-cat');
+     catBtns.forEach(function(b){b.classList.toggle('on',b===btn);});
+     renderPack();
+   });
+ });
  function fetchPack(){
    fetch('/api/packing').then(function(r){return r.json();}).then(function(j){
      _packItems=j.items||[];renderPack();
@@ -3576,10 +3703,13 @@ renderBuds();
  var packInput=document.getElementById('packInput');
  var packSubmit=document.getElementById('packSubmit');
  function addPackItem(){
-   var text=(packInput&&packInput.value||'').trim();
+   var text=(packInput?packInput.value:'').trim();
+   var cat=document.getElementById('packCat');
+   var who=document.getElementById('packWho');
    if(!text)return;
-   packSubmit.disabled=true;
-   fetch('/api/packing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})})
+   if(packSubmit)packSubmit.disabled=true;
+   fetch('/api/packing',{method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({text:text,category:cat?cat.value:'misc',assignedTo:who?who.value:'Everyone'})})
      .then(function(r){return r.json();})
      .then(function(j){
        if(j.item){_packItems.push(j.item);renderPack();}
@@ -3591,104 +3721,175 @@ renderBuds();
  if(packSubmit)packSubmit.addEventListener('click',addPackItem);
  if(packInput)packInput.addEventListener('keydown',function(e){if(e.key==='Enter')addPackItem();});
 
- /* ---------- group poll ---------- */
- var _poll=null;
- var _myPerson='';
- fetch('/api/me').then(function(r){return r.json();}).then(function(j){
-   _myName=j.name||''; _myPerson=j.person||j.name||'';
-   if(_poll)renderPoll(); // re-render once we know who we are
- });
- function renderPoll(){
-   var body=document.getElementById('pollBody');
+ /* ===================== GROUP POLL ===================== */
+ var _pollData={active:null,history:[]};
+ var _histOpen=false;
+
+ function renderPollActive(){
+   var el=document.getElementById('pollActive');
    var phase=document.getElementById('pollPhase');
-   if(!body)return;
-   if(!_poll||(!_poll.open&&_poll.options.every(function(o){return !o.voters.length;}))){
-     body.innerHTML='<p class="poll-none">No poll right now.</p>';
+   var prevLine=document.getElementById('pollPrevLine');
+   if(!el)return;
+   var p=_pollData.active;
+   if(!p){
+     el.innerHTML='<p class="poll-none">No active poll right now.</p>';
      if(phase)phase.textContent='';
-     // Show create UI for admins
+     if(prevLine)prevLine.textContent='No active poll';
      renderPollCreate();
      return;
    }
-   var total=_poll.options.reduce(function(s,o){return s+o.voters.length;},0);
-   var myVote=null;
-   _poll.options.forEach(function(o){if(o.voters.indexOf(_myPerson)>=0)myVote=o.id;});
-   if(phase)phase.textContent=_poll.open?'Open':'Closed';
-   var html='<p class="poll-q">'+escH(_poll.question)+(_poll.open?'':'<span class="poll-closed">Closed</span>')+'</p>'
-     +'<div class="poll-opts">';
-   _poll.options.forEach(function(o){
-     var pct=total?Math.round(o.voters.length/total*100):0;
-     var isMyVote=(o.id===myVote);
-     html+='<div class="poll-opt'+(isMyVote?' voted':'')+'" data-oid="'+o.id+'">'
-       +'<div class="poll-opt-'+(isMyVote?'voted':'bg')+'" style="width:'+pct+'%"></div>'
-       +'<div class="poll-opt-row">'
-       +'<span class="poll-opt-text">'+escH(o.text)+(isMyVote?'<span class="poll-you">✓ you</span>':'')+'</span>'
-       +'<span class="poll-opt-meta">'+pct+'% · '+o.voters.length+'</span>'
-       +'</div>'
-       +'</div>';
-   });
-   html+='</div>';
-   if(total>0){
-     var allVoters=[]; _poll.options.forEach(function(o){allVoters=allVoters.concat(o.voters);});
-     html+='<p class="poll-voters">'+total+' vote'+(total!==1?'s':'')+' · '+allVoters.map(escH).join(', ')+'</p>';
-   }
-   body.innerHTML=html;
-   if(_poll.open){
-     body.querySelectorAll('.poll-opt').forEach(function(el){
-       el.style.cursor='pointer';
-       el.addEventListener('click',function(){
-         var oid=el.getAttribute('data-oid');
-         fetch('/api/poll/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({optionId:oid})})
-           .then(function(r){return r.json();})
-           .then(function(j){if(j.poll){_poll=j.poll;renderPoll();}})
-           .catch(function(){});
-       });
+   onMe(function(){
+     var total=p.options.reduce(function(s,o){return s+o.voters.length;},0);
+     var myVote=null;
+     p.options.forEach(function(o){if(o.voters.indexOf(_myPerson)>=0)myVote=o.id;});
+     if(phase)phase.textContent=p.open?'Open':'Closed';
+     if(prevLine)prevLine.textContent=p.question.slice(0,48)+(p.question.length>48?'…':'');
+     var html=(p.open?'<div class="poll-active-label"><span class="poll-active-dot"></span>Live</div>':'')
+       +'<p class="poll-q">'+escH(p.question)
+         +(!p.open?'<span class="poll-closed" style="margin-left:8px">Closed</span>':'')
+       +'</p>'
+       +'<div class="poll-opts">';
+     p.options.forEach(function(o){
+       var n=o.voters.length;
+       var pct=total?Math.round(n/total*100):0;
+       var isMe=(o.id===myVote);
+       var votersStr=n?o.voters.map(escH).join(', '):'';
+       html+='<div class="poll-opt'+(isMe?' voted':'')+(p.open?' open':'')+'" data-oid="'+escH(o.id)+'">'
+         +'<div class="poll-opt-fill '+(isMe?'mine':'other')+'" style="width:'+pct+'%"></div>'
+         +'<div class="poll-opt-row">'
+           +'<span class="poll-opt-text">'+escH(o.text)+(isMe?'<span class="poll-you-chip">you</span>':'')+'</span>'
+           +'<span class="poll-opt-pct">'+pct+'%</span>'
+           +'<span class="poll-opt-n">('+n+')</span>'
+         +'</div>'
+         +(votersStr?'<div class="poll-opt-voters">'+votersStr+'</div>':'')
+         +'</div>';
      });
-   }
-   renderPollCreate();
+     html+='</div>'
+       +'<div class="poll-footer"><span class="poll-total">'+total+' vote'+(total!==1?'s':'')+'</span></div>';
+     el.innerHTML=html;
+     if(p.open){
+       el.querySelectorAll('.poll-opt.open').forEach(function(opt){
+         opt.addEventListener('click',function(){
+           var oid=opt.getAttribute('data-oid');
+           fetch('/api/poll/vote',{method:'POST',headers:{'Content-Type':'application/json'},
+             body:JSON.stringify({optionId:oid})})
+             .then(function(r){return r.json();})
+             .then(function(j){
+               if(j.active){_pollData.active=j.active;renderPollActive();}
+             }).catch(function(){});
+         });
+       });
+     }
+     renderPollCreate();
+   });
  }
+
  function renderPollCreate(){
-   var body=document.getElementById('pollBody');
-   if(!body||!_isAdmin)return;
-   var existing=body.querySelector('.poll-create');
-   if(existing)existing.remove();
-   var div=document.createElement('div');
-   div.className='poll-create';
-   if(!_poll||!_poll.open){
-     div.innerHTML='<textarea class="poll-create-q" id="pollQ" rows="2" placeholder="Ask the crew something…"></textarea>'
-       +'<div id="pollOptsWrap"><input class="poll-create-opt" placeholder="Option 1"><input class="poll-create-opt" placeholder="Option 2"></div>'
-       +'<div class="poll-create-actions"><button class="poll-create-submit" id="pollSubmit">Post Poll</button></div>';
-     body.appendChild(div);
-     document.getElementById('pollSubmit').addEventListener('click',function(){
-       var q=(document.getElementById('pollQ').value||'').trim();
-       var opts=Array.from(body.querySelectorAll('.poll-create-opt')).map(function(i){return i.value.trim();}).filter(Boolean);
-       if(!q||opts.length<2){alert('Need a question and at least 2 options.');return;}
-       fetch('/api/poll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,options:opts})})
+   var el=document.getElementById('pollCreate');
+   if(!el||!_isAdmin)return;
+   var p=_pollData.active;
+   if(p&&p.open){
+     el.innerHTML='<div class="poll-create">'
+       +'<div class="poll-create-actions">'
+         +'<button class="poll-btn-close" id="pollClosePoll">Close poll</button>'
+       +'</div></div>';
+     document.getElementById('pollClosePoll').addEventListener('click',function(){
+       fetch('/api/poll',{method:'DELETE'})
          .then(function(r){return r.json();})
-         .then(function(j){if(j.poll){_poll=j.poll;renderPoll();}})
+         .then(function(j){if(j.ok){fetchPollData();}})
          .catch(function(){});
      });
    } else {
-     div.innerHTML='<div class="poll-create-actions"><button class="poll-close-btn" id="pollClose">Close poll</button></div>';
-     body.appendChild(div);
-     document.getElementById('pollClose').addEventListener('click',function(){
-       fetch('/api/poll',{method:'DELETE'})
+     el.innerHTML='<div class="poll-create">'
+       +'<div class="poll-create-label">Post a new poll</div>'
+       +'<textarea class="poll-field" id="pollQ" rows="2" placeholder="Ask the crew something…"></textarea>'
+       +'<div class="poll-opts-create" id="pollOptsWrap">'
+         +'<div class="poll-opt-create-row"><input class="poll-field" placeholder="Option 1"></div>'
+         +'<div class="poll-opt-create-row"><input class="poll-field" placeholder="Option 2"></div>'
+         +'<div class="poll-opt-create-row"><input class="poll-field" placeholder="Option 3 (optional)"></div>'
+       +'</div>'
+       +'<button class="poll-add-opt" id="pollAddOpt">+ Add option</button>'
+       +'<div class="poll-create-actions">'
+         +'<button class="poll-btn-submit" id="pollSubmitBtn">Post Poll</button>'
+       +'</div>'
+       +'</div>';
+     document.getElementById('pollAddOpt').addEventListener('click',function(){
+       var wrap=document.getElementById('pollOptsWrap');
+       var n=wrap.querySelectorAll('input').length+1;
+       var row=document.createElement('div');row.className='poll-opt-create-row';
+       row.innerHTML='<input class="poll-field" placeholder="Option '+n+'">'
+         +'<button type="button" class="poll-opt-del">×</button>';
+       row.querySelector('.poll-opt-del').addEventListener('click',function(){row.remove();});
+       wrap.appendChild(row);
+     });
+     document.getElementById('pollSubmitBtn').addEventListener('click',function(){
+       var q=(document.getElementById('pollQ').value||'').trim();
+       var opts=Array.from(document.getElementById('pollOptsWrap').querySelectorAll('input'))
+         .map(function(i){return i.value.trim();}).filter(Boolean);
+       if(!q||opts.length<2){alert('Need a question and at least 2 options.');return;}
+       fetch('/api/poll',{method:'POST',headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({question:q,options:opts})})
          .then(function(r){return r.json();})
-         .then(function(j){if(j.ok){_poll.open=false;renderPoll();}})
+         .then(function(j){if(j.active){_pollData.active=j.active;renderPollActive();renderPollHistory();}})
          .catch(function(){});
      });
    }
  }
- var _isAdmin=false;
- fetch('/api/me').then(function(r){return r.json();}).then(function(j){
-   _myName=j.name||''; _myPerson=j.person||j.name||''; _isAdmin=!!j.isAdmin;
-   fetchPollData();
- });
+
+ function renderPollHistory(){
+   var el=document.getElementById('pollHistory');
+   if(!el)return;
+   var hist=_pollData.history||[];
+   if(!hist.length){el.innerHTML='';return;}
+   var label=document.createElement('div');
+   label.className='poll-history';
+   var toggle=document.createElement('div');
+   toggle.className='poll-hist-label';
+   toggle.innerHTML='Past polls ('+hist.length+')<span class="poll-hist-toggle'+(_histOpen?' open':'')+'">›</span>';
+   var listEl=document.createElement('div');
+   listEl.className='poll-hist-list';
+   listEl.style.display=_histOpen?'flex':'none';
+   hist.forEach(function(p){
+     var total=p.options.reduce(function(s,o){return s+o.voters.length;},0);
+     var maxN=p.options.reduce(function(m,o){return Math.max(m,o.voters.length);},0);
+     var when=p.closedAt?new Date(p.closedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+     var item=document.createElement('div');item.className='poll-hist-item';
+     var inner='<div class="poll-hist-q">'+escH(p.question)+'</div>';
+     p.options.forEach(function(o){
+       var n=o.voters.length;
+       var pct=total?Math.round(n/total*100):0;
+       var isWinner=(n===maxN&&n>0);
+       inner+='<div class="poll-hist-opt">'
+         +'<span class="poll-hist-text">'+escH(o.text)+'</span>'
+         +'<div class="poll-hist-bar-wrap"><div class="poll-hist-bar'+(isWinner?' winner':'')+'" style="width:'+pct+'%"></div></div>'
+         +'<span class="poll-hist-pct">'+pct+'%</span>'
+         +'</div>';
+     });
+     if(when)inner+='<div class="poll-hist-when">'+total+' votes · '+when+'</div>';
+     item.innerHTML=inner;
+     listEl.appendChild(item);
+   });
+   toggle.addEventListener('click',function(){
+     _histOpen=!_histOpen;
+     listEl.style.display=_histOpen?'flex':'none';
+     var arr=toggle.querySelector('.poll-hist-toggle');
+     if(arr)arr.className='poll-hist-toggle'+(_histOpen?' open':'');
+   });
+   label.appendChild(toggle);
+   label.appendChild(listEl);
+   el.innerHTML='';
+   el.appendChild(label);
+ }
+
  function fetchPollData(){
    fetch('/api/poll').then(function(r){return r.json();}).then(function(j){
-     _poll=j.poll;renderPoll();
+     _pollData={active:j.active||null,history:j.history||[]};
+     renderPollActive();
+     renderPollHistory();
+   }).catch(function(){
+     renderPollActive();
    });
  }
- // Single /api/me fetch covers weather, packing, poll (replace the earlier standalone fetches)
 })();
 
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
