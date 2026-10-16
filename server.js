@@ -22,6 +22,7 @@ if (missing.length > 0) {
 const ISSUER = process.env.ZITADEL_ISSUER.replace(/\/$/, '');
 const SERVICE_TOKEN = process.env.ZITADEL_SERVICE_TOKEN || '';
 const WEBAUTHN_RP_ID = process.env.WEBAUTHN_RP_ID || 'crcmz.me';
+const WEBAUTHN_LEGACY_RP_ID = process.env.WEBAUTHN_LEGACY_RP_ID || 'auth.crcmz.me';
 
 // ---------- Photo Wall storage ----------
 // Uploads live on this server's disk under UPLOADS_DIR (default
@@ -163,10 +164,9 @@ async function main() {
   app.post('/auth/passkey/begin', async (req, res) => {
     if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
     const identifier = (req.body && req.body.identifier || '').trim();
-    const challenge = { domain: WEBAUTHN_RP_ID, userVerificationRequirement: 'USER_VERIFICATION_REQUIREMENT_REQUIRED' };
-    let sessionBody;
+    let loginName = null;
     if (identifier) {
-      let loginName = identifier;
+      loginName = identifier;
       if (identifier.includes('@')) {
         try {
           const sr = await fetch(`${ISSUER}/management/v1/users/_search`, {
@@ -178,27 +178,36 @@ async function main() {
             const data = await sr.json();
             if (data.result && data.result.length > 0) {
               loginName = data.result[0].preferredLoginName || identifier;
-              console.log('[crcmz-trip] passkey/begin email resolved to loginName:', loginName.replace(/@.*/, '@...'));
+              console.log('[crcmz-trip] passkey/begin resolved to loginName:', loginName.slice(0, 4) + '...');
             } else {
-              console.log('[crcmz-trip] passkey/begin email not found in Zitadel, trying as loginName directly');
+              console.log('[crcmz-trip] passkey/begin email not in Zitadel, trying as loginName directly');
             }
           }
         } catch (_) { /* use identifier as-is */ }
       }
-      sessionBody = { checks: { user: { loginName } }, challenges: { webAuthN: challenge } };
-    } else {
-      sessionBody = { challenges: { webAuthN: challenge } };
     }
     try {
-      const r = await fetch(`${ISSUER}/v2/sessions`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionBody),
-      });
+      // Try current RP ID first; fall back to legacy RP ID if Zitadel says
+      // no credentials registered there (WEBAU-4G8sw = passkey registered to old domain).
+      const rpDomains = [...new Set([WEBAUTHN_RP_ID, WEBAUTHN_LEGACY_RP_ID])];
+      let r, errBody;
+      for (const domain of rpDomains) {
+        const webAuthN = { domain, userVerificationRequirement: 'USER_VERIFICATION_REQUIREMENT_REQUIRED' };
+        const body = loginName
+          ? { checks: { user: { loginName } }, challenges: { webAuthN } }
+          : { challenges: { webAuthN } };
+        r = await fetch(`${ISSUER}/v2/sessions`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!(r.status >= 500 && (errBody = await r.text()).includes('WEBAU-4G8sw'))) break;
+        console.log('[crcmz-trip] passkey/begin: WEBAU-4G8sw on', domain, '— retrying with legacy RP ID');
+      }
       if (!r.ok) {
-        const errBody = await r.text();
+        if (!errBody) errBody = await r.text();
         console.error('[crcmz-trip] passkey/begin Zitadel error:', r.status, errBody.slice(0, 300));
-        const msg = r.status === 404 ? "No CRCMZ account found for that email. Use the email you signed up with." : "Could not start passkey flow. Try the email from your CRCMZ account.";
+        const msg = r.status === 404 ? 'No CRCMZ account found for that email. Use the email you signed up with.' : 'Could not start passkey flow. Try the email from your CRCMZ account.';
         return res.status(404).json({ error: msg });
       }
       const data = await r.json();
