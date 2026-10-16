@@ -269,34 +269,39 @@ async function main() {
 <title>Sign in · CRCMZ Trip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
+/* Same design language as the app (critique P1-10): warm cream on app
+   indigo, Space Grotesk for name/heading/body/buttons, mono kept for
+   small labels only, Newsreader italic for the one accent word. */
+@font-face{font-family:"Newsreader";src:url("/assets/fonts/newsreader-it.woff2") format("woff2");font-style:italic;font-weight:500;font-display:swap}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#04060e;--surface:rgba(255,255,255,.04);--line:rgba(255,255,255,.09);--cream:#e9ecff;--muted:rgba(233,236,255,.45);--amber:#f2b33d}
-html,body{height:100%;background:var(--bg);color:var(--cream);font-family:"IBM Plex Mono",monospace;-webkit-font-smoothing:antialiased}
+:root{--bg:#0A0E27;--surface:rgba(255,255,255,.04);--line:rgba(245,239,224,.12);--cream:#F5EFE0;--muted:#A9A5C6;--amber:#F2B33D;--amber2:#FFC65C;--err:#F87171}
+html,body{height:100%;background:var(--bg);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);position:relative;overflow:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(242,179,61,.07),transparent 70%),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(100,120,255,.06),transparent 65%);pointer-events:none}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(242,179,61,.07),transparent 70%),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(165,180,255,.06),transparent 65%);pointer-events:none}
 .card{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:360px;padding:40px 32px 36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
 .logo{display:flex;flex-direction:column;align-items:center;gap:10px}
-.logo-mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1a1d2e 0%,#0d0f1a 100%);border:1px solid rgba(242,179,61,.25);display:flex;align-items:center;justify-content:center}
+.logo-mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#10163A 0%,#0D1233 100%);border:1px solid rgba(242,179,61,.25);display:flex;align-items:center;justify-content:center}
 .logo-mark svg{width:28px;height:28px}
-.logo-name{font-size:22px;font-weight:600;letter-spacing:.12em;color:var(--cream)}
-.logo-trip{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:-4px}
+.logo-name{font-size:22px;font-weight:700;letter-spacing:.02em;color:var(--cream)}
+.logo-trip{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:-4px}
 .divider{width:100%;height:1px;background:var(--line)}
 .copy{text-align:center;display:flex;flex-direction:column;gap:8px}
-.copy h1{font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--cream)}
-.copy p{font-size:12.5px;color:var(--muted);line-height:1.6;letter-spacing:.02em}
-input[type=email]{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--cream);font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.03em;outline:none;transition:border-color .15s}
+.copy h1{font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--cream)}
+.copy h1 .serif{font-family:"Newsreader",Georgia,serif;font-style:italic;font-weight:500;color:var(--amber2)}
+.copy p{font-size:14px;color:var(--muted);line-height:1.55}
+input[type=email]{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--cream);font-family:inherit;font-size:16px;outline:none;transition:border-color .15s}
 input[type=email]:focus{border-color:rgba(242,179,61,.5)}
-input[type=email]::placeholder{color:rgba(233,236,255,.3)}
-.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border:none;border-radius:12px;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:700;letter-spacing:.08em;text-decoration:none;transition:opacity .15s,transform .1s}
+input[type=email]::placeholder{color:rgba(245,239,224,.3)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border:none;border-radius:12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.02em;text-decoration:none;transition:opacity .15s,transform .1s}
 .btn:active{opacity:.85;transform:scale(.98)}
 .btn:disabled{opacity:.5;cursor:default}
-.btn-passkey{background:var(--amber);color:#09090e}
-.btn-oidc{background:rgba(255,255,255,.07);color:var(--cream);border:1px solid var(--line);font-size:12.5px;margin-top:-4px}
+.btn-passkey{background:var(--amber);color:#221A04}
+.btn-oidc{background:rgba(255,255,255,.07);color:var(--cream);border:1px solid var(--line);font-size:13.5px;margin-top:-4px}
 .btn svg{width:18px;height:18px;flex-shrink:0}
-.errmsg{font-size:12px;color:#f87171;text-align:center;min-height:18px;letter-spacing:.02em}
-.footer{font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7}
+.errmsg{font-size:12.5px;color:var(--err);text-align:center;min-height:18px}
+.footer{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7}
 </style>
 </head>
 <body>
@@ -310,13 +315,13 @@ input[type=email]::placeholder{color:rgba(233,236,255,.3)}
       </svg>
     </div>
     <div>
-      <div class="logo-name">CRCMZ</div>
-      <div class="logo-trip">Trip 2.0 &nbsp;·&nbsp; YYC</div>
+      <div class="logo-name">CRCMZ TRIP</div>
+      <div class="logo-trip">Calgary &nbsp;·&nbsp; Oct 29 – Nov 1</div>
     </div>
   </div>
   <div class="divider"></div>
   <div class="copy">
-    <h1>Welcome back</h1>
+    <h1>Welcome <span class="serif">back</span></h1>
     <p>Sign in with your CRCMZ account to access the trip hub.</p>
   </div>
   ${hasPasskey ? `<input type="email" id="em" placeholder="your@email.com" autocomplete="username webauthn" autocapitalize="off" inputmode="email"/>
@@ -1016,7 +1021,7 @@ async function passkeyLogin(){
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="color-scheme" content="dark"/>
 <link rel="icon" href="data:,">
-<title>Trip Album · CRCMZ</title>
+<title>Album · CRCMZ Trip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1042,7 +1047,7 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 /* Grid */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding-bottom:60px}
 @media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:360px){.grid{grid-template-columns:1fr}}
+
 .tile{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .tile-media{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;background:#06080f}
 .tile-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
@@ -1057,11 +1062,14 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 .btn-upload{display:inline-flex;align-items:center;gap:8px;background:var(--amber2);color:#0a0b12;font-size:14px;font-weight:700;padding:10px 18px;border-radius:99px;cursor:pointer;border:none;transition:opacity .15s}
 .btn-upload:hover{opacity:.85}
 #uploadStatus{font-size:13px;color:var(--muted)}
-.wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
-.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;background:rgba(10,11,18,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tabbar a.tab{flex:1;background:none;border:0;color:rgba(233,236,255,.6);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;text-decoration:none}
-.tabbar a.tab.on{color:var(--amber2)}
-.tabbar a.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+/* The album's bar IS the app's floating glass pill (critique P1-9) —
+   same geometry, glass, radius and drop-shadow recipe as the app's
+   .tabbar, not the full-bleed square slab it used to be. */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:100;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);filter:drop-shadow(0 14px 20px rgba(2,3,10,.45));padding:8px}
+.tabbar a.tab{flex:1;background:none;border:0;color:rgba(233,236,255,.82);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;text-decoration:none}
+.tabbar a.tab.on{color:var(--amber)}
+.tabbar a.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 /* Lightbox */
 #lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);flex-direction:column}
 #lb.on{display:flex}
@@ -1078,8 +1086,8 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 <body>
 <header><div class="wrap"><div class="hdr">
   <div class="hdr-left">
-    <div class="label">CRCMZ Trip 2.0 · Photos</div>
-    <h1>TX/CA — YYC 2.0</h1>
+    <div class="label">CRCMZ Trip · Photos</div>
+    <h1>Shared album</h1>
     <div class="hdr-meta">${count} item${count !== 1 ? 's' : ''}${IMMICH_SHARE_URL ? ' &nbsp;·&nbsp; <a href="' + IMMICH_SHARE_URL + '" target="_blank" rel="noopener" class="share-link">Open in Immich ↗</a>' : ''}</div>
   </div>
   <div style="width:44px"></div>
