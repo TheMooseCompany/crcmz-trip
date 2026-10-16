@@ -1591,15 +1591,24 @@ ${text.trim()}`;
       const r = await fetch(`${aiBase}/chat/completions`, {
         method: 'POST',
         headers: aiHeaders,
-        body: JSON.stringify({ model: aiModel, messages: [{ role: 'user', content: userMsg }], temperature: 0, max_tokens: 512 }),
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [{ role: 'user', content: userMsg }],
+          temperature: 0,
+          max_tokens: 600,
+          chat_template_kwargs: { enable_thinking: false },
+        }),
         signal: AbortSignal.timeout(90000),
       });
       if (!r.ok) return res.status(502).json({ error: 'AI server error' });
       const data = await r.json();
       let content = (data.choices?.[0]?.message?.content || '').trim();
+      // Strip Qwen3 thinking blocks (tagged or inline preamble)
       content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-      content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const flight = JSON.parse(content);
+      // Extract the JSON object — ignore any surrounding prose or markdown
+      const match = content.match(/\{[\s\S]*\}/);
+      if (!match) return res.status(500).json({ error: 'AI did not return JSON' });
+      const flight = JSON.parse(match[0]);
       res.json({ ok: true, flight });
     } catch (e) {
       res.status(500).json({ error: e.message || 'parse failed' });
