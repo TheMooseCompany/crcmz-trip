@@ -1007,16 +1007,23 @@ body.reduced .days-layout{display:block}
    inside ~236px. A card starts hidden (driver-armed .fl-wait) and
    pops (rise + fade on its inner wrapper) only at its scroll
    moment, so an upcoming card never sits visibly under the pile.
-   The last card carries a tall bottom margin — trailing travel
-   inside the stack's content box — so the completed pile stays
-   pinned for a beat while the next section rises beneath it, and
-   the following section cannot enter the frame before the pile
-   completes. A small driver recedes covered cards (scale ~.95 +
-   dim), gated to the section in view + Home active. Reduced
-   motion: a plain condensed list, everything visible. */
+   The trailing beat — the completed pile pinned while the next
+   section rises beneath it — is carried by a .fl-tail SPACER inside
+   the stack, never by a margin on the last card: a sticky box is
+   constrained to its containing block measured on its MARGIN box,
+   so a bottom margin on the card itself makes the card's margin box
+   end exactly where the stack ends and zeroes its stick range (the
+   card then never sticks at all — the Oct 16 hotfix; verified in
+   WebKit + Chromium rigs, port-work/fl_webkit_probe.py). As in-flow
+   content after the last card, the spacer extends the containing
+   block by the beat, so the last card pins for the whole beat and
+   releases with the pile. A small driver recedes covered cards
+   (scale ~.95 + dim), gated to the section in view + Home active.
+   Reduced motion: a plain condensed list, everything visible, no
+   spacer. */
 .fl-sec{padding-top:0}
 .fl-stack{display:flex;flex-direction:column;gap:40px;--fl-peek:46px}
-.fl-stack .fl-card:last-of-type{margin-bottom:max(120px,calc(100vh - 280px))}
+.fl-tail{flex:0 0 auto;height:max(120px,calc(100vh - 280px))}
 .fl-stack.fl-armed .fl-card.fl-wait{opacity:0}
 .fl-card.fl-pop .fl-in{animation:bpPop .6s var(--ease) both}
 .fl-card{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--fl-peek));z-index:calc(2 + var(--i,0));
@@ -1057,11 +1064,11 @@ body.reduced .days-layout{display:block}
 @media (prefers-reduced-motion: reduce){
   .fl-stack{gap:14px}
   .fl-card{position:static}
-  .fl-stack .fl-card:last-of-type{margin-bottom:0}
+  .fl-tail{display:none}
 }
 body.reduced .fl-stack{gap:14px}
 body.reduced .fl-card{position:static}
-body.reduced .fl-stack .fl-card:last-of-type{margin-bottom:0}
+body.reduced .fl-tail{display:none}
 body.reduced .fl-stack .fl-card.fl-wait{opacity:1}
 body.reduced .fl-card.fl-pop .fl-in{animation:none}
 /* poll history */
@@ -4437,7 +4444,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
         +'</div>'
         +'</div>'
         +'</article>';
-    }).join('')+'</div>';
+    }).join('')+'<div class="fl-tail" aria-hidden="true"></div></div>';
     if(window.__flRefresh)window.__flRefresh();
   }
   var flSig=null;
