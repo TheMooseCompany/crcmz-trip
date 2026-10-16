@@ -220,7 +220,7 @@ async function main() {
   app.get('/api/photos', requireAuth, (req, res) => {
     const index = readIndex();
     const items = Object.values(index)
-      .filter((m) => !m.hidden)
+      .filter((m) => !m.hidden && !m.immichId && fs.existsSync(path.join(UPLOADS_DIR, m.name)))
       .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
       .map((m) => ({
         name: m.name,
