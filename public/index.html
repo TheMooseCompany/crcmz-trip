@@ -710,7 +710,7 @@ body:not(.reduced) #days .day-dots{display:none}
 body.reduced .days-visual{display:none}
 body.reduced .days-layout{display:block}
 /* --- trip progress readout --- */
-#tripProgress{padding-top:26px}
+#tripProgress{padding-top:12px}
 /* Effectively opaque for the same reason as the NEXT UP card below:
    the old 45%/55% alpha stops let lower-layer text ghost through the
    card mid-scroll. The stops here are that gradient composited over
@@ -979,7 +979,7 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 .nu-att{color:var(--amber2);border:1px solid var(--line-amber);background:rgba(242,179,61,.1)}
 .nu-ok{color:var(--peri);border:1px solid rgba(165,180,255,.5);background:rgba(165,180,255,.08)}
 /* ---------- Home: countdown as one tabular stat strip ---------- */
-.cd-strip{display:flex;align-items:flex-start;justify-content:center;gap:12px;margin-top:14px;flex-wrap:nowrap}
+.cd-strip{display:flex;align-items:flex-start;justify-content:center;gap:12px;margin-top:8px;flex-wrap:nowrap}
 .cd-cell{text-align:center;min-width:62px}
 .cd-cell b{display:block;font-size:40px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
 .cd-cell span{display:block;margin-top:4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -2138,6 +2138,20 @@ function renderProgress(p){
  sceneEl.style.filter=landE>0.001?('blur('+(landE*9).toFixed(1)+'px) brightness('+(1-0.16*landE).toFixed(2)+')'):'';
  sceneEl.style.opacity=(1-0.55*landE).toFixed(2);
  if(heroScrim)heroScrim.style.opacity=(1-landE).toFixed(2);
+ /* Landed composition (owner's gap report, measured in the rig): the
+    hero stack is top-anchored, so the final frame ended at ~47% of the
+    stage — ~445px of empty blurred scene sat under the CTA row before
+    the countdown block. Across the same landing stretch the whole
+    stack settles toward vertical centre, shrinking that void to
+    ~280px. A pure function of p like everything else in this driver —
+    the seam stays a continuous 1:1 scrub: no snap, no rebase, no
+    compaction, and frames before p .80 are untouched. The settle is
+    capped and scaled down on short viewports, and the reduced-motion
+    frame (landed-fit, auto height) keeps its static layout. */
+ if(!REDUCED){
+   var settle=Math.max(0,Math.min(165,(window.innerHeight-580)*0.62))*landE;
+   heroLayer.style.transform=settle>0.05?('translateY('+settle.toFixed(1)+'px)'):'';
+ }
  /* V5 layered scrub: depth rates + draw-on arcs + playhead rail.
     depthT is zoom depth 0→1 across the dive; the far star field
     drifts at a fraction of the map, arcs/planes lean past it, labels
