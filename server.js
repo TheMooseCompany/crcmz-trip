@@ -176,7 +176,12 @@ async function main() {
           });
           if (sr.ok) {
             const data = await sr.json();
-            if (data.result && data.result.length > 0) loginName = data.result[0].preferredLoginName || identifier;
+            if (data.result && data.result.length > 0) {
+              loginName = data.result[0].preferredLoginName || identifier;
+              console.log('[crcmz-trip] passkey/begin email resolved to loginName:', loginName.replace(/@.*/, '@...'));
+            } else {
+              console.log('[crcmz-trip] passkey/begin email not found in Zitadel, trying as loginName directly');
+            }
           }
         } catch (_) { /* use identifier as-is */ }
       }
@@ -190,7 +195,12 @@ async function main() {
         headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionBody),
       });
-      if (!r.ok) return res.status(404).json({ error: 'could not start passkey flow' });
+      if (!r.ok) {
+        const errBody = await r.text();
+        console.error('[crcmz-trip] passkey/begin Zitadel error:', r.status, errBody.slice(0, 300));
+        const msg = r.status === 404 ? "No CRCMZ account found for that email. Use the email you signed up with." : "Could not start passkey flow. Try the email from your CRCMZ account.";
+        return res.status(404).json({ error: msg });
+      }
       const data = await r.json();
       const raw = data?.challenges?.webAuthN?.publicKeyCredentialRequestOptions;
       if (!raw) return res.status(500).json({ error: 'no webauthn challenge returned' });
