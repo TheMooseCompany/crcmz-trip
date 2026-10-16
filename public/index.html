@@ -702,6 +702,61 @@ body.reduced .days-layout{display:block}
 .tp-days span.on{color:var(--amber2);font-weight:600}
 .tp-days.tp-hidden{display:none}
 .tp-scale{display:flex;justify-content:space-between;margin:0 0 6px;font-family:"Space Grotesk",sans-serif;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-weight:600;line-height:1.2}
+/* --- weather strip --- */
+.wx-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 14px;box-shadow:var(--shadow-card);margin-top:14px}
+.wx-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.wx-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.wx-dow{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.wx-icon{font-size:22px;line-height:1}
+.wx-temps{font-size:12px;font-weight:600;color:var(--cream);font-variant-numeric:tabular-nums;white-space:nowrap}
+.wx-lo{color:var(--muted);font-weight:400}
+.wx-err{color:var(--muted);font-size:13px;margin-top:12px}
+/* --- packing list --- */
+.pack-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
+.pack-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pack-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--amber2)}
+.pack-list{display:flex;flex-direction:column;gap:0}
+.pack-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(245,239,224,.07)}
+.pack-item:last-child{border-bottom:0}
+.pack-check{width:20px;height:20px;flex:none;border-radius:6px;border:2px solid rgba(245,239,224,.25);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s}
+.pack-check.on{background:var(--amber);border-color:var(--amber)}
+.pack-check.on::after{content:'✓';font-size:12px;color:#221A04;font-weight:700}
+.pack-text{flex:1;font-size:14.5px;color:var(--cream)}
+.pack-item.done .pack-text{text-decoration:line-through;color:var(--muted2)}
+.pack-by{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted2);white-space:nowrap}
+.pack-del{background:none;border:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:4px;line-height:1;opacity:.6}
+.pack-del:hover{opacity:1;color:#f87171}
+.pack-add{display:flex;gap:8px;margin-top:12px}
+.pack-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none}
+.pack-input:focus{border-color:rgba(242,179,61,.5)}
+.pack-input::placeholder{color:rgba(245,239,224,.35)}
+.pack-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 14px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.pack-empty{color:var(--muted);font-size:13.5px;padding:8px 0}
+/* --- group poll --- */
+.poll-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
+.poll-q{font-size:17px;font-weight:600;line-height:1.35;color:var(--cream);margin:10px 0 14px}
+.poll-opts{display:flex;flex-direction:column;gap:8px}
+.poll-opt{position:relative;border:1px solid rgba(245,239,224,.12);border-radius:12px;padding:11px 14px;cursor:pointer;overflow:hidden;transition:border-color .18s}
+.poll-opt.voted{border-color:var(--amber2)}
+.poll-opt-bg{position:absolute;left:0;top:0;bottom:0;background:rgba(242,179,61,.12);border-radius:12px;transition:width .4s var(--ease)}
+.poll-opt-voted{position:absolute;left:0;top:0;bottom:0;background:rgba(242,179,61,.2);border-radius:12px;transition:width .4s var(--ease)}
+.poll-opt-row{position:relative;display:flex;align-items:center;gap:8px}
+.poll-opt-text{flex:1;font-size:14.5px;color:var(--cream);font-weight:500}
+.poll-opt-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.poll-you{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--amber2);margin-left:6px}
+.poll-closed{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);border:1px solid rgba(245,239,224,.12);border-radius:99px;padding:3px 9px;margin-left:8px;vertical-align:middle}
+.poll-voters{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:10px}
+.poll-none{color:var(--muted);font-size:13.5px;padding:4px 0}
+.poll-create{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.poll-create-q{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:14px;font-family:inherit;outline:none;resize:none}
+.poll-create-q:focus{border-color:rgba(242,179,61,.5)}
+.poll-create-q::placeholder,.poll-create-opt::placeholder{color:rgba(245,239,224,.35)}
+.poll-create-opt{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:13.5px;font-family:inherit;outline:none}
+.poll-create-opt:focus{border-color:rgba(242,179,61,.5)}
+.poll-create-actions{display:flex;gap:8px;flex-wrap:wrap}
+.poll-create-submit,.poll-close-btn{border:none;border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer}
+.poll-create-submit{background:var(--amber);color:#221A04}
+.poll-close-btn{background:rgba(255,255,255,.08);color:var(--cream)}
 /* --- list reveals: CSS scroll-driven where supported, IO elsewhere --- */
 @supports (animation-timeline: view()){
   .rv{animation:rvIn linear both;animation-timeline:view();animation-range:entry 0% entry 55%}
@@ -1176,9 +1231,36 @@ img{max-width:100%}
       <div class="tp-days tp-hidden" id="tpDays"><span data-ticklab="0">Thu 29</span><span data-ticklab="1">Fri 30</span><span data-ticklab="2">Sat 31</span><span data-ticklab="3">Sun 1</span></div>
     </div>
   </div></section>
+<!-- ================= WEATHER ================= -->
+  <section id="weatherSec"><div class="wrap">
+    <div class="tp-card wx-card reveal" id="wxCard">
+      <div class="tp-top"><span class="label">Calgary Forecast</span><span class="tp-phase mono" id="wxPhase">YYC · Oct 29–Nov 1</span></div>
+      <div class="wx-strip" id="wxStrip">
+        <div class="wx-day"><span class="wx-dow">Thu 29</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Fri 30</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Sat 31</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
+        <div class="wx-day"><span class="wx-dow">Sun 1</span><span class="wx-icon">⏳</span><span class="wx-temps">—</span></div>
+      </div>
+    </div>
+  </div></section>
 <!-- ================= NEXT UP ================= -->
   <section id="nextUpSec"><div class="wrap">
     <div class="card nu-card reveal attention" id="nextUpCard"><div class="label">Next up · Thu 29</div><div class="nu-title">Moiz lands.</div><p class="nu-body">InterestingSoup (Moiz) lands in Calgary. Landing time: …</p><span class="nu-att">⚠ Landing time still to come</span></div>
+  </div></section>
+<!-- ================= POLL ================= -->
+  <section id="pollSec"><div class="wrap">
+    <div class="poll-card reveal" id="pollCard">
+      <div class="tp-top"><span class="label">Group Poll</span><span class="tp-phase mono" id="pollPhase">loading…</span></div>
+      <div id="pollBody"><p class="poll-none">No poll yet.</p></div>
+    </div>
+  </div></section>
+<!-- ================= PACKING ================= -->
+  <section id="packSec"><div class="wrap">
+    <div class="pack-card reveal" id="packCard">
+      <div class="pack-top"><span class="label">Packing List</span><span class="pack-count" id="packCount">—</span></div>
+      <div class="pack-list" id="packList"><p class="pack-empty">Nothing yet — add the first item.</p></div>
+      <div class="pack-add"><input class="pack-input" id="packInput" type="text" placeholder="Add an item…" maxlength="120"><button class="pack-submit" id="packSubmit">Add</button></div>
+    </div>
   </div></section>
   <!-- ================= PREVIEWS (Home) ================= -->
   <section id="previews"><div class="wrap">
@@ -3396,6 +3478,220 @@ renderBuds();
  }
  tpUpdate(); setInterval(tpUpdate,1000);
 })();
+
+/* ================= Weather / Packing / Poll =================
+   Three live-data cards on the Home tab. Each fetches its own
+   endpoint on load and re-renders in-place. */
+(function(){
+ /* ---------- weather ---------- */
+ var WX_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
+   51:'🌦️',53:'🌦️',55:'🌦️',56:'🌧️',57:'🌧️',
+   61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',
+   71:'🌨️',73:'🌨️',75:'❄️',77:'🌨️',
+   80:'🌦️',81:'🌦️',82:'🌦️',85:'🌨️',86:'🌨️',
+   95:'⛈️',96:'⛈️',99:'⛈️'};
+ var WX_DAYS=['Thu 29','Fri 30','Sat 31','Sun 1'];
+ function wxIcon(code){
+   var k=+code;
+   if(k in WX_ICONS)return WX_ICONS[k];
+   // nearest bucket
+   if(k>=80)return '🌦️'; if(k>=71)return '🌨️'; if(k>=61)return '🌧️';
+   if(k>=51)return '🌦️'; if(k>=45)return '🌫️'; if(k>=3)return '☁️';
+   return '☀️';
+ }
+ function wxRound(n){return n==null?'—':Math.round(n)+'°';}
+ function renderWx(days){
+   var strip=document.getElementById('wxStrip');
+   if(!strip)return;
+   var phase=document.getElementById('wxPhase');
+   strip.innerHTML=days.map(function(d,i){
+     return '<div class="wx-day">'
+       +'<span class="wx-dow">'+WX_DAYS[i]+'</span>'
+       +'<span class="wx-icon">'+wxIcon(d.code)+'</span>'
+       +'<span class="wx-temps">'+wxRound(d.high)+' <span class="wx-lo">'+wxRound(d.low)+'</span></span>'
+       +'</div>';
+   }).join('');
+   if(phase)phase.textContent='YYC · Calgary, AB';
+ }
+ fetch('/api/weather')
+   .then(function(r){return r.json();})
+   .then(function(j){if(j.days&&j.days.length)renderWx(j.days);})
+   .catch(function(){
+     var strip=document.getElementById('wxStrip');
+     if(strip)strip.innerHTML='<p class="wx-err">Forecast unavailable right now.</p>';
+   });
+
+ /* ---------- packing list ---------- */
+ var _packItems=[];
+ var _myName='';
+ fetch('/api/me').then(function(r){return r.json();}).then(function(j){_myName=j.name||'';});
+ function renderPack(){
+   var list=document.getElementById('packList');
+   var count=document.getElementById('packCount');
+   if(!list)return;
+   var checked=_packItems.filter(function(i){return i.checkedBy;}).length;
+   if(count)count.textContent=checked+' / '+_packItems.length+' packed';
+   if(!_packItems.length){
+     list.innerHTML='<p class="pack-empty">Nothing yet — add the first item.</p>';
+     return;
+   }
+   list.innerHTML=_packItems.map(function(item){
+     var done=!!item.checkedBy;
+     return '<div class="pack-item'+(done?' done':'')+'" data-pid="'+item.id+'">'
+       +'<button type="button" class="pack-check'+(done?' on':'')+'"></button>'
+       +'<span class="pack-text">'+escH(item.text)+'</span>'
+       +'<span class="pack-by">'+escH(item.addedBy)+'</span>'
+       +'<button type="button" class="pack-del" aria-label="Remove">×</button>'
+       +'</div>';
+   }).join('');
+   list.querySelectorAll('.pack-check').forEach(function(btn){
+     btn.addEventListener('click',function(){
+       var id=btn.closest('[data-pid]').getAttribute('data-pid');
+       btn.disabled=true;
+       fetch('/api/packing/'+id+'/check',{method:'PATCH'})
+         .then(function(r){return r.json();})
+         .then(function(j){
+           var item=_packItems.find(function(i){return i.id===id;});
+           if(item)item.checkedBy=j.checkedBy;
+           renderPack();
+         }).catch(function(){btn.disabled=false;});
+     });
+   });
+   list.querySelectorAll('.pack-del').forEach(function(btn){
+     btn.addEventListener('click',function(){
+       var id=btn.closest('[data-pid]').getAttribute('data-pid');
+       btn.disabled=true;
+       fetch('/api/packing/'+id,{method:'DELETE'})
+         .then(function(){_packItems=_packItems.filter(function(i){return i.id!==id;});renderPack();})
+         .catch(function(){btn.disabled=false;});
+     });
+   });
+ }
+ function fetchPack(){
+   fetch('/api/packing').then(function(r){return r.json();}).then(function(j){
+     _packItems=j.items||[];renderPack();
+   });
+ }
+ fetchPack();
+ var packInput=document.getElementById('packInput');
+ var packSubmit=document.getElementById('packSubmit');
+ function addPackItem(){
+   var text=(packInput&&packInput.value||'').trim();
+   if(!text)return;
+   packSubmit.disabled=true;
+   fetch('/api/packing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})})
+     .then(function(r){return r.json();})
+     .then(function(j){
+       if(j.item){_packItems.push(j.item);renderPack();}
+       if(packInput)packInput.value='';
+     })
+     .catch(function(){})
+     .finally(function(){if(packSubmit)packSubmit.disabled=false;});
+ }
+ if(packSubmit)packSubmit.addEventListener('click',addPackItem);
+ if(packInput)packInput.addEventListener('keydown',function(e){if(e.key==='Enter')addPackItem();});
+
+ /* ---------- group poll ---------- */
+ var _poll=null;
+ var _myPerson='';
+ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+   _myName=j.name||''; _myPerson=j.person||j.name||'';
+   if(_poll)renderPoll(); // re-render once we know who we are
+ });
+ function renderPoll(){
+   var body=document.getElementById('pollBody');
+   var phase=document.getElementById('pollPhase');
+   if(!body)return;
+   if(!_poll||(!_poll.open&&_poll.options.every(function(o){return !o.voters.length;}))){
+     body.innerHTML='<p class="poll-none">No poll right now.</p>';
+     if(phase)phase.textContent='';
+     // Show create UI for admins
+     renderPollCreate();
+     return;
+   }
+   var total=_poll.options.reduce(function(s,o){return s+o.voters.length;},0);
+   var myVote=null;
+   _poll.options.forEach(function(o){if(o.voters.indexOf(_myPerson)>=0)myVote=o.id;});
+   if(phase)phase.textContent=_poll.open?'Open':'Closed';
+   var html='<p class="poll-q">'+escH(_poll.question)+(_poll.open?'':'<span class="poll-closed">Closed</span>')+'</p>'
+     +'<div class="poll-opts">';
+   _poll.options.forEach(function(o){
+     var pct=total?Math.round(o.voters.length/total*100):0;
+     var isMyVote=(o.id===myVote);
+     html+='<div class="poll-opt'+(isMyVote?' voted':'')+'" data-oid="'+o.id+'">'
+       +'<div class="poll-opt-'+(isMyVote?'voted':'bg')+'" style="width:'+pct+'%"></div>'
+       +'<div class="poll-opt-row">'
+       +'<span class="poll-opt-text">'+escH(o.text)+(isMyVote?'<span class="poll-you">✓ you</span>':'')+'</span>'
+       +'<span class="poll-opt-meta">'+pct+'% · '+o.voters.length+'</span>'
+       +'</div>'
+       +'</div>';
+   });
+   html+='</div>';
+   if(total>0){
+     var allVoters=[]; _poll.options.forEach(function(o){allVoters=allVoters.concat(o.voters);});
+     html+='<p class="poll-voters">'+total+' vote'+(total!==1?'s':'')+' · '+allVoters.map(escH).join(', ')+'</p>';
+   }
+   body.innerHTML=html;
+   if(_poll.open){
+     body.querySelectorAll('.poll-opt').forEach(function(el){
+       el.style.cursor='pointer';
+       el.addEventListener('click',function(){
+         var oid=el.getAttribute('data-oid');
+         fetch('/api/poll/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({optionId:oid})})
+           .then(function(r){return r.json();})
+           .then(function(j){if(j.poll){_poll=j.poll;renderPoll();}})
+           .catch(function(){});
+       });
+     });
+   }
+   renderPollCreate();
+ }
+ function renderPollCreate(){
+   var body=document.getElementById('pollBody');
+   if(!body||!_isAdmin)return;
+   var existing=body.querySelector('.poll-create');
+   if(existing)existing.remove();
+   var div=document.createElement('div');
+   div.className='poll-create';
+   if(!_poll||!_poll.open){
+     div.innerHTML='<textarea class="poll-create-q" id="pollQ" rows="2" placeholder="Ask the crew something…"></textarea>'
+       +'<div id="pollOptsWrap"><input class="poll-create-opt" placeholder="Option 1"><input class="poll-create-opt" placeholder="Option 2"></div>'
+       +'<div class="poll-create-actions"><button class="poll-create-submit" id="pollSubmit">Post Poll</button></div>';
+     body.appendChild(div);
+     document.getElementById('pollSubmit').addEventListener('click',function(){
+       var q=(document.getElementById('pollQ').value||'').trim();
+       var opts=Array.from(body.querySelectorAll('.poll-create-opt')).map(function(i){return i.value.trim();}).filter(Boolean);
+       if(!q||opts.length<2){alert('Need a question and at least 2 options.');return;}
+       fetch('/api/poll',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,options:opts})})
+         .then(function(r){return r.json();})
+         .then(function(j){if(j.poll){_poll=j.poll;renderPoll();}})
+         .catch(function(){});
+     });
+   } else {
+     div.innerHTML='<div class="poll-create-actions"><button class="poll-close-btn" id="pollClose">Close poll</button></div>';
+     body.appendChild(div);
+     document.getElementById('pollClose').addEventListener('click',function(){
+       fetch('/api/poll',{method:'DELETE'})
+         .then(function(r){return r.json();})
+         .then(function(j){if(j.ok){_poll.open=false;renderPoll();}})
+         .catch(function(){});
+     });
+   }
+ }
+ var _isAdmin=false;
+ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+   _myName=j.name||''; _myPerson=j.person||j.name||''; _isAdmin=!!j.isAdmin;
+   fetchPollData();
+ });
+ function fetchPollData(){
+   fetch('/api/poll').then(function(r){return r.json();}).then(function(j){
+     _poll=j.poll;renderPoll();
+   });
+ }
+ // Single /api/me fetch covers weather, packing, poll (replace the earlier standalone fetches)
+})();
+
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ================= V5 · ambient pause + list reveals =================
    Ambient scenes pause while their view is off-screen. Food/Buds

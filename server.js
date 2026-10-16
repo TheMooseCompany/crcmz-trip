@@ -1161,6 +1161,122 @@ document.addEventListener('keydown', function(e) {
 </html>`);
   });
 
+  // ---------- Weather forecast (Calgary, Open-Meteo, 30-min cache) ----------
+  let wxCache = { data: null, at: 0 };
+  app.get('/api/weather', requireAuth, async (req, res) => {
+    const now = Date.now();
+    if (wxCache.data && now - wxCache.at < 30 * 60 * 1000) return res.json(wxCache.data);
+    try {
+      const url = 'https://api.open-meteo.com/v1/forecast'
+        + '?latitude=51.0447&longitude=-114.0719'
+        + '&daily=weathercode,temperature_2m_max,temperature_2m_min'
+        + '&temperature_unit=celsius&timezone=America%2FEdmonton'
+        + '&start_date=2026-10-29&end_date=2026-11-01';
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`Open-Meteo ${r.status}`);
+      const j = await r.json();
+      const d = j.daily || {};
+      const days = (d.time || []).map((date, i) => ({
+        date,
+        code: (d.weathercode || [])[i] ?? 0,
+        high: (d.temperature_2m_max || [])[i] ?? null,
+        low: (d.temperature_2m_min || [])[i] ?? null,
+      }));
+      wxCache = { data: { days }, at: now };
+      res.json({ days });
+    } catch (e) {
+      console.error('[crcmz-trip] weather fetch failed:', e.message);
+      if (wxCache.data) return res.json(wxCache.data);
+      res.status(503).json({ error: 'Weather unavailable.' });
+    }
+  });
+
+  // ---------- Packing list ----------
+  const PACK_PATH = path.join(__dirname, 'data', 'packing.json');
+  function readPacking() {
+    try { return JSON.parse(fs.readFileSync(PACK_PATH, 'utf8')) || []; } catch { return []; }
+  }
+  function writePacking(list) {
+    const tmp = `${PACK_PATH}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(list, null, 2));
+    fs.renameSync(tmp, PACK_PATH);
+  }
+  app.get('/api/packing', requireAuth, (req, res) => res.json({ items: readPacking() }));
+  app.post('/api/packing', requireAuth, (req, res) => {
+    const text = ((req.body && req.body.text) || '').trim();
+    if (!text || text.length > 120) return res.status(400).json({ error: 'Invalid item.' });
+    const list = readPacking();
+    const item = { id: crypto.randomUUID(), text, addedBy: displayName(req.session.user), addedAt: new Date().toISOString(), checkedBy: null };
+    list.push(item);
+    writePacking(list);
+    res.status(201).json({ ok: true, item });
+  });
+  app.patch('/api/packing/:id/check', requireAuth, (req, res) => {
+    const list = readPacking();
+    const item = list.find((i) => i.id === req.params.id);
+    if (!item) return res.status(404).json({ error: 'Not found.' });
+    item.checkedBy = item.checkedBy ? null : displayName(req.session.user);
+    writePacking(list);
+    res.json({ ok: true, checkedBy: item.checkedBy });
+  });
+  app.delete('/api/packing/:id', requireAuth, (req, res) => {
+    const list = readPacking();
+    const idx = list.findIndex((i) => i.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Not found.' });
+    list.splice(idx, 1);
+    writePacking(list);
+    res.json({ ok: true });
+  });
+
+  // ---------- Group poll (one active poll at a time, admin creates/closes) ----------
+  const POLL_PATH = path.join(__dirname, 'data', 'poll.json');
+  function readPoll() {
+    try { return JSON.parse(fs.readFileSync(POLL_PATH, 'utf8')) || null; } catch { return null; }
+  }
+  function writePoll(p) {
+    const tmp = `${POLL_PATH}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(p, null, 2));
+    fs.renameSync(tmp, POLL_PATH);
+  }
+  app.get('/api/poll', requireAuth, (req, res) => res.json({ poll: readPoll() }));
+  app.post('/api/poll', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
+    const { question, options } = req.body || {};
+    if (typeof question !== 'string' || question.trim().length < 3 || question.trim().length > 200) {
+      return res.status(400).json({ error: 'Invalid question.' });
+    }
+    if (!Array.isArray(options) || options.length < 2 || options.length > 8) {
+      return res.status(400).json({ error: 'Need 2–8 options.' });
+    }
+    const opts = options.map((t, i) => {
+      if (typeof t !== 'string' || !t.trim()) throw Object.assign(new Error('bad option'), { status: 400 });
+      return { id: `opt${i}`, text: t.trim(), voters: [] };
+    });
+    const poll = { id: crypto.randomUUID(), question: question.trim(), options: opts, open: true, createdAt: new Date().toISOString(), createdBy: displayName(req.session.user) };
+    writePoll(poll);
+    res.status(201).json({ ok: true, poll });
+  });
+  app.post('/api/poll/vote', requireAuth, (req, res) => {
+    const { optionId } = req.body || {};
+    const poll = readPoll();
+    if (!poll || !poll.open) return res.status(404).json({ error: 'No active poll.' });
+    const opt = poll.options.find((o) => o.id === optionId);
+    if (!opt) return res.status(400).json({ error: 'Invalid option.' });
+    const voter = matchPerson(req.session.user) || displayName(req.session.user);
+    poll.options.forEach((o) => { o.voters = o.voters.filter((v) => v !== voter); });
+    opt.voters.push(voter);
+    writePoll(poll);
+    res.json({ ok: true, poll });
+  });
+  app.delete('/api/poll', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
+    const poll = readPoll();
+    if (!poll) return res.status(404).json({ error: 'No poll.' });
+    poll.open = false;
+    writePoll(poll);
+    res.json({ ok: true });
+  });
+
   // The admin console is NOT part of the public page. public/index.html
   // is a template carrying three placeholders; the dock button, the admin
   // view and the admin script live in private/ and are injected only for
