@@ -4128,4 +4128,34 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 </script>
 
 
+
+<!-- FLIGHT-CARD-PATCH (2026-10-16): shows Samad's flights on the day cards until the flights store carries them (MCP tasks 3dc4b0f1ecfd41069ee93a105e505366 + b45362f5ff0849ceb1c84b34a5437d5d). Remove this whole block once those records exist in /api/flights. -->
+<script>
+(function(){
+  var STYLE='margin-top:12px;padding:9px 12px;border-radius:12px;border:1px solid rgba(138,94,16,.35);background:rgba(242,179,61,.13);font-size:13px;line-height:1.45';
+  function chip(card, text){
+    if(card.querySelector('[data-flight-patch]')) return;
+    var d=document.createElement('div');
+    d.setAttribute('data-flight-patch','1'); d.setAttribute('style',STYLE); d.textContent=text;
+    card.appendChild(d);
+  }
+  function patch(){
+    document.querySelectorAll('.day-card').forEach(function(card){
+      var h=card.querySelector('h3'); if(!h) return;
+      var t=h.textContent||'';
+      if(t.indexOf('Samad lands')===0){
+        card.querySelectorAll('.day-list li').forEach(function(li){
+          if(li.textContent.indexOf('[TO FILL]')>-1) li.textContent='Asamad lands in Calgary. Landing time: 11:30 AM, Flight WS 1541.';
+        });
+        chip(card,'\u2708 WS 1541 \u00B7 Houston \u2192 Calgary \u00B7 Fri Oct 30 \u00B7 Lands 11:30 AM');
+      }
+      if(t.indexOf('Send-off')===0){
+        chip(card,'\u2708 Samad flies home \u00B7 WS 1540 \u00B7 Calgary \u2192 Houston \u00B7 Sun Nov 1 \u00B7 Departs 6:00 PM');
+      }
+    });
+  }
+  function run(){ patch(); setTimeout(patch,700); setTimeout(patch,2000); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+})();
+</script>
 </body></html>
