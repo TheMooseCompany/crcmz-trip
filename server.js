@@ -89,6 +89,18 @@ function readIndex() {
 function writeIndex(index) {
   fs.writeFileSync(INDEX_PATH, JSON.stringify(index, null, 2));
 }
+// Delete any local files that were already uploaded to Immich (clean up on restart).
+function pruneLocalFiles() {
+  const index = readIndex();
+  for (const [name, meta] of Object.entries(index)) {
+    if (!meta.immichId) continue;
+    const localPath = path.join(UPLOADS_DIR, name);
+    if (fs.existsSync(localPath)) {
+      fs.unlink(localPath, () => {});
+    }
+  }
+}
+pruneLocalFiles();
 
 const photoUpload = multer({
   storage: multer.diskStorage({
@@ -248,14 +260,17 @@ async function main() {
       });
       writeIndex(index);
       // Fire Immich uploads in the background — don't block the response.
+      // On success: store immichId in index and delete the local file (Immich is the source of truth).
       if (IMMICH_URL && IMMICH_API_KEY) {
-        Promise.all(files.map((f) => uploadToImmich(
-          path.join(UPLOADS_DIR, f.filename), f.originalname, now,
-        ).then((assetId) => {
-          if (!assetId) return;
-          const idx = readIndex();
-          if (idx[f.filename]) { idx[f.filename].immichId = assetId; writeIndex(idx); }
-        }))).catch(() => {});
+        Promise.all(files.map((f) => {
+          const localPath = path.join(UPLOADS_DIR, f.filename);
+          return uploadToImmich(localPath, f.originalname, now).then((assetId) => {
+            if (!assetId) return;
+            const idx = readIndex();
+            if (idx[f.filename]) { idx[f.filename].immichId = assetId; writeIndex(idx); }
+            fs.unlink(localPath, () => {});
+          });
+        })).catch(() => {});
       }
       res.status(201).json({ ok: true, added: added.map((m) => m.name) });
     });
@@ -779,7 +794,7 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 #lb-media{max-width:min(92vw,1200px);max-height:82dvh;display:flex;align-items:center;justify-content:center}
 #lb-media img,#lb-media video{max-width:100%;max-height:82dvh;border-radius:8px;object-fit:contain;display:block}
 #lb-caption{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-align:center}
-.lb-close{position:fixed;top:14px;right:16px;background:rgba(4,6,18,.85);border:1px solid var(--line);color:var(--cream);font-size:18px;border-radius:99px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
+.lb-close{position:fixed;top:max(14px,env(safe-area-inset-top,0px) + 10px);right:max(16px,env(safe-area-inset-right,0px) + 10px);background:rgba(4,6,18,.85);border:1px solid var(--line);color:var(--cream);font-size:20px;border-radius:99px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
 .lb-close:hover{border-color:var(--line-amber);color:var(--amber2)}
 .lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(4,6,18,.75);border:1px solid var(--line);color:var(--cream);font-size:24px;border-radius:99px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;z-index:301}
 .lb-nav:hover{border-color:var(--line-amber);color:var(--amber2)}
