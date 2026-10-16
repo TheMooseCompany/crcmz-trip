@@ -251,7 +251,11 @@ async function main() {
       if (IMMICH_URL && IMMICH_API_KEY) {
         Promise.all(files.map((f) => uploadToImmich(
           path.join(UPLOADS_DIR, f.filename), f.originalname, now,
-        ))).catch(() => {});
+        ).then((assetId) => {
+          if (!assetId) return;
+          const idx = readIndex();
+          if (idx[f.filename]) { idx[f.filename].immichId = assetId; writeIndex(idx); }
+        }))).catch(() => {});
       }
       res.status(201).json({ ok: true, added: added.map((m) => m.name) });
     });
@@ -588,25 +592,52 @@ async function main() {
         const bucketsR = await fetch(`${IMMICH_URL}/api/timeline/buckets?${qp}`, {
           headers: { 'x-api-key': IMMICH_API_KEY },
         });
+        // Build immichId → uploadedBy map from local index (trip app uploads)
+        const localIndex = readIndex();
+        const immichIdToName = {};
+        Object.values(localIndex).forEach((m) => {
+          if (m.immichId) immichIdToName[m.immichId] = m.uploadedBy || 'crew';
+        });
+
         if (bucketsR.ok) {
           const buckets = await bucketsR.json();
+          // Collect unique ownerIds to resolve names for non-local photos
+          const ownerIds = new Set();
+          const rawItems = [];
           for (const bucket of (Array.isArray(buckets) ? buckets : [])) {
             const bR = await fetch(`${IMMICH_URL}/api/timeline/bucket?${qp}&timeBucket=${encodeURIComponent(bucket.timeBucket)}`, {
               headers: { 'x-api-key': IMMICH_API_KEY },
             });
             if (!bR.ok) continue;
-            const col = await bR.json(); // columnar: { id: [...], isImage: [...], ... }
+            const col = await bR.json();
             const ids = col.id || [];
-            ids.forEach((id, i) => items.push({
-              id,
-              url: `/album/asset/${id}/original`,
-              thumb: `/album/asset/${id}/thumbnail`,
-              originalName: id,
-              uploadedBy: 'crew',
-              uploadedAt: (col.fileCreatedAt || [])[i] || (col.createdAt || [])[i] || '',
-              kind: (col.isImage || [])[i] !== false ? 'image' : 'video',
-            }));
+            ids.forEach((id, i) => {
+              const ownerId = (col.ownerId || [])[i];
+              if (ownerId) ownerIds.add(ownerId);
+              rawItems.push({
+                id, ownerId,
+                url: `/album/asset/${id}/original`,
+                thumb: `/album/asset/${id}/thumbnail`,
+                originalName: id,
+                uploadedAt: (col.fileCreatedAt || [])[i] || (col.createdAt || [])[i] || '',
+                kind: (col.isImage || [])[i] !== false ? 'image' : 'video',
+              });
+            });
           }
+          // Resolve owner names from Immich for photos not in local index
+          const ownerNames = {};
+          await Promise.all([...ownerIds].map(async (uid) => {
+            try {
+              const ur = await fetch(`${IMMICH_URL}/api/users/${uid}`, { headers: { 'x-api-key': IMMICH_API_KEY } });
+              if (ur.ok) { const u = await ur.json(); ownerNames[uid] = u.name || u.email || 'crew'; }
+            } catch { /* ignore */ }
+          }));
+          rawItems.forEach((item) => {
+            items.push({
+              ...item,
+              uploadedBy: immichIdToName[item.id] || ownerNames[item.ownerId] || 'crew',
+            });
+          });
         }
         if (items.length > 0) {
           items.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
