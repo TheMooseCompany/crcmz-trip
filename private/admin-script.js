@@ -354,6 +354,13 @@ function flightBlock(f,i){
   return '<details class="adm-entry" '+(i===0?'open':'')+'>'
     +'<summary>'+cEsc((f.person||'')+(f.flightNumber?' · '+f.flightNumber:'')+(f.departureDate?' · '+f.departureDate:''))+' <span class="adm-sum-sub">'+cEsc(f.originCode||'')+'→'+cEsc(f.destinationCode||'')+'</span></summary>'
     +'<div class="adm-entry-body">'
+    +'<div style="margin-bottom:14px;padding:10px 12px;background:rgba(242,179,61,.08);border:1px solid rgba(242,179,61,.2);border-radius:10px">'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#a9a5c6;margin-bottom:6px">Paste booking text — AI fills the fields</div>'
+    +'<textarea class="adm-inp fl-parse-txt" rows="3" style="width:100%;resize:vertical;font-size:13px" placeholder="Paste email, itinerary or booking confirmation text here…"></textarea>'
+    +'<div style="display:flex;gap:10px;align-items:center;margin-top:6px">'
+    +'<button type="button" class="adm-save fl-parse-btn" style="padding:6px 14px;font-size:13px">Parse with AI</button>'
+    +'<span class="fl-parse-status" style="font-size:13px;color:#a9a5c6"></span>'
+    +'</div></div>'
     +'<div class="adm-grid">'+F('Person','<select class="adm-sel fl-person">'+personOpts+'</select>')+F('Flight number',inp('fl-num',f.flightNumber))+'</div>'
     +'<div class="adm-grid">'+F('Airline',inp('fl-airline',f.airline))+F('Aircraft',inp('fl-aircraft',f.aircraft))+'</div>'
     +'<div class="adm-grid">'+F('Origin city',inp('fl-origin',f.origin))+F('Origin code (e.g. YVR)',inp('fl-ocode',f.originCode))+'</div>'
@@ -379,12 +386,44 @@ function bindFlightDeletes(){
     };
   });
 }
+function bindFlightParses(){
+  document.querySelectorAll('#admFlightsList .fl-parse-btn').forEach(function(b){
+    if(b._parseBound)return; b._parseBound=true;
+    b.addEventListener('click',function(){
+      var entry=b.closest('.adm-entry');
+      var txt=entry&&entry.querySelector('.fl-parse-txt');
+      var status=entry&&entry.querySelector('.fl-parse-status');
+      if(!txt||!txt.value.trim())return;
+      b.disabled=true; if(status)status.textContent='Parsing… (10–25s)';
+      fetch('/api/flights/parse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt.value})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          b.disabled=false;
+          if(d.error){if(status)status.textContent='Error: '+d.error;return;}
+          var f=d.flight||{};
+          function set(sel,val){var el=entry.querySelector(sel);if(el&&val!=null&&val!=='')el.value=val;}
+          set('.fl-num',f.flightNumber); set('.fl-airline',f.airline);
+          set('.fl-origin',f.origin); set('.fl-ocode',f.originCode);
+          set('.fl-dest',f.destination); set('.fl-dcode',f.destinationCode);
+          set('.fl-date',f.departureDate); set('.fl-dep',f.departureTime);
+          set('.fl-arr',f.arrivalTime); set('.fl-dur',f.duration);
+          set('.fl-aircraft',f.aircraft); set('.fl-cabin',f.cabin);
+          set('.fl-term',f.terminal); set('.fl-gate',f.gate);
+          set('.fl-notes',f.notes);
+          var wifi=entry.querySelector('.fl-wifi');if(wifi&&f.hasWifi!=null)wifi.checked=!!f.hasWifi;
+          if(status)status.textContent='✓ Done — check fields then save';
+          txt.value='';
+        })
+        .catch(function(e){b.disabled=false;if(status)status.textContent='Failed: '+(e.message||'error');});
+    });
+  });
+}
 function loadAdminFlights(){
   fetch('/api/flights').then(function(r){return r.json();}).then(function(j){
     _adminFlights=j.flights||[];
     var list=$('admFlightsList');
     if(list)list.innerHTML=_adminFlights.map(flightBlock).join('');
-    bindFlightDeletes();
+    bindFlightDeletes(); bindFlightParses();
   }).catch(function(){});
 }
 loadAdminFlights();
@@ -394,8 +433,8 @@ $('admFlightsAdd').addEventListener('click',function(){
     destination:'Calgary',destinationCode:'YYC',departureDate:'',departureTime:'',arrivalTime:'',
     duration:'',aircraft:'',cabin:'Economy',hasWifi:true,status:'scheduled',gate:'',terminal:'',notes:''},0);
   var node=wrap.firstChild; node.open=true;
-  $('admFlightsList').appendChild(node); bindFlightDeletes();
-  var fn=node.querySelector('.fl-num'); if(fn)fn.focus();
+  $('admFlightsList').appendChild(node); bindFlightDeletes(); bindFlightParses();
+  var fn=node.querySelector('.fl-parse-txt'); if(fn)fn.focus();
 });
 
 /* ---------- Danger zone ---------- */

@@ -1566,6 +1566,42 @@ document.addEventListener('keydown', function(e) {
   app.get('/api/flights', requireAuth, (req, res) => {
     res.json({ flights: readFlights() });
   });
+
+  app.post('/api/flights/parse', requireAuth, async (req, res) => {
+    const { text } = req.body || {};
+    if (!text || typeof text !== 'string' || !text.trim())
+      return res.status(400).json({ error: 'text required' });
+    if (text.length > 4000)
+      return res.status(400).json({ error: 'text too long (max 4000 chars)' });
+    const aiBase = (process.env.AI_BASE_URL || 'http://192.168.4.38:1234/v1').replace(/\/$/, '');
+    const aiModel = process.env.AI_MODEL || 'Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-8bit';
+    const userMsg = `Extract flight information from this booking/itinerary text. Return ONLY a valid JSON object — no explanation, no markdown fences.
+
+Fields (use empty string for unknown, true/false for hasWifi):
+flightNumber, airline, origin (city), originCode (IATA), destination (city), destinationCode (IATA),
+departureDate (YYYY-MM-DD), departureTime (HH:MM 24h), arrivalTime (HH:MM 24h),
+duration (e.g. "1h 29m"), aircraft, cabin, hasWifi, terminal, gate, notes
+
+Text:
+${text.trim()}`;
+    try {
+      const r = await fetch(`${aiBase}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: aiModel, messages: [{ role: 'user', content: userMsg }], temperature: 0, max_tokens: 512 }),
+        signal: AbortSignal.timeout(90000),
+      });
+      if (!r.ok) return res.status(502).json({ error: 'AI server error' });
+      const data = await r.json();
+      let content = (data.choices?.[0]?.message?.content || '').trim();
+      content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+      const flight = JSON.parse(content);
+      res.json({ ok: true, flight });
+    } catch (e) {
+      res.status(500).json({ error: e.message || 'parse failed' });
+    }
+  });
   app.post('/api/flights', requireAuth, (req, res) => {
     const { id, person, flightNumber, airline, origin, originCode, destination, destinationCode,
             departureDate, departureTime, arrivalTime, duration, aircraft, cabin, hasWifi,
