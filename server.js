@@ -815,6 +815,11 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
 .btn-upload{display:inline-flex;align-items:center;gap:8px;background:var(--amber2);color:#0a0b12;font-size:14px;font-weight:700;padding:10px 18px;border-radius:99px;cursor:pointer;border:none;transition:opacity .15s}
 .btn-upload:hover{opacity:.85}
 #uploadStatus{font-size:13px;color:var(--muted)}
+.wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;background:rgba(10,11,18,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar a.tab{flex:1;background:none;border:0;color:rgba(233,236,255,.6);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;text-decoration:none}
+.tabbar a.tab.on{color:var(--amber2)}
+.tabbar a.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 /* Lightbox */
 #lb{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,18,.96);flex-direction:column}
 #lb.on{display:flex}
@@ -835,7 +840,7 @@ header{padding:24px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20p
     <h1>TX/CA — YYC 2.0</h1>
     <div class="hdr-meta">${count} item${count !== 1 ? 's' : ''}${IMMICH_SHARE_URL ? ' &nbsp;·&nbsp; <a href="' + IMMICH_SHARE_URL + '" target="_blank" rel="noopener" class="share-link">Open in Immich ↗</a>' : ''}</div>
   </div>
-  <a class="back" href="/">← Back</a>
+  <div style="width:44px"></div>
 </div></div></header>
 
 <div class="wrap">
@@ -915,6 +920,14 @@ document.addEventListener('keydown', function(e) {
   });
 })();
 </script>
+<nav class="tabbar" aria-label="Trip sections">
+  <a class="tab" href="/#home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+  <a class="tab" href="/#food"><svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M2.5 19.5h19"/><path d="M12 8V6.5"/><circle cx="12" cy="5" r="1"/></svg><span>Food</span></a>
+  <a class="tab on" href="/album"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg><span>Photos</span></a>
+  <a class="tab" href="/#split"><svg viewBox="0 0 24 24"><path d="M4 12h16"/><circle cx="12" cy="6" r="1.7"/><circle cx="12" cy="18" r="1.7"/></svg><span>Split</span></a>
+  <a class="tab" href="/#fifa"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"/></svg><span>FIFA</span></a>
+  <a class="tab" href="/#buds"><svg viewBox="0 0 24 24"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"/><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"/><path d="M12 21v-6"/></svg><span>Buds</span></a>
+</nav>
 </body>
 </html>`);
   });
