@@ -1314,7 +1314,7 @@ document.addEventListener('keydown', function(e) {
   });
 
   // ── Flights store ──────────────────────────────────────────────────────────
-  const FLIGHTS_PATH = '/data/flights.json';
+  const FLIGHTS_PATH = path.join(__dirname, 'data', 'flights.json');
   function readFlights() {
     try { return JSON.parse(fs.readFileSync(FLIGHTS_PATH, 'utf8')); } catch { return []; }
   }
