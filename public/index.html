@@ -134,7 +134,7 @@ nav>*{pointer-events:auto}
 .pv-top,.pv-meta,.pv-nav{transition:opacity .25s ease}
 /* ---------- Sections ---------- */
 main{position:relative;background:linear-gradient(180deg,var(--deep),var(--sky) 240px)}
-section{padding:72px 0 8px}
+section{padding:40px 0 4px}
 .sec-head{max-width:700px;margin-bottom:30px}
 .sec-head h2{font-size:clamp(32px,5vw,52px);line-height:1.02;letter-spacing:-.02em;margin:12px 0 12px;font-weight:600}
 .sec-head h2 .serif{color:var(--amber2)}
@@ -425,11 +425,11 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
    is the mechanism the cinematic stage already pins with on that phone,
    so the bar (last element in the document, in flow) rides the visible
    bottom with its background painted in normal flow. */
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(2,3,10,.45),inset 0 1px 0 rgba(255,255,255,.22);padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabbar{will-change:transform;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(2,3,10,.45),inset 0 1px 0 rgba(255,255,255,.22);padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
 .tabbar::-webkit-scrollbar{display:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
 .view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
-body.switching .reveal,body.switching .rv{transition:none!important;animation:none!important}
+body.switching .reveal,body.switching .rv,body.scrolling .reveal,body.scrolling .rv{transition:none!important;animation:none!important}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
    (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
    .tabbar (0-1-0) and repaint the bar translucent cream on Food and
@@ -1334,6 +1334,17 @@ img{max-width:100%}
   <section id="flightsSec" class="fl-sec"><div class="wrap">
     <div id="flightsCards"></div>
   </div></section>
+  <section id="stay"><div class="wrap">
+    <div class="sec-head reveal"><div class="label">01 · The Stay</div><h2>Basecamp: <span class="serif">Bayside,</span> Airdrie.</h2></div>
+    <div class="card stay-compact reveal">
+      <div class="stay-photo">
+        <img src="assets/stay.jpg" alt="The Airbnb in Bayside, Airdrie — living space of the 4-bedroom house the crew is staying in" loading="lazy">
+        <span class="rating" id="stayRating">★ 4.92 · Guest Favorite</span>
+        <div class="stay-scrim"><div class="stay-scrim-main"><div class="stay-scrim-name">Bayside, Airdrie</div><div class="stay-scrim-sub">Waterfront house on the canals · Oct 29 – Nov 1</div></div><span class="stay-phase-chip" id="stayPhaseChip">T-minus 13d</span></div>
+      </div>
+      <div class="stay-body" id="stayBody"><p class="stay-intro">Bayside, Airdrie — waterfront house on the canals · 18 min to YYC · 30 min to downtown Calgary</p><div class="stay-stats"><div class="stay-stat"><span>Sleeps</span><b>11</b></div><div class="stay-stat"><span>Bedrooms</span><b>4</b></div><div class="stay-stat"><span>Beds</span><b>6</b></div><div class="stay-stat"><span>Baths</span><b>3.5</b></div></div><div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">4:00–11:00 PM</div><p>self check-in, smart lock</p><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1619643402121865110" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Before 11:00 AM</div><p>Leave it tidy; keys as instructed</p><button type="button" class="btn stay-tile-btn" id="stayCopyBtn">Copy details</button></div></div><div class="stay-warns"><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Quiet hours 10:00 PM – 7:00 AM, noise monitored — warnings escalate, and repeat violations can end the stay</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No smoking or vaping — $250 fine</span></div></div><details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>No parties or events</li><li>No pets</li><li>Late checkout is billed: $50 for the first hour, then $35 per 30 minutes</li></ul><div class="amenities"><span>Pool table</span><span>theatre seats</span><span>canal views</span><span>fast Wi-Fi + dedicated office</span><span>free parking (garage + driveway)</span><span>in-home laundry</span><span>full kitchen</span><span>air conditioning</span></div><p class="host-line">Hosted by <b>Susan · Premier Stays · Superhost</b>. Exact address lands in the group chat after booking.</p></details><div class="stay-receipt"><div class="label" style="margin-bottom:4px">The receipt</div><div class="kv"><span>3 × per night</span><span class="t-data">$302.67</span></div><div class="kv"><span>Long-stay discount</span><span class="t-data">−$135.60</span></div><div class="kv"><span>Taxes &amp; fees</span><span class="t-data">$84.96</span></div><div class="kv total"><span>Total</span><span class="t-data">$857.36</span></div><p class="stay-receipt-note">Line items as shown by Airbnb; their per-line rounding lands a cent over the total.</p></div></div>
+    </div>
+  </div></section>
   <!-- ================= PREVIEWS (Home) ================= -->
   <section id="previews"><div class="wrap">
     <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
@@ -1348,17 +1359,7 @@ img{max-width:100%}
     </div>
   </div></section>
 <!-- ================= STAY (condensed) ================= -->
-  <section id="stay"><div class="wrap">
-    <div class="sec-head reveal"><div class="label">01 · The Stay</div><h2>Basecamp: <span class="serif">Bayside,</span> Airdrie.</h2></div>
-    <div class="card stay-compact reveal">
-      <div class="stay-photo">
-        <img src="assets/stay.jpg" alt="The Airbnb in Bayside, Airdrie — living space of the 4-bedroom house the crew is staying in" loading="lazy">
-        <span class="rating" id="stayRating">★ 4.92 · Guest Favorite</span>
-        <div class="stay-scrim"><div class="stay-scrim-main"><div class="stay-scrim-name">Bayside, Airdrie</div><div class="stay-scrim-sub">Waterfront house on the canals · Oct 29 – Nov 1</div></div><span class="stay-phase-chip" id="stayPhaseChip">T-minus 13d</span></div>
-      </div>
-      <div class="stay-body" id="stayBody"><p class="stay-intro">Bayside, Airdrie — waterfront house on the canals · 18 min to YYC · 30 min to downtown Calgary</p><div class="stay-stats"><div class="stay-stat"><span>Sleeps</span><b>11</b></div><div class="stay-stat"><span>Bedrooms</span><b>4</b></div><div class="stay-stat"><span>Beds</span><b>6</b></div><div class="stay-stat"><span>Baths</span><b>3.5</b></div></div><div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">4:00–11:00 PM</div><p>self check-in, smart lock</p><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1619643402121865110" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Before 11:00 AM</div><p>Leave it tidy; keys as instructed</p><button type="button" class="btn stay-tile-btn" id="stayCopyBtn">Copy details</button></div></div><div class="stay-warns"><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Quiet hours 10:00 PM – 7:00 AM, noise monitored — warnings escalate, and repeat violations can end the stay</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No smoking or vaping — $250 fine</span></div></div><details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>No parties or events</li><li>No pets</li><li>Late checkout is billed: $50 for the first hour, then $35 per 30 minutes</li></ul><div class="amenities"><span>Pool table</span><span>theatre seats</span><span>canal views</span><span>fast Wi-Fi + dedicated office</span><span>free parking (garage + driveway)</span><span>in-home laundry</span><span>full kitchen</span><span>air conditioning</span></div><p class="host-line">Hosted by <b>Susan · Premier Stays · Superhost</b>. Exact address lands in the group chat after booking.</p></details><div class="stay-receipt"><div class="label" style="margin-bottom:4px">The receipt</div><div class="kv"><span>3 × per night</span><span class="t-data">$302.67</span></div><div class="kv"><span>Long-stay discount</span><span class="t-data">−$135.60</span></div><div class="kv"><span>Taxes &amp; fees</span><span class="t-data">$84.96</span></div><div class="kv total"><span>Total</span><span class="t-data">$857.36</span></div><p class="stay-receipt-note">Line items as shown by Airbnb; their per-line rounding lands a cent over the total.</p></div></div>
-    </div>
-  </div></section>
+  
 <!-- ================= DAYS ================= -->
   <section id="days"><div class="wrap">
     <div class="sec-head reveal"><div class="label">02 · The Four Days</div><h2>One anchor a day. <span class="serif">Everything else</span> is hangout.</h2></div>
@@ -2587,6 +2588,12 @@ document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function
 /* The Add expense button lives in the Split view's flow, directly
    under the position card - never fixed over content. */
 (function(){var b=document.getElementById('spAddBtn'),h=document.querySelector('#view-split .sp-hero');if(b&&h)h.after(b);})();
+var scrollIdleT=0;
+window.addEventListener('scroll',function(){
+ document.body.classList.add('scrolling');
+ clearTimeout(scrollIdleT);
+ scrollIdleT=setTimeout(function(){document.body.classList.remove('scrolling')},160);
+},{passive:true});
 window.addEventListener('hashchange',applyRoute);
 applyRoute();
 </script>
