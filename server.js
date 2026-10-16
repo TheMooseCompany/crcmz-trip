@@ -398,6 +398,38 @@ async function main() {
     res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user) });
   });
 
+  // Link previews: chat/social crawlers (WhatsApp, iMessage, Telegram,
+  // Discord, Slack…) cannot log in, so bot user-agents receive a tiny public
+  // document carrying only the Open Graph tags, and the preview image is
+  // public. Real visitors continue to the login gate untouched. The preview
+  // exposes branding only — title, dates, one image — never site content.
+  const PREVIEW_BOTS = /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|linkedinbot|pinterest|redditbot|skypeuripreview|meta-externalagent/i;
+  const PREVIEW_HTML = '<!doctype html><html><head><meta charset="utf-8">'
+    + '<title>CRCMZ BOYZ — Calgary Trip</title>'
+    + '<meta name="description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta property="og:type" content="website">'
+    + '<meta property="og:url" content="https://trip.crcmz.me/">'
+    + '<meta property="og:title" content="CRCMZ BOYZ — Calgary Trip">'
+    + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta property="og:image" content="https://trip.crcmz.me/og-image.jpg">'
+    + '<meta property="og:image:width" content="1200">'
+    + '<meta property="og:image:height" content="630">'
+    + '<meta name="twitter:card" content="summary_large_image">'
+    + '</head><body>CRCMZ BOYZ — Calgary Trip</body></html>';
+  app.get('/og-image.jpg', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.sendFile(path.join(__dirname, 'public', 'og-image.jpg'));
+  });
+  app.use((req, res, next) => {
+    const p = req.path || '';
+    if (req.method === 'GET'
+      && !p.startsWith('/api') && !p.startsWith('/auth') && !p.startsWith('/uploads')
+      && PREVIEW_BOTS.test(req.get('user-agent') || '')) {
+      return res.type('html').send(PREVIEW_HTML);
+    }
+    next();
+  });
+
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
 
   app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
