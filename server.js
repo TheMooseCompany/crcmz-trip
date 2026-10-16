@@ -430,9 +430,12 @@ async function main() {
 
   // Who is logged in, mapped to a Split roster person so the client can
   // default the payer to the signed-in user instead of a fixed name.
+  // Aliases per the CRCMZ identity chart (MCP person_profile): Mutasif's
+  // identity name is "themoosecompany thegoopcompany"; Moiz is
+  // InterestingSoup, PSN moiiz41510, WhatsApp name "MQ".
   const PERSON_ALIASES = [
-    ['Mutasif', ['mutasif', 'moose', 'themoosecompany']],
-    ['Moiz', ['moiz', 'soup', 'interestingsoup']],
+    ['Mutasif', ['mutasif', 'moose', 'themoosecompany', 'thegoopcompany']],
+    ['Moiz', ['moiz', 'soup', 'interestingsoup', 'moiiz41510', 'mq']],
     ['Noor', ['noor']],
     ['Samad', ['samad', 'asamad']],
     ['Brendan', ['brendan']],
@@ -442,8 +445,11 @@ async function main() {
     if (!user) return null;
     const hay = [user.name, user.preferred_username, user.email]
       .filter(Boolean).join(' ').toLowerCase();
+    const tokens = hay.split(/[^a-z0-9]+/).filter(Boolean);
     for (const [person, aliases] of PERSON_ALIASES) {
-      if (aliases.some((a) => hay.includes(a))) return person;
+      // Long aliases match as substrings; a short alias like "mq" must be
+      // a whole token so it cannot false-positive inside other words.
+      if (aliases.some((a) => (a.length >= 3 ? hay.includes(a) : tokens.includes(a)))) return person;
     }
     return null;
   }
@@ -741,7 +747,36 @@ document.addEventListener('keydown', function(e) {
 </html>`);
   });
 
-  app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
+  // The admin console is NOT part of the public page. public/index.html
+  // is a template carrying three placeholders; the dock button, the admin
+  // view and the admin script live in private/ and are injected only for
+  // the two admins (Mutasif and Moiz, per the CRCMZ identity chart).
+  // Everyone else's copy of the page contains no admin markup or code.
+  const PAGE_TEMPLATE_PATH = path.join(__dirname, 'public', 'index.html');
+  let adminFragments = null;
+  try {
+    adminFragments = {
+      dock: fs.readFileSync(path.join(__dirname, 'private', 'admin-dock.html'), 'utf8'),
+      view: fs.readFileSync(path.join(__dirname, 'private', 'admin-view.html'), 'utf8'),
+      script: fs.readFileSync(path.join(__dirname, 'private', 'admin-script.js'), 'utf8'),
+    };
+  } catch (e) {
+    console.error('[crcmz-trip] admin fragments missing; admin console disabled:', e.message);
+  }
+  function renderPage(user) {
+    let html = fs.readFileSync(PAGE_TEMPLATE_PATH, 'utf8');
+    const parts = adminFragments && isAdminUser(user)
+      ? { dock: adminFragments.dock, view: adminFragments.view, script: `<script>${adminFragments.script}</script>` }
+      : { dock: '', view: '', script: '' };
+    return html
+      .replace('<!--ADMIN_DOCK-->', () => parts.dock)
+      .replace('<!--ADMIN_VIEW-->', () => parts.view)
+      .replace('<!--ADMIN_SCRIPT-->', () => parts.script);
+  }
+  app.get(['/', '/index.html'], requireAuth, (req, res) => {
+    res.type('html').send(renderPage(req.session.user));
+  });
+  app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: false }));
 
   app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
 

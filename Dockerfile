@@ -8,6 +8,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY server.js ./
 COPY public ./public
+COPY private ./private
 
 # Photo Wall storage. In Coolify, mount a persistent volume at /app/data
 # (or set UPLOADS_DIR to the mount path) or uploads are lost on redeploy.
