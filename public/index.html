@@ -425,7 +425,8 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
    is the mechanism the cinematic stage already pins with on that phone,
    so the bar (last element in the document, in flow) rides the visible
    bottom with its background painted in normal flow. */
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(2,3,10,.45),inset 0 1px 0 rgba(255,255,255,.22);padding:8px}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 40px rgba(2,3,10,.45),inset 0 1px 0 rgba(255,255,255,.22);padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabbar::-webkit-scrollbar{display:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
 .view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
@@ -434,7 +435,7 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
    Split — the content bleeding through the bar in the owner's recording.
    This rule (0-2-1) keeps the bar's dark slab on every view. */
 body[data-view] .tabbar{background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55))}
-.tabbar .tab{flex:1;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
+.tabbar .tab{flex:none;min-width:56px;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
 .tabbar .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tabbar .tab.on{color:var(--amber)}
 /* Apple polish: one press language everywhere — a small settle, never a bounce */
@@ -1290,55 +1291,12 @@ img{max-width:100%}
   <section id="nextUpSec"><div class="wrap">
     <div class="card nu-card reveal attention" id="nextUpCard"><div class="label">Next up · Thu 29</div><div class="nu-title">Moiz lands.</div><p class="nu-body">InterestingSoup (Moiz) lands in Calgary. Landing time: …</p><span class="nu-att">⚠ Landing time still to come</span></div>
   </div></section>
-<!-- ================= POLL ================= -->
-  <section id="pollSec"><div class="wrap">
-    <div class="poll-card reveal" id="pollCard">
-      <div class="tp-top"><span class="label">Group Poll</span><span class="tp-phase mono" id="pollPhase">loading…</span></div>
-      <div id="pollActive"></div>
-      <div id="pollCreate"></div>
-      <div id="pollHistory"></div>
-    </div>
-  </div></section>
-<!-- ================= PACKING ================= -->
-  <section id="packSec"><div class="wrap">
-    <div class="pack-card reveal" id="packCard">
-      <div class="pack-top"><span class="label">Packing List</span><span class="pack-count" id="packCount">—</span></div>
-      <div class="pack-prog"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div>
-      <div class="pack-cats" id="packCats">
-        <button class="pack-cat-btn on" data-cat="all">All</button>
-        <button class="pack-cat-btn" data-cat="clothes">Clothes</button>
-        <button class="pack-cat-btn" data-cat="electronics">Electronics</button>
-        <button class="pack-cat-btn" data-cat="documents">Documents</button>
-        <button class="pack-cat-btn" data-cat="buds">Buds</button>
-        <button class="pack-cat-btn" data-cat="misc">Misc</button>
-      </div>
-      <div class="pack-list" id="packList"><p class="pack-empty">Nothing yet — add the first item.</p></div>
-      <div class="pack-add">
-        <div class="pack-add-row">
-          <input class="pack-input" id="packInput" type="text" placeholder="Add an item…" maxlength="120">
-          <button class="pack-submit" id="packSubmit">Add</button>
-        </div>
-        <div class="pack-add-row">
-          <select class="pack-select" id="packCat">
-            <option value="misc">Misc</option>
-            <option value="clothes">Clothes</option>
-            <option value="electronics">Electronics</option>
-            <option value="documents">Documents</option>
-            <option value="buds">Buds</option>
-          </select>
-          <select class="pack-select" id="packWho" style="flex:1">
-            <option value="Everyone">Everyone</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div></section>
   <!-- ================= PREVIEWS (Home) ================= -->
   <section id="previews"><div class="wrap">
     <div class="sec-head reveal"><div class="label">The Hub · Previews</div><h2>Everything else, <span class="serif">one tap away.</span></h2><p>Full sections live on their own tabs — here's the glance version.</p></div>
     <div class="prev-grid">
-      <a class="prev-card reveal" href="#weatherSec"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#0D1533,#14193B)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#A5B4FF;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span><span class="prev-main"><h3>WEATHER</h3><p id="wxPrevLine">Tap to see the 4-day forecast</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
-      <a class="prev-card reveal" href="#pollSec"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A1333,#0D0A22)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#C4B5FD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="prev-main"><h3>GROUP POLL</h3><p id="pollPrevLine">No active poll</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
+      <button type="button" class="prev-card reveal" data-view="poll"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A1333,#0D0A22)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#C4B5FD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="prev-main"><h3>GROUP POLL</h3><p id="pollPrevLine">No active poll</p></span><span class="prev-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="prev-card reveal" data-view="pack"><span class="prev-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#1A3322,#0A1A12)"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#6EE7B7;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg></span><span class="prev-main"><h3>PACKING LIST</h3><p id="packPrevLine">Loading…</p></span><span class="prev-arrow" aria-hidden="true">→</span></button>
       <a class="prev-card reveal" href="#food"><img class="prev-thumb" src="assets/prev-food.jpg" alt="" loading="lazy"><span class="prev-main"><h3>FOOD FINDER</h3><p id="foodPrevLine">50 spots · 9 breakfast</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
       <a class="prev-card reveal" href="#photos"><img class="prev-thumb" src="assets/prev-photos.jpg" alt="" loading="lazy"><span class="prev-main"><h3>PHOTO WALL</h3><p id="photoPrevLine">5 shots on the wall</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
       <a class="prev-card reveal" href="#split"><img class="prev-thumb" src="assets/prev-split.jpg" alt="" loading="lazy"><span class="prev-main"><h3>THE SPLIT</h3><p id="splitPrevLine">Brendan owes Mutasif $37.36</p></span><span class="prev-arrow" aria-hidden="true">→</span></a>
@@ -1368,6 +1326,55 @@ img{max-width:100%}
           <div class="day-row" id="dayRow" data-lenis-prevent=""><article class="day-card active"><div class="dow">Thu</div><div class="dnum">29</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Touchdown</span><h3>Moiz lands.</h3><ul class="day-list"><li>InterestingSoup (Moiz) lands in Calgary. Landing time: [TO FILL]</li><li>Check-in 4:00–11:00 PM, smart lock. Settle in, pool table, first food run.</li></ul></article><article class="day-card"><div class="dow">Fri</div><div class="dnum">30</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Day 2</span><h3>Samad lands.</h3><ul class="day-list"><li>Asamad lands in Calgary. Landing time: [TO FILL]</li><li>Chill at the Airbnb, order food and Zoot.</li><li>Full crew in by tonight.</li></ul></article><article class="day-card"><div class="dow">Sat · Halloween</div><div class="dnum">31</div><div class="dmon">Oct 2026</div><span class="chip day-chip">Main Event</span><h3>Movie night.</h3><ul class="day-list"><li>Street Fighter (2026) — on the big screen.</li></ul><div class="movie-links"><a class="btn movie-btn" href="https://www.cineplex.com/movie/street-fighter-2026" target="_blank" rel="noopener"><span class="chain-chip"><img src="assets/cineplex.png" alt="" width="16" height="16" onerror="this.parentNode.style.display='none'"></span><span><b>Cineplex</b> — Street Fighter</span></a><a class="btn movie-btn" href="https://www.landmarkcinemas.com/film-info/street-fighter/" target="_blank" rel="noopener"><span class="chain-chip"><img src="assets/landmark.png" alt="" width="16" height="16" onerror="this.parentNode.style.display='none'"></span><span><b>Landmark</b> — Street Fighter</span></a></div><ul class="day-list tight"><li>Calgary crew meetup: the wider crew is invited to the house for dinner and a hang sesh.</li><li>Quiet hours from 10:00 PM — house rule.</li></ul></article><article class="day-card"><div class="dow">Sun</div><div class="dnum">1</div><div class="dmon">Nov 2026</div><h3>Send-off</h3><ul class="day-list"><li>Brunch, then departures. Checkout before 11 AM.</li></ul></article></div>
         </div>
         <div class="day-dots reveal" id="dayDots" aria-hidden="true"><button type="button" data-i="0" aria-label="Go to day 1" class="on"></button><button type="button" data-i="1" aria-label="Go to day 2"></button><button type="button" data-i="2" aria-label="Go to day 3"></button><button type="button" data-i="3" aria-label="Go to day 4"></button></div>
+      </div>
+    </div>
+  </div></section>
+  </div>
+  <div class="view amb-paused" id="view-poll" hidden="">
+<!-- ================= POLL TAB ================= -->
+  <section id="pollSec"><div class="wrap">
+    <div class="sec-head reveal" style="padding-bottom:0"><div class="label">Group Poll</div><h2>What does the <span class="serif">crew think?</span></h2></div>
+    <div class="poll-card reveal" id="pollCard">
+      <div class="tp-top"><span class="label">Active Poll</span><span class="tp-phase mono" id="pollPhase">loading…</span></div>
+      <div id="pollActive"></div>
+      <div id="pollCreate"></div>
+      <div id="pollHistory"></div>
+    </div>
+  </div></section>
+  </div>
+  <div class="view amb-paused" id="view-pack" hidden="">
+<!-- ================= PACKING TAB ================= -->
+  <section id="packSec"><div class="wrap">
+    <div class="sec-head reveal" style="padding-bottom:0"><div class="label">Packing List</div><h2>Don't forget <span class="serif">a thing.</span></h2></div>
+    <div class="pack-card reveal" id="packCard">
+      <div class="pack-top"><span class="label">Gear Check</span><span class="pack-count" id="packCount">—</span></div>
+      <div class="pack-prog"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div>
+      <div class="pack-cats" id="packCats">
+        <button class="pack-cat-btn on" data-cat="all">All</button>
+        <button class="pack-cat-btn" data-cat="clothes">Clothes</button>
+        <button class="pack-cat-btn" data-cat="electronics">Electronics</button>
+        <button class="pack-cat-btn" data-cat="documents">Documents</button>
+        <button class="pack-cat-btn" data-cat="buds">Buds</button>
+        <button class="pack-cat-btn" data-cat="misc">Misc</button>
+      </div>
+      <div class="pack-list" id="packList"><p class="pack-empty">Nothing yet — add the first item.</p></div>
+      <div class="pack-add">
+        <div class="pack-add-row">
+          <input class="pack-input" id="packInput" type="text" placeholder="Add an item…" maxlength="120">
+          <button class="pack-submit" id="packSubmit">Add</button>
+        </div>
+        <div class="pack-add-row">
+          <select class="pack-select" id="packCat">
+            <option value="misc">Misc</option>
+            <option value="clothes">Clothes</option>
+            <option value="electronics">Electronics</option>
+            <option value="documents">Documents</option>
+            <option value="buds">Buds</option>
+          </select>
+          <select class="pack-select" id="packWho" style="flex:1">
+            <option value="Everyone">Everyone</option>
+          </select>
+        </div>
       </div>
     </div>
   </div></section>
@@ -1567,6 +1574,8 @@ img{max-width:100%}
   <button type="button" class="tab" data-view="split"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"></path><circle cx="12" cy="6" r="1.7"></circle><circle cx="12" cy="18" r="1.7"></circle></svg><span>Split</span></button>
   <button type="button" class="tab" data-view="fifa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"></path></svg><span>FIFA</span></button>
   <button type="button" class="tab" data-view="buds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"></path><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"></path><path d="M12 21v-6"></path></svg><span>Buds</span></button>
+  <button type="button" class="tab" data-view="poll"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg><span>Poll</span></button>
+  <button type="button" class="tab" data-view="pack"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg><span>Pack</span></button>
   <!--ADMIN_DOCK-->
 </nav>
 
@@ -2480,7 +2489,7 @@ updateFoodPreview();
    Single-document app shell: five views, hash-deep-linkable.
    #food / #photos / #split / #fifa open that view at the top;
    section hashes (#stay, #days) land on Home, scrolled there. */
-var V3_VIEWS=['home','food','photos','split','fifa','buds','admin'];
+var V3_VIEWS=['home','food','photos','split','fifa','buds','poll','pack','admin'];
 var cineEl=document.getElementById('cinematic');
 function showView(name){
  V3_VIEWS.forEach(function(v){var el=document.getElementById('view-'+v); if(el)el.hidden=(v!==name);});
@@ -2497,7 +2506,7 @@ function applyRoute(){
  if(h&&h!=='top'){var el=document.getElementById(h); if(el)setTimeout(function(){el.scrollIntoView({block:'start'})},80);}
  else window.scrollTo(0,0);
 }
-document.querySelectorAll('.tabbar .tab').forEach(function(t){
+document.querySelectorAll('.tabbar .tab,[data-view].prev-card').forEach(function(t){
  t.addEventListener('click',function(){
    var v=t.getAttribute('data-view');
    if((location.hash||'')==='#'+v)applyRoute(); else location.hash=v;
@@ -3636,8 +3645,10 @@ renderBuds();
    var total=_packItems.length, done=_packItems.filter(function(i){return i.checkedBy;}).length;
    var fill=document.getElementById('packProgFill');
    var count=document.getElementById('packCount');
+   var prev=document.getElementById('packPrevLine');
    if(count)count.textContent=done+' / '+total+' packed';
    if(fill)fill.style.width=(total?Math.round(done/total*100):0)+'%';
+   if(prev)prev.textContent=total?done+' / '+total+' packed':'Nothing added yet';
  }
  function renderPack(){
    var list=document.getElementById('packList');
