@@ -20,6 +20,8 @@ if (missing.length > 0) {
   process.exit(1);
 }
 const ISSUER = process.env.ZITADEL_ISSUER.replace(/\/$/, '');
+const SERVICE_TOKEN = process.env.ZITADEL_SERVICE_TOKEN || '';
+const WEBAUTHN_RP_ID = process.env.WEBAUTHN_RP_ID || 'crcmz.me';
 
 // ---------- Photo Wall storage ----------
 // Uploads live on this server's disk under UPLOADS_DIR (default
@@ -157,12 +159,88 @@ async function main() {
 
   app.get('/healthz', (req, res) => res.status(200).type('text/plain').send('ok'));
 
+  // ---------- Passkey auth (when ZITADEL_SERVICE_TOKEN is set) ----------
+  app.post('/auth/passkey/begin', async (req, res) => {
+    if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
+    const identifier = (req.body && req.body.identifier || '').trim();
+    const challenge = { domain: WEBAUTHN_RP_ID, userVerificationRequirement: 'USER_VERIFICATION_REQUIREMENT_REQUIRED' };
+    let sessionBody;
+    if (identifier) {
+      let loginName = identifier;
+      if (identifier.includes('@')) {
+        try {
+          const sr = await fetch(`${ISSUER}/management/v1/users/_search`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ queries: [{ emailQuery: { emailAddress: identifier, method: 'TEXT_QUERY_METHOD_EQUALS' } }] }),
+          });
+          if (sr.ok) {
+            const data = await sr.json();
+            if (data.result && data.result.length > 0) loginName = data.result[0].preferredLoginName || identifier;
+          }
+        } catch (_) { /* use identifier as-is */ }
+      }
+      sessionBody = { checks: { user: { loginName } }, challenges: { webAuthN: challenge } };
+    } else {
+      sessionBody = { challenges: { webAuthN: challenge } };
+    }
+    try {
+      const r = await fetch(`${ISSUER}/v2/sessions`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(sessionBody),
+      });
+      if (!r.ok) return res.status(404).json({ error: 'could not start passkey flow' });
+      const data = await r.json();
+      const raw = data?.challenges?.webAuthN?.publicKeyCredentialRequestOptions;
+      if (!raw) return res.status(500).json({ error: 'no webauthn challenge returned' });
+      const options = raw.publicKey || raw;
+      res.json({ sessionId: data.sessionId, options });
+    } catch (e) {
+      console.error('[crcmz-trip] passkey/begin error:', e.message);
+      res.status(503).json({ error: 'service unavailable' });
+    }
+  });
+
+  app.post('/auth/passkey/complete', async (req, res) => {
+    if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
+    const { sessionId, assertion } = req.body || {};
+    if (!sessionId || !assertion) return res.status(400).json({ error: 'sessionId and assertion required' });
+    try {
+      const r = await fetch(`${ISSUER}/v2/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checks: { webAuthN: { credentialAssertionData: assertion } } }),
+      });
+      if (!r.ok) return res.status(401).json({ error: 'passkey verification failed' });
+      const sr = await fetch(`${ISSUER}/v2/sessions/${sessionId}`, {
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}` },
+      });
+      const userF = (await sr.json())?.session?.factors?.user || {};
+      const sub = userF.id || '';
+      if (!sub) return res.status(401).json({ error: 'session invalid' });
+      req.session.user = {
+        sub,
+        email: userF.loginName || '',
+        name: userF.displayName || userF.loginName || '',
+        preferred_username: userF.loginName || '',
+      };
+      const next = (typeof req.query.next === 'string' && req.query.next.startsWith('/')) ? req.query.next : (req.session.returnTo || '/');
+      delete req.session.returnTo;
+      res.json({ ok: true, next });
+    } catch (e) {
+      console.error('[crcmz-trip] passkey/complete error:', e.message);
+      res.status(503).json({ error: 'service unavailable' });
+    }
+  });
+
   app.get('/auth/login', (req, res) => {
     if (req.query.returnTo && typeof req.query.returnTo === 'string' && req.query.returnTo.startsWith('/')) {
       req.session.returnTo = req.query.returnTo;
     }
-    // Show custom sign-in page unless ?proceed=1 (the button posts that).
+    // Show custom sign-in page unless ?proceed=1 (OIDC fallback).
     if (!req.query.proceed) {
+      const hasPasskey = !!SERVICE_TOKEN;
       return res.type('html').send(`<!doctype html>
 <html lang="en">
 <head>
@@ -175,12 +253,11 @@ async function main() {
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#04060e;--surface:rgba(255,255,255,.04);--line:rgba(255,255,255,.09);--cream:#e9ecff;--muted:rgba(233,236,255,.45);--amber:#f2b33d;--amber-glow:rgba(242,179,61,.18)}
+:root{--bg:#04060e;--surface:rgba(255,255,255,.04);--line:rgba(255,255,255,.09);--cream:#e9ecff;--muted:rgba(233,236,255,.45);--amber:#f2b33d}
 html,body{height:100%;background:var(--bg);color:var(--cream);font-family:"IBM Plex Mono",monospace;-webkit-font-smoothing:antialiased}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);gap:0;position:relative;overflow:hidden}
-/* Background glow */
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);position:relative;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(242,179,61,.07),transparent 70%),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(100,120,255,.06),transparent 65%);pointer-events:none}
-.card{display:flex;flex-direction:column;align-items:center;gap:28px;width:100%;max-width:360px;padding:40px 32px 36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
+.card{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:360px;padding:40px 32px 36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
 .logo{display:flex;flex-direction:column;align-items:center;gap:10px}
 .logo-mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1a1d2e 0%,#0d0f1a 100%);border:1px solid rgba(242,179,61,.25);display:flex;align-items:center;justify-content:center}
 .logo-mark svg{width:28px;height:28px}
@@ -190,9 +267,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .copy{text-align:center;display:flex;flex-direction:column;gap:8px}
 .copy h1{font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--cream)}
 .copy p{font-size:12.5px;color:var(--muted);line-height:1.6;letter-spacing:.02em}
-.btn-signin{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;background:var(--amber);color:#09090e;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:700;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;text-decoration:none;transition:opacity .15s,transform .1s}
-.btn-signin:active{opacity:.85;transform:scale(.98)}
-.btn-signin svg{width:18px;height:18px;flex-shrink:0}
+input[type=email]{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--cream);font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.03em;outline:none;transition:border-color .15s}
+input[type=email]:focus{border-color:rgba(242,179,61,.5)}
+input[type=email]::placeholder{color:rgba(233,236,255,.3)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border:none;border-radius:12px;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13.5px;font-weight:700;letter-spacing:.08em;text-decoration:none;transition:opacity .15s,transform .1s}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-passkey{background:var(--amber);color:#09090e}
+.btn-oidc{background:rgba(255,255,255,.07);color:var(--cream);border:1px solid var(--line);font-size:12.5px;margin-top:-4px}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+.errmsg{font-size:12px;color:#f87171;text-align:center;min-height:18px;letter-spacing:.02em}
 .footer{font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7}
 </style>
 </head>
@@ -214,18 +298,67 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="divider"></div>
   <div class="copy">
     <h1>Welcome back</h1>
-    <p>Sign in with your CRCMZ account to&nbsp;access the trip hub.</p>
+    <p>Sign in with your CRCMZ account to access the trip hub.</p>
   </div>
-  <a class="btn-signin" href="/auth/login?proceed=1">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-      <polyline points="10 17 15 12 10 7"/>
-      <line x1="15" y1="12" x2="3" y2="12"/>
-    </svg>
+  ${hasPasskey ? `<input type="email" id="em" placeholder="your@email.com" autocomplete="username webauthn" autocapitalize="off" inputmode="email"/>
+  <div class="errmsg" id="errmsg"></div>
+  <button class="btn btn-passkey" id="pkBtn" onclick="passkeyLogin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    Sign in with Passkey
+  </button>
+  <a class="btn btn-oidc" href="/auth/login?proceed=1">Use password instead</a>` : `<a class="btn btn-passkey" href="/auth/login?proceed=1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
     Sign in with CRCMZ
-  </a>
+  </a>`}
   <div class="footer">CRCMZ · auth.crcmz.me</div>
 </div>
+${hasPasskey ? `<script>
+function b64url(buf){return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=/g,'')}
+function fromB64url(s){const pad='='.repeat((4-s.length%4)%4);return Uint8Array.from(atob((s+pad).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)).buffer}
+function showErr(msg){document.getElementById('errmsg').textContent=msg}
+
+let _conditionalAbort=null;
+async function _begin(identifier,silent){
+  const br=await fetch('/auth/passkey/begin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(identifier?{identifier}:{})});
+  if(!br.ok){if(!silent)showErr((await br.json()).error||'Could not start passkey flow.');return null;}
+  const {sessionId,options}=await br.json();
+  options.challenge=fromB64url(options.challenge);
+  if(options.allowCredentials)options.allowCredentials=options.allowCredentials.map(c=>({...c,id:fromB64url(c.id)}));
+  return {sessionId,options};
+}
+async function _complete(sessionId,cred){
+  const assertion={id:cred.id,rawId:b64url(cred.rawId),type:cred.type,response:{clientDataJSON:b64url(cred.response.clientDataJSON),authenticatorData:b64url(cred.response.authenticatorData),signature:b64url(cred.response.signature),userHandle:cred.response.userHandle?b64url(cred.response.userHandle):null}};
+  const cr=await fetch('/auth/passkey/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,assertion})});
+  if(!cr.ok){showErr((await cr.json()).error||'Passkey verification failed.');return;}
+  window.location.href=(await cr.json()).next||'/';
+}
+async function passkeyLogin(){
+  if(!window.PublicKeyCredential){showErr('Passkeys not supported in this browser.');return;}
+  if(_conditionalAbort){_conditionalAbort.abort();_conditionalAbort=null;}
+  const identifier=document.getElementById('em').value.trim();
+  if(!identifier){document.getElementById('em').focus();showErr('Enter your email first.');return;}
+  const btn=document.getElementById('pkBtn');
+  btn.disabled=true;btn.textContent='Waiting for passkey…';
+  try{
+    const began=await _begin(identifier);
+    if(!began)return;
+    const cred=await navigator.credentials.get({publicKey:began.options});
+    await _complete(began.sessionId,cred);
+  }catch(e){
+    if(e.name!=='NotAllowedError')showErr('Passkey error: '+e.message);
+  }finally{btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Sign in with Passkey';}
+}
+(async()=>{
+  if(!window.PublicKeyCredential)return;
+  const ok=await PublicKeyCredential.isConditionalMediationAvailable?.()??false;
+  if(!ok)return;
+  const began=await _begin('',true);
+  if(!began)return;
+  _conditionalAbort=new AbortController();
+  try{const cred=await navigator.credentials.get({publicKey:began.options,mediation:'conditional',signal:_conditionalAbort.signal});await _complete(began.sessionId,cred);}
+  catch(e){if(e.name!=='AbortError'&&e.name!=='NotAllowedError')console.warn('conditional passkey:',e);}
+})();
+</script>` : ''}
 </body>
 </html>`);
     }
