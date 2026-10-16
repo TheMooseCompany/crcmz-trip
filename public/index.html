@@ -2351,7 +2351,7 @@ applyRoute();
     a.setAttribute('aria-label', p.originalName||'Trip photo');
     if(p.kind==='image'){
       var img=document.createElement('img');
-      img.src=p.url; img.alt=p.originalName||'Trip photo'; img.loading='lazy';
+      img.src=p.thumb||p.url; img.alt=p.originalName||'Trip photo'; img.loading='lazy';
       a.appendChild(img);
     } else {
       var play=document.createElement('span');

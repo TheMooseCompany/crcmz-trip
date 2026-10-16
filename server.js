@@ -220,17 +220,30 @@ async function main() {
   app.get('/api/photos', requireAuth, (req, res) => {
     const index = readIndex();
     const items = Object.values(index)
-      .filter((m) => !m.hidden && !m.immichId && fs.existsSync(path.join(UPLOADS_DIR, m.name)))
+      .filter((m) => {
+        if (m.hidden) return false;
+        // Keep if Immich-backed (proxy URL) or still local
+        return m.immichId || fs.existsSync(path.join(UPLOADS_DIR, m.name));
+      })
       .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
-      .map((m) => ({
-        name: m.name,
-        originalName: m.originalName,
-        url: `/uploads/${encodeURIComponent(m.name)}`,
-        uploadedBy: m.uploadedBy,
-        uploadedAt: m.uploadedAt,
-        size: m.size,
-        kind: IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video',
-      }));
+      .map((m) => {
+        const url = m.immichId
+          ? `/album/asset/${m.immichId}/original`
+          : `/uploads/${encodeURIComponent(m.name)}`;
+        const thumb = m.immichId
+          ? `/album/asset/${m.immichId}/thumbnail`
+          : `/uploads/${encodeURIComponent(m.name)}`;
+        return {
+          name: m.name,
+          originalName: m.originalName,
+          url,
+          thumb,
+          uploadedBy: m.uploadedBy,
+          uploadedAt: m.uploadedAt,
+          size: m.size,
+          kind: IMAGE_EXT.has(path.extname(m.name).toLowerCase()) ? 'image' : 'video',
+        };
+      });
     res.json({ photos: items });
   });
 
