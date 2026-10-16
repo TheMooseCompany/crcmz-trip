@@ -786,6 +786,41 @@ body.reduced .days-layout{display:block}
 .poll-create-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .poll-btn-submit{background:var(--amber);border:none;border-radius:10px;padding:9px 18px;color:#221A04;font-weight:700;font-size:13px;cursor:pointer}
 .poll-btn-close,.poll-btn-cancel{background:rgba(255,255,255,.08);border:none;border-radius:10px;padding:9px 16px;color:var(--cream);font-weight:600;font-size:13px;cursor:pointer}
+/* --- flight cards --- */
+.fl-sec{padding-top:0}
+.fl-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#0D1533,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
+.fl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fl-airline{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.fl-number{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--amber2)}
+.fl-person-chip{font-family:"IBM Plex Mono",monospace;font-size:10px;background:rgba(165,180,255,.15);color:var(--peri);border-radius:4px;padding:2px 8px}
+.fl-route{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
+.fl-code{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1}
+.fl-route-mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.fl-arrow-line{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,239,224,.2),transparent);position:relative}
+.fl-arrow-line::after{content:'›';position:absolute;right:-4px;top:-9px;font-size:16px;color:rgba(245,239,224,.3)}
+.fl-duration{font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--muted2);letter-spacing:.12em}
+.fl-times{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px}
+.fl-time-col{display:flex;flex-direction:column;gap:2px}
+.fl-time-col:last-child{text-align:right;align-items:flex-end}
+.fl-time{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:700;color:var(--cream);line-height:1}
+.fl-airport{font-size:11px;color:var(--muted);margin-top:1px}
+.fl-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.fl-tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--muted)}
+.fl-wifi{color:#60A5FA}
+.fl-gate-row{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--amber2);margin-bottom:8px}
+.fl-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.fl-status{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:5px 12px;border-radius:99px}
+.fl-status.scheduled{background:rgba(165,180,255,.12);color:var(--peri)}
+.fl-status.on-time{background:rgba(74,222,128,.12);color:#4ade80}
+.fl-status.delayed{background:rgba(251,146,60,.12);color:#fb923c}
+.fl-status.boarding{background:rgba(96,165,250,.18);color:#60a5fa;animation:pollPulse 1.2s ease-in-out infinite}
+.fl-status.departed{background:rgba(192,132,252,.12);color:#c084fc}
+.fl-status.landed{background:rgba(74,222,128,.18);color:#4ade80}
+.fl-status.cancelled{background:rgba(248,113,113,.12);color:#f87171}
+.fl-status-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.fl-track{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--peri);text-decoration:none;padding:5px 12px;border:1px solid rgba(165,180,255,.25);border-radius:99px;transition:background .15s}
+.fl-track:hover{background:rgba(165,180,255,.1)}
+.fl-notes{font-size:13px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid rgba(245,239,224,.07)}
 /* poll history */
 .poll-history{margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,239,224,.07)}
 .poll-hist-label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:6px}
@@ -1188,6 +1223,9 @@ img{max-width:100%}
         </g><g id="cityTX" class="city-g" style="--tx: 531px; --ty: 394px; transform: translate(531px, 394px) scale(0.725);" transform="translate(531,394)">
           <circle r="3" fill="none" stroke="#F5EFE0" stroke-width="1.4"></circle>
           <text y="30" text-anchor="middle" fill="#A9A5C6" font-family="Space Grotesk, sans-serif" font-size="11" letter-spacing="2">TEXAS</text>
+        </g><g id="cityYVR" class="city-g" style="--tx: 358px; --ty: 247px; transform: translate(358px, 247px) scale(0.725);" transform="translate(358,247)">
+          <circle r="3" fill="none" stroke="#F5EFE0" stroke-width="1.4"></circle>
+          <text y="-14" text-anchor="middle" fill="#A9A5C6" font-family="Space Grotesk, sans-serif" font-size="11" letter-spacing="2">VANCOUVER</text>
         </g><g id="cityYYC" class="city-g" style="--tx: 417px; --ty: 231px; transform: translate(417px, 231px) scale(0.725);" transform="translate(417,231)">
           <circle class="pulse" r="8" fill="none" stroke="#F2B33D" stroke-width="1.6" opacity="0" style="animation: auto ease 0s 1 normal none running none;"></circle>
           <circle class="pulse p2" r="8" fill="none" stroke="#F2B33D" stroke-width="1.2" opacity="0" style="animation: auto ease 0s 1 normal none running none;"></circle>
@@ -1290,6 +1328,10 @@ img{max-width:100%}
 <!-- ================= NEXT UP ================= -->
   <section id="nextUpSec"><div class="wrap">
     <div class="card nu-card reveal attention" id="nextUpCard"><div class="label">Next up · Thu 29</div><div class="nu-title">Moiz lands.</div><p class="nu-body">InterestingSoup (Moiz) lands in Calgary. Landing time: …</p><span class="nu-att">⚠ Landing time still to come</span></div>
+  </div></section>
+<!-- ================= FLIGHTS ================= -->
+  <section id="flightsSec" class="fl-sec"><div class="wrap">
+    <div id="flightsCards"></div>
   </div></section>
   <!-- ================= PREVIEWS (Home) ================= -->
   <section id="previews"><div class="wrap">
@@ -1834,7 +1876,8 @@ revealCheck();
    CSS scroll-driven animations previously drove this on supporting
    browsers; on the user's iPhone they ran to their end keyframes at
    load, so the page opened on the landed frame. They are gone. */
-var P={YYC:{x:417,y:231},CA:{x:364,y:349},TX:{x:531,y:394},CAc:{x:390,y:220},TXc:{x:474,y:227}};
+var P={YYC:{x:417,y:231},CA:{x:364,y:349},TX:{x:531,y:394},YVR:{x:358,y:247},
+       CAc1:{x:350,y:295},CAc2:{x:382,y:224},TXc1:{x:430,y:256},TXc2:{x:382,y:224}};
 var world=document.getElementById('world');
 var bigWord=document.getElementById('bigWord'),heroLayer=document.getElementById('heroLayer');
 var heroLate=heroLayer.querySelector('.hero-late');
@@ -1855,10 +1898,11 @@ var detailLayer=document.getElementById('detailLayer');
 function qPt(a,c,b,t){var u=1-t;return {x:u*u*a.x+2*u*t*c.x+t*t*b.x, y:u*u*a.y+2*u*t*c.y+t*t*b.y}}
 function qAng(a,c,b,t){var dx=2*(1-t)*(c.x-a.x)+2*t*(b.x-c.x), dy=2*(1-t)*(c.y-a.y)+2*t*(b.y-c.y);return Math.atan2(dy,dx)*180/Math.PI+90}
 function qPath(a,c,b){return "M"+a.x+","+a.y+" Q"+c.x+","+c.y+" "+b.x+","+b.y}
-document.getElementById('arcCA').setAttribute('d',qPath(P.CA,P.CAc,P.YYC));
-document.getElementById('arcTX').setAttribute('d',qPath(P.TX,P.TXc,P.YYC));
-document.getElementById('drawCA').setAttribute('d',qPath(P.CA,P.CAc,P.YYC));
-document.getElementById('drawTX').setAttribute('d',qPath(P.TX,P.TXc,P.YYC));
+function qPath2(a,c1,v,c2,b){return "M"+a.x+","+a.y+" Q"+c1.x+","+c1.y+" "+v.x+","+v.y+" Q"+c2.x+","+c2.y+" "+b.x+","+b.y}
+document.getElementById('arcCA').setAttribute('d',qPath2(P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC));
+document.getElementById('arcTX').setAttribute('d',qPath2(P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC));
+document.getElementById('drawCA').setAttribute('d',qPath2(P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC));
+document.getElementById('drawTX').setAttribute('d',qPath2(P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC));
 /* V5 parallax planes: regroup the scene into depth layers. The world
    (map) rides at 1x; the arc + plane layer leans in at ~1.15x around
    the YYC focal point; the label layer (peer cities + city markers)
@@ -1878,7 +1922,7 @@ var labelLayer=document.createElementNS(SVGNS,'g'); labelLayer.id='labelLayer';
 (function(){
  var anchor=document.getElementById('detailLayer');
  anchor.parentNode.insertBefore(labelLayer,anchor);
- ['detailLayer','cityCA','cityTX','cityYYC'].forEach(function(id){
+ ['detailLayer','cityCA','cityYVR','cityTX','cityYYC'].forEach(function(id){
    var n=document.getElementById(id); if(n)labelLayer.appendChild(n);
  });
 })();
@@ -1887,6 +1931,7 @@ var railFill=document.getElementById('cineRailFill');
 var yycText=document.getElementById('yycText');
 var drawCAEl=document.getElementById('drawCA'),drawTXEl=document.getElementById('drawTX');
 document.getElementById('cityCA').setAttribute('transform','translate('+P.CA.x+','+P.CA.y+')');
+document.getElementById('cityYVR').setAttribute('transform','translate('+P.YVR.x+','+P.YVR.y+')');
 document.getElementById('cityTX').setAttribute('transform','translate('+P.TX.x+','+P.TX.y+')');
 document.getElementById('cityYYC').setAttribute('transform','translate('+P.YYC.x+','+P.YYC.y+')');
 var pulses=document.querySelectorAll('#cityYYC .pulse');
@@ -1895,8 +1940,13 @@ function buildDots(id,a,c,b,n){
  for(var i=0;i<n;i++){var pt=qPt(a,c,b,i/(n-1));html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+pt.y.toFixed(1)+'" r="2.3" opacity="0"/>'}
  g.innerHTML=html; return g.querySelectorAll('circle');
 }
-var dotsCA=buildDots('dotsCA',P.CA,P.CAc,P.YYC,42);
-var dotsTX=buildDots('dotsTX',P.TX,P.TXc,P.YYC,42);
+function buildDotsVia(id,a,c1,v,c2,b,n){
+ var g=document.getElementById(id),html='';
+ for(var i=0;i<n;i++){var ti=i/(n-1),pt;if(ti<0.5){pt=qPt(a,c1,v,ti*2)}else{pt=qPt(v,c2,b,(ti-0.5)*2)}html+='<circle cx="'+pt.x.toFixed(1)+'" cy="'+pt.y.toFixed(1)+'" r="2.3" opacity="0"/>'}
+ g.innerHTML=html; return g.querySelectorAll('circle');
+}
+var dotsCA=buildDotsVia('dotsCA',P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC,42);
+var dotsTX=buildDotsVia('dotsTX',P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC,42);
 var planeCA=document.getElementById('planeCA'),planeTX=document.getElementById('planeTX');
 var cityDots=detailLayer.querySelectorAll('.city-dot');
 var stylePulse=document.createElement('style');
@@ -1964,10 +2014,10 @@ if(!location.hash)window.scrollTo(0,0);
    Mode starves frame callbacks. City labels, planes and route dots are
    counter-scaled as the world zooms, so nothing balloons at ×7.2. */
 var STEPS=[
- {s:1.25,fx:435,fy:295,t:0,detail:0},
- {s:2.4,fx:428,fy:272,t:.35,detail:0},
- {s:3.9,fx:422,fy:252,t:.65,detail:.35},
- {s:5.6,fx:419,fy:240,t:.9,detail:.8},
+ {s:1.25,fx:432,fy:295,t:0,detail:0},
+ {s:2.4,fx:408,fy:267,t:.35,detail:0},
+ {s:3.9,fx:395,fy:249,t:.65,detail:.35},
+ {s:5.6,fx:409,fy:237,t:.9,detail:.8},
  {s:7.2,fx:417,fy:231,t:1,detail:1}
 ];
 function cineProgress(){
@@ -1995,6 +2045,7 @@ function renderProgress(p){
  world.style.transform='translate('+view.cx+'px,'+view.cy+'px) scale('+s.toFixed(3)+') translate('+(-fx)+'px,'+(-fy)+'px)';
  var inv=1/Math.sqrt(s),invF=1/s;
  document.getElementById('cityCA').style.transform='translate(364px,349px) scale('+inv.toFixed(3)+')';
+ document.getElementById('cityYVR').style.transform='translate(358px,247px) scale('+inv.toFixed(3)+')';
  document.getElementById('cityTX').style.transform='translate(531px,394px) scale('+inv.toFixed(3)+')';
  document.getElementById('cityYYC').style.transform='translate(417px,231px) scale('+inv.toFixed(3)+')';
  cityDots.forEach(function(g){
@@ -2002,16 +2053,18 @@ function renderProgress(p){
    g.style.transform='translate('+tx+','+ty+') scale('+invF.toFixed(3)+')';
  });
  detailLayer.style.opacity=st.detail;
- function fly(plane,dots,a,c,b,off){
+ function flyVia(plane,dots,a,c1,v,c2,b,off){
    var t=Math.max(0,Math.min(1,st.t*1.04-off));
-   var pt=qPt(a,c,b,t),ang=qAng(a,c,b,Math.min(t,.999));
+   var pt,ang,t2;
+   if(t<0.5){t2=t*2;pt=qPt(a,c1,v,t2);ang=qAng(a,c1,v,Math.min(t2,.999));}
+   else{t2=(t-0.5)*2;pt=qPt(v,c2,b,t2);ang=qAng(v,c2,b,Math.min(t2,.999));}
    plane.style.transform='translate('+pt.x.toFixed(1)+'px,'+pt.y.toFixed(1)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(1.2/Math.sqrt(s)).toFixed(3)+')';
    plane.setAttribute('opacity',st.t>=1?0:1);
    var dotO=.95*(1-.45*(i===4?1:0));
    for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}
  }
- fly(planeCA,dotsCA,P.CA,P.CAc,P.YYC,0);
- fly(planeTX,dotsTX,P.TX,P.TXc,P.YYC,.03);
+ flyVia(planeCA,dotsCA,P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC,0);
+ flyVia(planeTX,dotsTX,P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC,.03);
  var wantPulses=i>=3;
  if(wantPulses!==pulsesOn){pulsesOn=wantPulses;setPulses(wantPulses)}
  var bw=(p>0.42&&p<0.85)?Math.min(1,Math.min((p-0.42)/0.08,(0.85-p)/0.06)):0;
@@ -3904,6 +3957,89 @@ renderBuds();
 })();
 
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ================= Flights =================
+   Live flight cards on the home page. Fetched on load; re-fetched every 60s. */
+(function(){
+  var FL_STATUS_LABELS={
+    'scheduled':'Scheduled','on-time':'On Time','delayed':'Delayed',
+    'boarding':'Boarding','departed':'Departed','landed':'Landed','cancelled':'Cancelled'
+  };
+  var _flights=[];
+  function flTrackUrl(fn){
+    var code=fn.replace(/\s+/g,'').toUpperCase();
+    return 'https://www.flightradar24.com/data/flights/'+code.toLowerCase();
+  }
+  function renderFlights(){
+    var container=document.getElementById('flightsCards');
+    if(!container)return;
+    var TRIP=['2026-10-28','2026-10-29','2026-10-30','2026-10-31','2026-11-01'];
+    var visible=_flights.filter(function(f){return TRIP.indexOf(f.departureDate)>=0;});
+    visible.sort(function(a,b){
+      var d=a.departureDate.localeCompare(b.departureDate);
+      if(d)return d;
+      return (a.departureTime||'').localeCompare(b.departureTime||'');
+    });
+    if(!visible.length){container.innerHTML='';return;}
+    container.innerHTML=visible.map(function(f){
+      var st=f.status||'scheduled';
+      var stLabel=FL_STATUS_LABELS[st]||st;
+      var trackUrl=flTrackUrl(f.flightNumber);
+      var gateHtml=f.gate?'<div class="fl-gate-row">Gate '+escH(f.gate)+(f.terminal?' · '+escH(f.terminal):'')+'</div>'
+        :(f.terminal?'<div class="fl-gate-row">'+escH(f.terminal)+'</div>':'');
+      var metaParts=[];
+      if(f.aircraft)metaParts.push('<span class="fl-tag">'+escH(f.aircraft)+'</span>');
+      if(f.cabin)metaParts.push('<span class="fl-tag">'+escH(f.cabin)+'</span>');
+      if(f.hasWifi)metaParts.push('<span class="fl-tag fl-wifi">Wi-Fi</span>');
+      var metaTags=metaParts.join('');
+      var notesHtml=f.notes?'<p class="fl-notes">'+escH(f.notes)+'</p>':'';
+      return '<div class="fl-card">'
+        +'<div class="fl-header">'
+          +'<div><div class="fl-airline">'+escH(f.airline||f.flightNumber)+'</div>'
+            +'<div class="fl-number">'+escH(f.flightNumber)+'</div></div>'
+          +'<span class="fl-person-chip">'+escH(f.person)+'</span>'
+        +'</div>'
+        +'<div class="fl-route">'
+          +'<span class="fl-code">'+escH(f.originCode)+'</span>'
+          +'<div class="fl-route-mid">'
+            +'<div class="fl-arrow-line"></div>'
+            +'<div class="fl-duration">'+escH(f.duration)+'</div>'
+          +'</div>'
+          +'<span class="fl-code">'+escH(f.destinationCode)+'</span>'
+        +'</div>'
+        +'<div class="fl-times">'
+          +'<div class="fl-time-col">'
+            +'<div class="fl-time">'+escH(f.departureTime||'—')+'</div>'
+            +'<div class="fl-airport">'+escH(f.origin||f.originCode)+'</div>'
+          +'</div>'
+          +'<div class="fl-time-col">'
+            +'<div class="fl-time">'+escH(f.arrivalTime||'—')+'</div>'
+            +'<div class="fl-airport">'+escH(f.destination||f.destinationCode)+'</div>'
+          +'</div>'
+        +'</div>'
+        +(metaTags?'<div class="fl-meta">'+metaTags+'</div>':'')
+        +gateHtml
+        +'<div class="fl-footer">'
+          +'<span class="fl-status '+escH(st)+'">'
+            +'<span class="fl-status-dot"></span>'+escH(stLabel)
+          +'</span>'
+          +'<a class="fl-track" href="'+escH(trackUrl)+'" target="_blank" rel="noopener">Track ›</a>'
+        +'</div>'
+        +notesHtml
+        +'</div>';
+    }).join('');
+  }
+  function fetchFlights(){
+    fetch('/api/flights').then(function(r){return r.json();}).then(function(j){
+      _flights=j.flights||[];
+      renderFlights();
+      if(window.__flightsLoaded)window.__flightsLoaded(_flights);
+    }).catch(function(){});
+  }
+  fetchFlights();
+  setInterval(fetchFlights,60000);
+  window._getFlights=function(){return _flights;};
+})();
 
 /* ================= V5 · ambient pause + list reveals =================
    Ambient scenes pause while their view is off-screen. Food/Buds
