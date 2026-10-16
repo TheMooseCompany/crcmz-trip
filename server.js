@@ -47,7 +47,6 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 async function uploadToImmich(filePath, originalName, mtime) {
   if (!IMMICH_URL || !IMMICH_API_KEY) return null;
   try {
-    const { FormData, File } = await import('undici');
     const fileData = fs.readFileSync(filePath);
     const form = new FormData();
     form.append('assetData', new File([fileData], originalName));
@@ -56,7 +55,6 @@ async function uploadToImmich(filePath, originalName, mtime) {
     form.append('fileCreatedAt', mtime || new Date().toISOString());
     form.append('fileModifiedAt', mtime || new Date().toISOString());
     form.append('isFavorite', 'false');
-    const { fetch } = await import('undici');
     const r = await fetch(`${IMMICH_URL}/api/assets`, {
       method: 'POST',
       headers: { 'x-api-key': IMMICH_API_KEY },
@@ -555,7 +553,6 @@ async function main() {
 
     if (IMMICH_URL && IMMICH_API_KEY && IMMICH_ALBUM_ID) {
       try {
-        const { fetch } = await import('undici');
         const r = await fetch(`${IMMICH_URL}/api/albums/${encodeURIComponent(IMMICH_ALBUM_ID)}?withoutAssets=false`, {
           headers: { 'x-api-key': IMMICH_API_KEY },
         });
