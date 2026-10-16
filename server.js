@@ -375,6 +375,29 @@ async function main() {
     res.json({ usdCad: fxCache.rate, stale: !fxCache.ok });
   });
 
+  // Who is logged in, mapped to a Split roster person so the client can
+  // default the payer to the signed-in user instead of a fixed name.
+  const PERSON_ALIASES = [
+    ['Mutasif', ['mutasif', 'moose', 'themoosecompany']],
+    ['Moiz', ['moiz', 'soup', 'interestingsoup']],
+    ['Noor', ['noor']],
+    ['Samad', ['samad', 'asamad']],
+    ['Brendan', ['brendan']],
+    ['Zubi', ['zubi']],
+  ];
+  function matchPerson(user) {
+    if (!user) return null;
+    const hay = [user.name, user.preferred_username, user.email]
+      .filter(Boolean).join(' ').toLowerCase();
+    for (const [person, aliases] of PERSON_ALIASES) {
+      if (aliases.some((a) => hay.includes(a))) return person;
+    }
+    return null;
+  }
+  app.get('/api/me', requireAuth, (req, res) => {
+    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user) });
+  });
+
   app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
 
   app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
