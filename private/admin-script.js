@@ -396,7 +396,7 @@ function bindFlightParses(){
       if(!txt||!txt.value.trim())return;
       b.disabled=true; if(status)status.textContent='Parsing… (10–25s)';
       fetch('/api/flights/parse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt.value})})
-        .then(function(r){if(!r.ok&&r.headers.get('content-type')||''.indexOf('json')===-1)throw new Error('Server error '+r.status);return r.json();})
+        .then(function(r){return r.json();})
         .then(function(d){
           b.disabled=false;
           if(d.error){if(status)status.textContent='Error: '+d.error;return;}
