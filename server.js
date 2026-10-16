@@ -550,8 +550,36 @@ async function main() {
   });
 
   // ---------- Immich asset proxy (serves thumbnails/originals with API key server-side) ----------
+  // Album allowlist: only IDs that belong to IMMICH_ALBUM_ID may be proxied.
+  // Refreshed every 5 minutes so new uploads appear without a restart.
+  let albumAllowlist = new Set();
+  let allowlistFetchedAt = 0;
+  async function refreshAlbumAllowlist() {
+    if (!IMMICH_URL || !IMMICH_API_KEY || !IMMICH_ALBUM_ID) return;
+    try {
+      const qp = `albumId=${encodeURIComponent(IMMICH_ALBUM_ID)}&size=MONTH&withPartners=false&withStacked=false`;
+      const bucketsR = await fetch(`${IMMICH_URL}/api/timeline/buckets?${qp}`, { headers: { 'x-api-key': IMMICH_API_KEY } });
+      if (!bucketsR.ok) return;
+      const buckets = await bucketsR.json();
+      const ids = new Set();
+      for (const bucket of (Array.isArray(buckets) ? buckets : [])) {
+        const bR = await fetch(`${IMMICH_URL}/api/timeline/bucket?${qp}&timeBucket=${encodeURIComponent(bucket.timeBucket)}`, { headers: { 'x-api-key': IMMICH_API_KEY } });
+        if (!bR.ok) continue;
+        const col = await bR.json();
+        (col.id || []).forEach((id) => ids.add(id));
+      }
+      albumAllowlist = ids;
+      allowlistFetchedAt = Date.now();
+    } catch { /* keep stale list */ }
+  }
+  async function ensureAllowlist() {
+    if (Date.now() - allowlistFetchedAt > 5 * 60 * 1000) await refreshAlbumAllowlist();
+  }
+
   app.get('/album/asset/:id/thumbnail', requireAuth, async (req, res) => {
     if (!IMMICH_URL || !IMMICH_API_KEY) return res.status(404).end();
+    await ensureAllowlist();
+    if (!albumAllowlist.has(req.params.id)) return res.status(403).end();
     try {
       const r = await fetch(`${IMMICH_URL}/api/assets/${req.params.id}/thumbnail?size=preview`, {
         headers: { 'x-api-key': IMMICH_API_KEY },
@@ -566,6 +594,8 @@ async function main() {
 
   app.get('/album/asset/:id/original', requireAuth, async (req, res) => {
     if (!IMMICH_URL || !IMMICH_API_KEY) return res.status(404).end();
+    await ensureAllowlist();
+    if (!albumAllowlist.has(req.params.id)) return res.status(403).end();
     try {
       const r = await fetch(`${IMMICH_URL}/api/assets/${req.params.id}/original`, {
         headers: { 'x-api-key': IMMICH_API_KEY },
