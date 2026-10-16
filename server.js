@@ -1274,7 +1274,6 @@ document.addEventListener('keydown', function(e) {
     res.json({ active: s.active, history: (s.history || []).slice().reverse().slice(0, 20) });
   });
   app.post('/api/poll', requireAuth, (req, res) => {
-    if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
     const { question, options } = req.body || {};
     if (typeof question !== 'string' || question.trim().length < 3 || question.trim().length > 200) {
       return res.status(400).json({ error: 'Invalid question.' });
@@ -1306,7 +1305,6 @@ document.addEventListener('keydown', function(e) {
     res.json({ ok: true, active: s.active });
   });
   app.delete('/api/poll', requireAuth, (req, res) => {
-    if (!isAdminUser(req.session.user)) return res.status(403).json({ error: 'Admins only.' });
     const s = readPollStore();
     if (!s.active) return res.status(404).json({ error: 'No active poll.' });
     s.active.open = false;
