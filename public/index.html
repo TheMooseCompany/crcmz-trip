@@ -2498,7 +2498,7 @@ applyRoute();
     stage.addEventListener('pointercancel', function(){ if(dragging){ dragging=false; goTo(cur, true); } });
     stage.addEventListener('click', function(e){
       if(dragMoved){ dragMoved=false; return; }
-      if(e.target===stage||e.target===track||e.target.tagName==='IMG'||(e.target.classList&&e.target.classList.contains('pv-slide'))){
+      if(e.target===stage||e.target===track||(e.target.classList&&e.target.classList.contains('pv-slide'))){
         if(viewer) viewer.classList.toggle('chrome-off');
       }
     });
