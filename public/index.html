@@ -1111,12 +1111,12 @@ img{max-width:100%}
    content ends halfway down its 100vh, and the track's second half
    still had to be scrolled through before Home arrived, so a full
    screen of empty indigo sat between the hero and THE COUNTDOWN.
-   Once the landing settles, the driver adds .landed-fit and the
-   section closes up to its content: the stage leaves the sticky
-   track and sizes to the hero, so the countdown follows the hero
-   directly in the same screenful. The compaction is one-shot for
-   the session — the flight itself is untouched and replays on the
-   next page load. */
+   .landed-fit survives ONLY as the prefers-reduced-motion
+   presentation: with no scroll journey, the driver renders the
+   landed frame statically in a closed-up section. The live scroll
+   path never compacts - any resize or scroll re-base at the seam
+   reads as a page pop (owner's recordings, 2026-10-16) - so the
+   track stays 200vh and the hub scrolls in continuously. */
 #cinematic.landed-fit{height:auto}
 #cinematic.landed-fit .stage{position:relative;height:auto}
 #cinematic.landed-fit .hero-layer{position:relative;inset:auto}
@@ -2021,7 +2021,6 @@ function setPulses(on){
  });
 }
 skipBtn.addEventListener('click',function(){
- if(window.__landNow){window.__landNow();return;}
  var top=cine.offsetTop+cine.offsetHeight-window.innerHeight;
  window.scrollTo({top:top,behavior:REDUCED?'auto':'smooth'});
 });
@@ -2199,132 +2198,17 @@ if(REDUCED){
  window.addEventListener('resize',function(){fitScene();curP=-1;sprP.x=cineProgress();sprP.v=0;sprT=performance.now();renderProgress(sprP.x)});
  var driveInt=setInterval(driveCine,150);
  renderProgress(sprP.x);
- /* Reversible compaction (owner's archaeology order, 2026-10-16):
-    the builds he remembers as smooth never latched anything - the
-    frame was a pure function of scroll in BOTH directions over a
-    constant 200vh track, and the scroll->progress coupling (spring
-    240/31 chasing cineProgress) is byte-identical in every build
-    since. What broke it was compaction itself (3bf094f: one-shot,
-    standstill trigger, no release) and then the one-way latch
-    (2ad62c8: reliable landing, driver disconnected for the session).
-    This restores the original contract with the gap fix kept: the
-    spring settling at progress 1 compacts + re-bases + glides as the
-    latch did; scrolling back to the top of the page RELEASES it -
-    the section expands, scroll re-anchors to the same frame (the
-    track end for hero readers, +growth for hub readers), and the
-    spring resumes
-    rendering the flight from scroll in both directions. The driver
-    paints only while Home is the active view (the __cineHome gate
-    below, fed by showView); that gate, not a dead driver, is what
-    keeps flight frames out of the other tabs. */
- var glideStop=null;
- /* Landing glide (owner's recordings, 2026-10-16): the compaction
-    alone settles the hero at the top of the compacted section, which
-    on shorter viewports leaves the countdown tiles straddling the
-    dock. After the rebase, if the countdown block's bottom sits below
-    the visible line above the dock, glide the scroll by exactly that
-    delta (~480 ms easeOutCubic) so the tiles rest fully above the
-    dock. Any wheel/touch cancels instantly; reduced-motion never
-    glides (landNow is unreachable on the REDUCED path anyway). A
-    release (releaseCine) cancels a running glide via glideStop. */
- function glideToCountdown(){
-  if(REDUCED)return;
-  var cd=document.querySelector('.cd-block'),bar=document.querySelector('.tabbar');
-  if(!cd)return;
-  var dockTop=bar?bar.getBoundingClientRect().top:window.innerHeight;
-  var d=Math.round(cd.getBoundingClientRect().bottom-(dockTop-8));
-  if(d<=0)return;
-  var from=Math.max(0,window.scrollY),to=from+d,t0=performance.now(),dur=480,cancelled=false,lastY=from;
-  var de=document.documentElement,prevSB=de.style.scrollBehavior;
-  de.style.scrollBehavior='auto';
-  function stop(){cancelled=true;if(glideStop===stop)glideStop=null;de.style.scrollBehavior=prevSB;window.removeEventListener('wheel',stop);window.removeEventListener('touchstart',stop);}
-  glideStop=stop;
-  window.addEventListener('wheel',stop,{passive:true});
-  window.addEventListener('touchstart',stop,{passive:true});
-  (function tick(now){
-   if(cancelled)return;
-   /* Yield to any scroll the glide did not write (a fresh swipe or
-      fling momentum): the reader always wins over the settle. */
-   if(Math.abs(window.scrollY-lastY)>6){stop();return;}
-   var t=Math.max(0,Math.min(1,(now-t0)/dur)),e=1-Math.pow(1-t,3);
-   lastY=Math.round(from+(to-from)*e);
-   window.scrollTo(0,lastY);
-   if(t<1)requestAnimationFrame(tick); else stop();
-  })(t0);
- }
- var fitDone=false,landedArmed=false,releaseHold=false;
- function landNow(){
-  if(fitDone)return; fitDone=true; landedArmed=false; releaseHold=false;
-  var y=window.scrollY,hBefore=cine.offsetHeight;
-  cine.classList.add('landed-fit');
-  void cine.offsetHeight;
-  var delta=hBefore-cine.offsetHeight;
-  heroLayer.classList.add('landed'); heroLayer.style.pointerEvents='auto';
-  skipBtn.style.display='none'; scrollCue.style.display='none';
-  renderProgress(1);
-  if(delta>0){
-   var landY=cine.offsetTop+hBefore-window.innerHeight,de=document.documentElement,prevSB=de.style.scrollBehavior;
-   /* Instant rebase: the page's CSS smooth-scroll would otherwise
-      animate this jump, and the glide below would measure the
-      countdown mid-animation and conclude it is not cut. */
-   de.style.scrollBehavior='auto';
-   if(y>landY+2)window.scrollTo(0,Math.max(cine.offsetTop,y-delta));
-   else window.scrollTo(0,cine.offsetTop);
-   de.style.scrollBehavior=prevSB;
-  }
-  glideToCountdown();
- }
- function releaseCine(){
-  if(!fitDone)return;
-  if(glideStop)glideStop();
-  var y=window.scrollY,hCompact=cine.offsetHeight,top=cine.offsetTop;
-  cine.classList.remove('landed-fit');
-  void cine.offsetHeight;
-  var hFull=cine.offsetHeight;
-  fitDone=false; landedArmed=false;
-  /* The expansion parks the reader on the same frame they were
-     reading. On the hero itself (scroll within the compacted
-     section) that frame is the landed hero, which in the expanded
-     geometry lives at the END of the track - not at scroll +
-     growth. Below the section, the hub content shifts by the exact
-     growth so it does not move on screen. The hold then keeps
-     fitCheck from re-compacting in the same beat: the spring is
-     settled at 1 here by design, indistinguishable from a fresh
-     landing; it clears once the reader scrolls away from the
-     landed position in either direction. */
-  releaseHold=true;
-  skipBtn.style.display=''; scrollCue.style.display='';
-  var de=document.documentElement,prevSB=de.style.scrollBehavior;
-  de.style.scrollBehavior='auto';
-  if(y<=top+hCompact)window.scrollTo(0,top+hFull-window.innerHeight);
-  else window.scrollTo(0,y+(hFull-hCompact));
-  de.style.scrollBehavior=prevSB;
-  sprP.x=cineProgress(); sprP.v=0; sprT=performance.now(); curP=-1;
-  renderProgress(sprP.x);
- }
- window.__landNow=landNow;
+ /* Pure scroll scrub (owner's order, 2026-10-16): no compaction,
+    no latch, no glide. The 200vh track never resizes and scroll is
+    never re-based, so flying into the countdown is one continuous
+    scroll in both directions - the model the smooth pre-compaction
+    builds shipped. The driver paints only while Home is the active
+    view (the __cineHome gate below, fed by showView); that gate,
+    not a dead driver, is what keeps flight frames out of the other
+    tabs. Compaction survives only in the REDUCED-motion branch
+    above, which renders the landed frame statically and has no
+    scroll journey to interrupt. */
  window.__cineHome=function(on){ cineHome=!!on; if(on)gateSnap=true; };
- function fitCheck(){
-  if(!cineHome)return;
-  if(!fitDone){
-   if(releaseHold){
-    var landY2=cine.offsetTop+cine.offsetHeight-window.innerHeight;
-    if(window.scrollY<landY2-40||window.scrollY>landY2+40)releaseHold=false;
-   }
-   if(!releaseHold&&sprP.x>=0.999&&Math.abs(sprP.v)<0.004)landNow();
-   return;
-  }
-  /* Arm the release only once the reader has genuinely entered the
-     hub (the glide or a scroll of their own carried them past the
-     hero); the landing rebase itself parks the scroll at the section
-     top, which must not read as "scrolled back to the top" or the
-     compaction would undo itself in the same beat. Once armed,
-     returning to the top releases the flight. */
-  if(window.scrollY>cine.offsetTop+40)landedArmed=true;
-  else if(landedArmed&&window.scrollY<=cine.offsetTop+2)releaseCine();
- }
- window.addEventListener('scroll',fitCheck,{passive:true});
- var fitInt=setInterval(fitCheck,200);
 }
 
 
