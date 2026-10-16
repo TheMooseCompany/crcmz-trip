@@ -1877,7 +1877,7 @@ revealCheck();
    browsers; on the user's iPhone they ran to their end keyframes at
    load, so the page opened on the landed frame. They are gone. */
 var P={YYC:{x:417,y:231},CA:{x:364,y:349},TX:{x:531,y:394},YVR:{x:358,y:247},
-       CAc1:{x:350,y:295},CAc2:{x:382,y:224},TXc1:{x:330,y:305},TXc2:{x:382,y:224}};
+       CAc1:{x:350,y:295},CAc2:{x:382,y:224},TXc:{x:474,y:227}};
 var world=document.getElementById('world');
 var bigWord=document.getElementById('bigWord'),heroLayer=document.getElementById('heroLayer');
 var heroLate=heroLayer.querySelector('.hero-late');
@@ -1900,9 +1900,9 @@ function qAng(a,c,b,t){var dx=2*(1-t)*(c.x-a.x)+2*t*(b.x-c.x), dy=2*(1-t)*(c.y-a
 function qPath(a,c,b){return "M"+a.x+","+a.y+" Q"+c.x+","+c.y+" "+b.x+","+b.y}
 function qPath2(a,c1,v,c2,b){return "M"+a.x+","+a.y+" Q"+c1.x+","+c1.y+" "+v.x+","+v.y+" Q"+c2.x+","+c2.y+" "+b.x+","+b.y}
 document.getElementById('arcCA').setAttribute('d',qPath2(P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC));
-document.getElementById('arcTX').setAttribute('d',qPath2(P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC));
+document.getElementById('arcTX').setAttribute('d',qPath(P.TX,P.TXc,P.YYC));
 document.getElementById('drawCA').setAttribute('d',qPath2(P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC));
-document.getElementById('drawTX').setAttribute('d',qPath2(P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC));
+document.getElementById('drawTX').setAttribute('d',qPath(P.TX,P.TXc,P.YYC));
 /* V5 parallax planes: regroup the scene into depth layers. The world
    (map) rides at 1x; the arc + plane layer leans in at ~1.15x around
    the YYC focal point; the label layer (peer cities + city markers)
@@ -1946,7 +1946,7 @@ function buildDotsVia(id,a,c1,v,c2,b,n){
  g.innerHTML=html; return g.querySelectorAll('circle');
 }
 var dotsCA=buildDotsVia('dotsCA',P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC,42);
-var dotsTX=buildDotsVia('dotsTX',P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC,42);
+var dotsTX=buildDots('dotsTX',P.TX,P.TXc,P.YYC,42);
 var planeCA=document.getElementById('planeCA'),planeTX=document.getElementById('planeTX');
 var cityDots=detailLayer.querySelectorAll('.city-dot');
 var stylePulse=document.createElement('style');
@@ -2064,7 +2064,7 @@ function renderProgress(p){
    for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}
  }
  flyVia(planeCA,dotsCA,P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC,0);
- flyVia(planeTX,dotsTX,P.TX,P.TXc1,P.YVR,P.TXc2,P.YYC,.03);
+ (function fly(plane,dots,a,c,b,off){var t=Math.max(0,Math.min(1,st.t*1.04-off));var pt=qPt(a,c,b,t),ang=qAng(a,c,b,Math.min(t,.999));plane.style.transform='translate('+pt.x.toFixed(1)+'px,'+pt.y.toFixed(1)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(1.2/Math.sqrt(s)).toFixed(3)+')';plane.setAttribute('opacity',st.t>=1?0:1);var dotO=.95*(1-.45*(i===4?1:0));for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}})(planeTX,dotsTX,P.TX,P.TXc,P.YYC,.03);
  var wantPulses=i>=3;
  if(wantPulses!==pulsesOn){pulsesOn=wantPulses;setPulses(wantPulses)}
  var bw=(p>0.42&&p<0.85)?Math.min(1,Math.min((p-0.42)/0.08,(0.85-p)/0.06)):0;
