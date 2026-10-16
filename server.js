@@ -646,6 +646,15 @@ async function main() {
       try {
         // Always refresh the allowlist on gallery load so deletions take effect immediately.
         await refreshAlbumAllowlist();
+        // Prune index entries whose immichId is no longer in the album.
+        const idxToClean = readIndex();
+        let pruned = false;
+        for (const [name, meta] of Object.entries(idxToClean)) {
+          if (meta.immichId && !albumAllowlist.has(meta.immichId)) {
+            delete idxToClean[name]; pruned = true;
+          }
+        }
+        if (pruned) writeIndex(idxToClean);
         // Use timeline bucket API — the only Immich v1.100+ endpoint that
         // correctly filters assets to a specific album.
         const qp = `albumId=${encodeURIComponent(IMMICH_ALBUM_ID)}&size=MONTH&withPartners=false&withStacked=false`;
