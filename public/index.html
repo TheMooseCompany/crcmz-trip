@@ -2125,6 +2125,7 @@ flash of Home. The router clears the tag when it takes over. */
 .tt-side{display:flex;align-items:center;gap:7px;font-size:13.5px;min-height:24px}.tt-side i,.tt-tb i,.tt-lb i{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
 .tt-side span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tt-side b{font-variant-numeric:tabular-nums}.tt-side small{opacity:.6;font-weight:400}
 .tt-side.w{font-weight:700}.tt-side.w b{color:#FFC65C}.tt-side.l{opacity:.55}
+.tt-side b.lv{color:#8cff2b}
 .tt-ser{font-size:11px;font-weight:700;color:#8cff2b;margin-top:2px}
 .tt-fin{display:flex;gap:14px;flex-wrap:wrap}.tt-fin>div{min-width:180px}
 .tt-groups{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
@@ -3152,7 +3153,7 @@ fcRenderAll();
   function h(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
   function roundName(st,r,n){if(st==='GF')return r===1?'Grand final':'Final reset';if(st==='P')return '3rd place';if(st==='L')return r===n?'Losers final':'Losers R'+r;var left=n-r;return left===0?'Final':left===1?'Semis':left===2?'Quarters':'Round of '+Math.pow(2,left+1)}
   function side(m,s,E){var id=s===1?m.e1:m.e2,e=E[id],w=m.status==='played'&&m.winner_id&&m.winner_id===id,l=m.status==='played'&&m.winner_id&&m.winner_id!==id,sc=s===1?m.score1:m.score2,pn=s===1?m.pens1:m.pens2;
-    return '<div class="tt-side'+(w?' w':'')+(l?' l':'')+'"><i style="background:'+h(e?e.color:'transparent')+'"></i><span>'+h(e?e.name:((s===1?m.wait1:m.wait2)||(m.status==='bye'?'Bye':'TBD')))+'</span>'+(m.status==='played'?'<b>'+h(sc)+(pn!=null?' <small>('+h(pn)+')</small>':'')+'</b>':'')+'</div>'}
+    return '<div class="tt-side'+(w?' w':'')+(l?' l':'')+'"><i style="background:'+h(e?e.color:'transparent')+'"></i><span>'+h(e?e.name:((s===1?m.wait1:m.wait2)||(m.status==='bye'?'Bye':'TBD')))+'</span>'+(m.status==='played'?'<b>'+h(sc)+(pn!=null?' <small>('+h(pn)+')</small>':'')+'</b>':'')+(m.status==='pending'&&e&&(m.partial||[]).length?'<b class="lv">'+m.partial.filter(function(g){return s===1?g.s1>g.s2:g.s2>g.s1}).length+'</b>':'')+'</div>'}
   function card(m,E,champ){var p=(m.partial||[]),ser=m.playable&&p.length?'<div class="tt-ser">Series '+p.filter(function(g){return g.s1>g.s2}).length+'–'+p.filter(function(g){return g.s2>g.s1}).length+'</div>':'';return '<div class="tt-m'+(m.playable?' up':'')+(m.status==='bye'?' bye':'')+(champ&&m.winner_id===champ&&!m.next_id?' gold':'')+'">'+side(m,1,E)+side(m,2,E)+ser+'</div>'}
   function bracket(t,st,E,title){var ms=t.matches.filter(function(m){return m.stage===st&&m.status!=='void'});if(!ms.length)return '';
     var rs=[];ms.forEach(function(m){if(rs.indexOf(m.round)<0)rs.push(m.round)});rs.sort(function(a,b){return a-b});
@@ -3171,7 +3172,7 @@ fcRenderAll();
       if(fin.length)body+='<div class="tt-fin">'+fin.map(function(m){return '<div><div class="tt-rh">'+h(roundName(m.stage,m.round,1))+'</div>'+card(m,E,t.champion_id)+'</div>'}).join('')+'</div>'}
     var pct=t.progress.total?Math.round(t.progress.played/t.progress.total*100):0;
     return '<article class="tt" style="--gc:'+h(t.game_color)+'"><header><span class="tt-game">'+h(t.game_label)+' · '+h(t.mode_label)+' · '+h(t.format_label)+'</span><h3>'+h(t.name)+'</h3>'
-      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+t.progress.played+'/'+t.progress.total+' '+(t.kind==='ffa'?'games':'matches')+'</span></div></header>'
+      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+t.progress.played+'/'+t.progress.total+' '+(t.kind==='ffa'?'games':'matches')+(t.kind!=='ffa'&&(t.progress.games||0)>t.progress.played?' · '+t.progress.games+' games in':'')+'</span></div></header>'
       +(champ?'<div class="tt-champ">🏆 <b>'+h(champ.name)+'</b> '+(champ.members.length>1?'are':'is')+' champion</div>':'')
       +body+'<a class="tt-open" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ →</a></article>'}
   var timer=null;
