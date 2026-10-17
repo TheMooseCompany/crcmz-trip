@@ -60,8 +60,10 @@ nav>*{pointer-events:auto}
 .nav-cd{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;color:var(--amber2);border:1px solid var(--line-amber);padding:6px 11px;border-radius:999px;background:rgba(10,14,39,.88);white-space:nowrap}
 @media(max-width:640px){.nav-links a{display:none}.nav-links a:last-child{display:block}}
 /* ---------- Cinematic ---------- */
-#cinematic{position:relative;height:200vh;background:var(--deep)}
-.step-sentinel{position:absolute;left:0;width:8px;height:40vh;pointer-events:none;opacity:0}
+/* 300vh: the dive scrubs over two screens of scroll, so a quick flick still
+   shows the whole flight instead of skipping through it. */
+#cinematic{position:relative;height:300vh;background:var(--deep)}
+.step-sentinel{position:absolute;left:0;width:8px;height:60vh;pointer-events:none;opacity:0}
 #world,#planeCA,#planeTX,#cityCA,#cityTX,#cityYYC{transition:transform .45s var(--ease)}
 #detailLayer{transition:opacity .45s var(--ease)}
 .city-dot{transition:transform .45s var(--ease),opacity .45s var(--ease)}
@@ -1653,7 +1655,7 @@ img{max-width:100%}
 @media(max-width:760px){.days-visual{top:calc(var(--header-h) + 8px)}}
 
 /* ================= V8 · LANDED GEOMETRY (owner's screenshot) =================
-   The 200vh track is the flight's scroll budget, but in the landed
+   The 300vh track is the flight's scroll budget, but in the landed
    state it left a dead viewport behind the hero: the pinned stage's
    content ends halfway down its 100vh, and the track's second half
    still had to be scrolled through before Home arrived, so a full
@@ -1663,7 +1665,7 @@ img{max-width:100%}
    landed frame statically in a closed-up section. The live scroll
    path never compacts - any resize or scroll re-base at the seam
    reads as a page pop (owner's recordings, 2026-10-16) - so the
-   track stays 200vh and the hub scrolls in continuously. */
+   track stays 300vh and the hub scrolls in continuously. */
 #cinematic.landed-fit{height:auto}
 #cinematic.landed-fit .stage{position:relative;height:auto}
 #cinematic.landed-fit .hero-layer{position:relative;inset:auto}
@@ -1854,10 +1856,10 @@ flash of Home. The router clears the tag when it takes over. */
     <button id="skip" type="button" style="opacity: 1; pointer-events: auto;">Skip to the hub →</button>
   </div>
   <div class="step-sentinel" data-step="0" style="top:0"></div>
-  <div class="step-sentinel" data-step="1" style="top:40vh"></div>
-  <div class="step-sentinel" data-step="2" style="top:80vh"></div>
-  <div class="step-sentinel" data-step="3" style="top:120vh"></div>
-  <div class="step-sentinel" data-step="4" style="top:160vh"></div>
+  <div class="step-sentinel" data-step="1" style="top:60vh"></div>
+  <div class="step-sentinel" data-step="2" style="top:120vh"></div>
+  <div class="step-sentinel" data-step="3" style="top:180vh"></div>
+  <div class="step-sentinel" data-step="4" style="top:240vh"></div>
 </div>
 
 <main id="top">
@@ -2600,7 +2602,7 @@ revealCheck();
 
 /* ================= Cinematic =================
    One driver on every browser: the frame is a pure function of scroll
-   progress through the 200vh cinematic (see renderProgress below),
+   progress through the 300vh cinematic (see renderProgress below),
    written on scroll/rAF with a 150 ms backstop for Low Power Mode.
    CSS scroll-driven animations previously drove this on supporting
    browsers; on the user's iPhone they ran to their end keyframes at
@@ -2739,7 +2741,7 @@ if('scrollRestoration' in history)history.scrollRestoration='manual';
 if(!location.hash)window.scrollTo(0,0);
 
 /* ================= Cinematic driver (all browsers) =================
-   The frame is a pure function of scroll progress through the 200vh
+   The frame is a pure function of scroll progress through the 300vh
    cinematic, interpolated between the five keyframe states below and
    written on scroll events + rAF, with a 150 ms interval backstop so the
    frame converges to the true scroll position even when iOS Low Power
@@ -3097,7 +3099,7 @@ if(REDUCED){
  var driveInt=setInterval(queueDrive,150);
  renderProgress(sprP.x);
  /* Pure scroll scrub (owner's order, 2026-10-16): no compaction,
-    no latch, no glide. The 200vh track never resizes and scroll is
+    no latch, no glide. The 300vh track never resizes and scroll is
     never re-based, so flying into the countdown is one continuous
     scroll in both directions - the model the smooth pre-compaction
     builds shipped. The driver paints only while Home is the active
