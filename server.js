@@ -253,6 +253,46 @@ async function main() {
     }
   });
 
+  app.post('/auth/password/login', async (req, res) => {
+    if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
+    const { identifier, password } = req.body || {};
+    if (!identifier || !password) return res.status(400).json({ error: 'identifier and password required' });
+    try {
+      const r = await fetch(`${ISSUER}/v2/sessions`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checks: { user: { loginName: identifier.trim() }, password: { password } } }),
+      });
+      if (!r.ok) {
+        const errBody = await r.text();
+        console.error('[crcmz-trip] password/login Zitadel error:', r.status, errBody.slice(0, 200));
+        return res.status(401).json({ error: 'Incorrect email or password.' });
+      }
+      const data = await r.json();
+      const sessionId = data.sessionId;
+      if (!sessionId) return res.status(401).json({ error: 'Login failed.' });
+      const sr = await fetch(`${ISSUER}/v2/sessions/${sessionId}`, {
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}` },
+      });
+      const userF = (await sr.json())?.session?.factors?.user || {};
+      const sub = userF.id || '';
+      if (!sub) return res.status(401).json({ error: 'Session invalid.' });
+      req.session.user = {
+        sub,
+        email: userF.loginName || '',
+        name: userF.displayName || userF.loginName || '',
+        preferred_username: userF.loginName || '',
+      };
+      const next = (req.session.returnTo && req.session.returnTo !== req.path)
+        ? req.session.returnTo : '/';
+      delete req.session.returnTo;
+      res.json({ ok: true, next });
+    } catch (e) {
+      console.error('[crcmz-trip] password/login error:', e.message);
+      res.status(503).json({ error: 'service unavailable' });
+    }
+  });
+
   app.get('/auth/login', (req, res) => {
     if (req.query.returnTo && typeof req.query.returnTo === 'string' && req.query.returnTo.startsWith('/')) {
       req.session.returnTo = req.query.returnTo;
@@ -437,7 +477,13 @@ async function passkeyLogin(){
     if (req.path.startsWith('/api/')) {
       return res.status(401).json({ error: 'Not logged in.' });
     }
-    req.session.returnTo = req.originalUrl || '/';
+    // Only save the intended destination for browser navigations (text/html).
+    // Asset requests (fonts, JS, CSS, images) must never overwrite it — doing
+    // so causes a post-login redirect to a binary file, triggering a download.
+    const accept = req.get('Accept') || '';
+    if (accept.includes('text/html')) {
+      req.session.returnTo = req.originalUrl || '/';
+    }
     return res.redirect('/auth/login');
   }
 
@@ -848,6 +894,36 @@ Return ONLY a valid JSON object with no explanation or markdown:
       res.json({ ok: true, summary: parsed.summary || '', suggestions });
     } catch (e) {
       res.status(500).json({ error: e.message || 'recommend failed' });
+    }
+  });
+
+  // Tourney proxy — pulls active tournaments from app.crcmz.me using machine token
+  const CRCMZ_MAIN_TOKEN = process.env.CRCMZ_MACHINE_TOKEN || '';
+  app.get('/api/tourney', requireAuth, async (req, res) => {
+    if (!CRCMZ_MAIN_TOKEN) return res.json({ tournaments: [] });
+    try {
+      const r = await fetch('https://app.crcmz.me/api/tourney/tournaments?status=active', {
+        headers: { 'Authorization': `Bearer ${CRCMZ_MAIN_TOKEN}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) return res.json({ tournaments: [] });
+      const data = await r.json();
+      res.json({ tournaments: Array.isArray(data) ? data : [] });
+    } catch {
+      res.json({ tournaments: [] });
+    }
+  });
+  app.get('/api/tourney/:tid', requireAuth, async (req, res) => {
+    if (!CRCMZ_MAIN_TOKEN) return res.status(503).json({ error: 'not configured' });
+    try {
+      const r = await fetch(`https://app.crcmz.me/api/tourney/tournaments/${req.params.tid}`, {
+        headers: { 'Authorization': `Bearer ${CRCMZ_MAIN_TOKEN}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) return res.status(r.status).json({ error: 'upstream error' });
+      res.json(await r.json());
+    } catch (e) {
+      res.status(500).json({ error: 'fetch failed' });
     }
   });
 

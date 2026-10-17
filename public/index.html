@@ -537,7 +537,7 @@ body.switching .reveal,body.switching .rv,body.scrolling .reveal,body.scrolling 
 .nm-card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 .bud-card{content-visibility:auto;contain-intrinsic-size:auto 222px}
 html.booting .view{display:none!important}
-html.booting[data-boot="food"] #view-food,html.booting[data-boot="photos"] #view-photos,html.booting[data-boot="split"] #view-split,html.booting[data-boot="fifa"] #view-fifa,html.booting[data-boot="buds"] #view-buds,html.booting[data-boot="poll"] #view-poll,html.booting[data-boot="pack"] #view-pack{display:block!important}
+html.booting[data-boot="food"] #view-food,html.booting[data-boot="photos"] #view-photos,html.booting[data-boot="split"] #view-split,html.booting[data-boot="tourney"] #view-tourney,html.booting[data-boot="buds"] #view-buds,html.booting[data-boot="poll"] #view-poll,html.booting[data-boot="pack"] #view-pack{display:block!important}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
    (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
    .tabbar (0-1-0) and repaint the bar translucent cream on Food and
@@ -853,7 +853,7 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 #view-food::before{background:radial-gradient(560px 340px at 14% 4%,rgba(242,179,61,.16),transparent 65%),radial-gradient(640px 420px at 90% 42%,rgba(165,180,255,.12),transparent 65%)}
 #view-photos::before{background:radial-gradient(620px 380px at 82% 8%,rgba(165,180,255,.13),transparent 65%),radial-gradient(560px 360px at 10% 60%,rgba(242,179,61,.07),transparent 65%)}
 #view-split::before{background:radial-gradient(560px 340px at 86% 6%,rgba(165,180,255,.14),transparent 65%),radial-gradient(640px 420px at 8% 55%,rgba(242,179,61,.13),transparent 65%)}
-#view-fifa::before{background:radial-gradient(640px 400px at 16% 10%,rgba(165,180,255,.12),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(51,65,154,.22),transparent 70%)}
+#view-tourney::before{background:radial-gradient(640px 400px at 16% 10%,rgba(165,180,255,.12),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(51,65,154,.22),transparent 70%)}
 #view-buds::before{background:radial-gradient(600px 380px at 84% 12%,rgba(242,179,61,.10),transparent 65%),radial-gradient(620px 420px at 12% 78%,rgba(165,180,255,.10),transparent 65%)}
 /* Buds AI recommendation widget */
 .buds-ai-wrap{margin:20px 0 24px;display:flex;flex-direction:column;gap:12px}
@@ -1586,12 +1586,12 @@ img{max-width:100%}
 <script>/* Boot view (deep links): tag the hash's view before any view
 markup parses, so the first paint is the requested view, never a
 flash of Home. The router clears the tag when it takes over. */
-(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','split','fifa','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();</script>
+(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','split','tourney','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();</script>
 
 <nav>
   <a class="nav-brand" href="#top">CRCMZ&nbsp;TRIP</a>
   <div class="nav-links">
-    <a href="#stay">Stay</a><a href="#days">Days</a><a href="#fifa">FC 27</a>
+    <a href="#stay">Stay</a><a href="#days">Days</a><a href="#tourney">Tourney</a>
     <span class="nav-cd" id="navCd">T-MINUS 12D 15H 05M</span>
   </div>
 </nav>
@@ -1840,7 +1840,7 @@ flash of Home. The router clears the tag when it takes over. */
       <a class="nav-tile nt-amber reveal" href="#food"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M2.5 19.5h19"/><path d="M12 8V6.5"/><circle cx="12" cy="5" r="1"/></svg></span><span class="nav-name">Food Finder</span><span class="nav-line" id="foodPrevLine">98 spots · 10 breakfast</span><span class="nav-arrow" aria-hidden="true">→</span></a>
       <a class="nav-tile nt-peri reveal" href="#photos"><span class="nav-badge nav-badge-peri" id="photoTileBadge">5</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg></span><span class="nav-name">Photo Wall</span><span class="nav-line" id="photoPrevLine">5 shots on the wall</span><span class="nav-arrow" aria-hidden="true">→</span></a>
       <a class="nav-tile nt-cream reveal" href="#split"><span class="nav-badge" id="splitTileBadge">$37.36</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/><circle cx="12" cy="6" r="1.7"/><circle cx="12" cy="18" r="1.7"/></svg></span><span class="nav-name">The Split</span><span class="nav-line" id="splitPrevLine">Brendan owes Mutasif</span><span class="nav-arrow" aria-hidden="true">→</span></a>
-      <a class="nav-tile nt-indigo reveal" href="#fifa"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"/></svg></span><span class="nav-name">FC 27</span><span class="nav-line" id="fifaPrevLine">No results yet</span><span class="nav-arrow" aria-hidden="true">→</span></a>
+      <a class="nav-tile nt-indigo reveal" href="#tourney"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v7a5 5 0 0 1-10 0V3z"/><path d="M3 6h4M17 6h4M12 10v5M9 19h6M12 15v4"/></svg></span><span class="nav-name">Tourney</span><span class="nav-line" id="tourneyPrevLine">No active tournaments</span><span class="nav-arrow" aria-hidden="true">→</span></a>
       <a class="nav-tile nt-peri2 reveal" href="#buds"><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"/><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"/><path d="M12 21v-6"/></svg></span><span class="nav-name">Buds</span><span class="nav-line wrap">Flower · pre-rolls · edibles</span><span class="nav-arrow" aria-hidden="true">→</span></a>
       <button type="button" class="nav-tile nt-amber2 reveal" data-view="poll"><span class="nav-livedot" id="pollTileDot" hidden></span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg></span><span class="nav-name">Group Poll</span><span class="nav-line" id="pollPrevLine">No active poll</span><span class="nav-arrow" aria-hidden="true">→</span></button>
       <button type="button" class="nav-tile nav-tile-wide nt-cream2 reveal" data-view="pack"><span class="nav-badge" id="packTileBadge" hidden>40%</span><span class="nav-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg></span><span><span class="nav-name">Packing</span><span class="nav-line" id="packPrevLine">Loading…</span></span><span class="nav-bar"><i id="packTileBar"></i></span><span class="nav-arrow" aria-hidden="true">→</span></button>
@@ -2031,24 +2031,20 @@ flash of Home. The router clears the tag when it takes over. */
     </div>
   </div>
   </div>
-  <div class="view amb-paused" id="view-fifa" hidden="">
-<!-- ================= FC 27 TOURNAMENT ================= -->
-  <section id="fifa"><div class="wrap">
-    <div class="sec-head reveal"><div class="label peri">06 · FC 27 Tournament</div><h2>The 2v2v2 <span class="serif">title race.</span></h2><p>Three duos. Everyone plays everyone — the top two meet in the final.</p></div>
-    <div class="fc-head reveal"><span class="fc-logo-chip"><img src="assets/fc-logo.jpg" alt="EA Sports FC logo" loading="lazy"></span><span class="fc-wordmark">FC 27 · 2v2v2 Tournament</span></div>
-  </div>
-    <div id="fcChampBand" hidden=""><div class="label peri">Tournament Winners</div><div class="cb-title">Champions</div><div id="cbLogos"></div><div id="cbName"></div></div>
-  <div class="wrap">
-    <div id="fcChamp" style="display: none;"><div class="cl">Tournament Winners</div><div id="fcChampLogos"></div><div class="cn" id="fcChampName"></div><span class="champ-stamp">CHAMPIONS</span></div>
-    <h3 class="fc-h3 reveal">Title race</h3>
-    <p class="fc-sub reveal">Rows spring to their new spot, flash and count up as results land. A duo locked into the final wears the QUALIFIED pill.</p>
-    <div class="live-table reveal" id="fcRace"><div class="tbl-row tbl-head" aria-hidden="true"><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GF</span><span>GA</span><span>GD</span><span>Pts</span></div><div class="tbl-row trow" data-team="0" role="button" tabindex="0" aria-label="Highlight Asamad + Kaptaan matches"><div class="t-team"><div class="t-line1"><span class="t-rank">1</span><input class="fc-name" data-name="0" type="text" maxlength="28" value="Asamad + Kaptaan" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="2" role="button" tabindex="0" aria-label="Highlight Killer + Deception matches"><div class="t-team"><div class="t-line1"><span class="t-rank">2</span><input class="fc-name" data-name="2" type="text" maxlength="28" value="Killer + Deception" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div><div class="tbl-row trow" data-team="1" role="button" tabindex="0" aria-label="Highlight Moiz + Moose matches"><div class="t-team"><div class="t-line1"><span class="t-rank">3</span><input class="fc-name" data-name="1" type="text" maxlength="28" value="Moiz + Moose" aria-label="Team name"></div><div class="t-line2"><span class="t-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span></div></div><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num">0</span><span class="t-num pts" data-pts="0">0</span></div></div>
-    <h3 class="fc-h3 reveal">The gauntlet</h3>
-    <p class="fc-sub reveal">Thumb the scores in with the steppers. The final unlocks once all three group matches are played.</p>
-    <div class="gauntlet reveal" id="fcGauntlet"><div class="match"><div class="match-top"><span class="match-title">Match 1</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="0" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="0" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="0" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 2</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/soup.webp" alt="" loading="lazy"><img src="assets/moose.webp" alt="" loading="lazy"></span><span class="m-name">Moiz + Moose</span><span class="stepper"><button type="button" data-m="1" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="1" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="1" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match"><div class="match-top"><span class="match-title">Match 3</span><span class="match-status">Up next</span></div><div class="match-side"><span class="m-chips"><img src="assets/samad.webp" alt="" loading="lazy"><img src="assets/kap.webp" alt="" loading="lazy"></span><span class="m-name">Asamad + Kaptaan</span><span class="stepper"><button type="button" data-m="2" data-side="0" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="0" data-dir="1" aria-label="Plus">+</button></span></div><div class="match-side"><span class="m-chips"><img src="assets/killer.webp" alt="" loading="lazy"><img src="assets/decep.webp" alt="" loading="lazy"></span><span class="m-name">Killer + Deception</span><span class="stepper"><button type="button" data-m="2" data-side="1" data-dir="-1" aria-label="Minus">−</button><span class="val">–</span><button type="button" data-m="2" data-side="1" data-dir="1" aria-label="Plus">+</button></span></div></div><div class="match final locked"><div class="match-top"><span class="match-title">The Final</span><span class="match-status">Locked</span></div><p class="match-note">Top two after the group stage.</p><p class="match-note">Locked — finish all three group matches to open the final.</p></div></div>
-    <div class="fc-foot reveal">
-      <p class="fc-note">Scores live on this phone. Screenshot the race for the chat.</p>
-      <button class="btn danger" id="fcReset" type="button">Reset tournament</button>
+  <div class="view amb-paused" id="view-tourney" hidden="">
+<!-- ================= TOURNEY ================= -->
+  <section id="tourney"><div class="wrap">
+    <div class="sec-head reveal">
+      <div class="label peri">Tourney</div>
+      <h2>Live <span class="serif">tournaments.</span></h2>
+      <p>Active CRCMZ tournaments — brackets, scores, standings.</p>
+    </div>
+    <div id="tourneyContent" class="reveal" style="margin-top:20px"></div>
+    <div style="margin-top:28px;text-align:center" class="reveal">
+      <a href="https://app.crcmz.me/app/tourney" target="_blank" rel="noopener"
+         style="display:inline-block;padding:13px 28px;border-radius:50px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:.01em">
+        Full Experience →
+      </a>
     </div>
   </div></section>
   </div>
@@ -2103,7 +2099,7 @@ flash of Home. The router clears the tag when it takes over. */
   <button type="button" class="tab" data-view="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"></path><path d="M2.5 19.5h19"></path><path d="M12 8V6.5"></path><circle cx="12" cy="5" r="1"></circle></svg><span>Food</span></button>
   <button type="button" class="tab" data-view="photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M3 17l5-4 4 3 3-2 6 4"></path></svg><span>Photos</span></button>
   <button type="button" class="tab" data-view="split"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"></path><circle cx="12" cy="6" r="1.7"></circle><circle cx="12" cy="18" r="1.7"></circle></svg><span>Split</span></button>
-  <button type="button" class="tab" data-view="fifa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5l3.2 2.3-1.2 3.7h-4l-1.2-3.7z"></path></svg><span>FIFA</span></button>
+  <button type="button" class="tab" data-view="tourney"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v7a5 5 0 0 1-10 0V3z"/><path d="M3 6h4M17 6h4M12 10v5M9 19h6M12 15v4"/></svg><span>Tourney</span></button>
   <button type="button" class="tab" data-view="buds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"></path><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"></path><path d="M12 21v-6"></path></svg><span>Buds</span></button>
   <button type="button" class="tab" data-view="poll"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg><span>Poll</span></button>
   <button type="button" class="tab" data-view="pack"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg><span>Pack</span></button>
@@ -2753,7 +2749,8 @@ if(REDUCED){
 }
 
 
-/* ================= FC 27 tournament: title race + gauntlet ================= */
+/* ================= FC 27 tournament (legacy — section replaced by Tourney) ================= */
+if(false){
 var FC_KEY='crcmz-fc27-v2',FC_OLD_KEY='crcmz-fc27-v1';
 var FC_LOGOS={samad:'assets/samad.webp',kaptaan:'assets/kap.webp',moiz:'assets/soup.webp',moose:'assets/moose.webp',killer:'assets/killer.webp',deception:'assets/decep.webp'};
 function buildFcTeams(){
@@ -2973,6 +2970,74 @@ document.getElementById('fcReset').addEventListener('click',function(){
  selTeam=-1; fcSave(); fcRenderAll();
 });
 fcRenderAll();
+} // end legacy FIFA block
+// ── Tourney live feed ────────────────────────────────────────────────────────
+(function(){
+  var el=document.getElementById('tourneyContent');
+  var prevLine=document.getElementById('tourneyPrevLine');
+  function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+  function renderTeamDot(color){return '<span style="width:8px;height:8px;border-radius:50%;background:'+esc(color)+';display:inline-block;flex-shrink:0"></span>'}
+  function renderMatch(m){
+    var t1name=m.team1?esc(m.team1.name):'TBD',t2name=m.team2?esc(m.team2.name):'TBD';
+    var t1color=m.team1?m.team1.color:'#555',t2color=m.team2?m.team2.color:'#555';
+    var s1=m.score1!=null?'<b>'+m.score1+'</b>':'',s2=m.score2!=null?'<b>'+m.score2+'</b>':'';
+    var w1=m.winner_id&&m.team1&&m.winner_id===m.team1.id,w2=m.winner_id&&m.team2&&m.winner_id===m.team2.id;
+    return '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px">'
+      +'<div style="display:flex;align-items:center;gap:6px;font-weight:'+(w1?700:400)+'">'
+      +renderTeamDot(t1color)+'<span style="flex:1;font-size:13px">'+t1name+'</span>'+s1+'</div>'
+      +'<div style="font-size:11px;text-align:center;opacity:.4">vs</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-weight:'+(w2?700:400)+'">'
+      +renderTeamDot(t2color)+'<span style="flex:1;font-size:13px">'+t2name+'</span>'+s2+'</div>'
+      +'</div>';
+  }
+  function renderTournament(t){
+    var html='<div style="margin-bottom:24px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+      +'<span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,.25);color:#a5b4fc">'+esc(t.game)+'</span>'
+      +'<span style="font-size:13px;font-weight:600">'+esc(t.name)+'</span>'
+      +'</div>';
+    if(t.rounds&&t.rounds.length){
+      html+='<div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px">';
+      t.rounds.forEach(function(r){
+        var label=r.round===t.rounds.length?'Final':r.round===t.rounds.length-1?'Semi-Final':'Round '+r.round;
+        html+='<div style="min-width:180px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;opacity:.5;margin-bottom:8px">'+esc(label)+'</div>'
+          +'<div style="display:flex;flex-direction:column;gap:8px">';
+        r.matches.forEach(function(m){html+=renderMatch(m);});
+        html+='</div></div>';
+      });
+      html+='</div>';
+    }else{
+      html+='<p style="opacity:.5;font-size:14px">No bracket yet.</p>';
+    }
+    html+='</div>';
+    return html;
+  }
+  function load(){
+    fetch('/api/tourney',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){
+      var list=d.tournaments||[];
+      if(!el)return;
+      if(!list.length){
+        el.innerHTML='<p style="opacity:.5;font-size:14px;text-align:center">No active tournaments right now.</p>';
+        if(prevLine)prevLine.textContent='No active tournaments';
+        return;
+      }
+      if(prevLine)prevLine.textContent=list.length+' active';
+      // Load full detail for each
+      Promise.all(list.map(function(t){
+        return fetch('/api/tourney/'+t.id,{credentials:'same-origin'}).then(function(r){return r.json();});
+      })).then(function(details){
+        el.innerHTML=details.map(renderTournament).join('');
+      }).catch(function(){
+        el.innerHTML=details?details.map(renderTournament).join(''):'<p style="opacity:.5">Could not load brackets.</p>';
+      });
+    }).catch(function(){
+      if(el)el.innerHTML='<p style="opacity:.5;font-size:14px;text-align:center">Could not load tournaments.</p>';
+    });
+  }
+  // Load when tab becomes visible
+  document.addEventListener('viewchange',function(e){if(e.detail==='tourney')load();});
+  if(document.body.getAttribute('data-view')==='tourney')load();
+})();
 </script>
 <script>
 /* ================= Food Finder \u00b7 Night Market =================
@@ -3148,7 +3213,7 @@ updateFoodPreview();
    Single-document app shell: five views, hash-deep-linkable.
    #food / #photos / #split / #fifa open that view at the top;
    section hashes (#stay, #days) land on Home, scrolled there. */
-var V3_VIEWS=['home','food','photos','split','fifa','buds','poll','pack','admin'];
+var V3_VIEWS=['home','food','photos','split','tourney','buds','poll','pack','admin'];
 var cineEl=document.getElementById('cinematic');
 function showView(name){
  document.body.classList.add('switching');
@@ -3160,6 +3225,7 @@ function showView(name){
  cineEl.style.display=(name==='home')?'':'none';
  if(window.__cineHome)window.__cineHome(name==='home');
  if(window.revealCheck){requestAnimationFrame(revealCheck);setTimeout(revealCheck,140);}
+ document.dispatchEvent(new CustomEvent('viewchange',{detail:name}));
 }
 function routeTop(){var de=document.documentElement,prev=de.style.scrollBehavior;de.style.scrollBehavior='auto';window.scrollTo(0,0);de.style.scrollBehavior=prev;}
 function applyRoute(){
