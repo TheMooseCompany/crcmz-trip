@@ -309,39 +309,46 @@ async function main() {
 <title>Sign in · CRCMZ Trip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:ital,wght@1,500&display=swap" rel="stylesheet"/>
 <style>
-/* Same design language as the app (critique P1-10): warm cream on app
-   indigo, Space Grotesk for name/heading/body/buttons, mono kept for
-   small labels only, Newsreader italic for the one accent word. */
-@font-face{font-family:"Newsreader";src:url("/assets/fonts/newsreader-it.woff2") format("woff2");font-style:italic;font-weight:500;font-display:swap}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0A0E27;--surface:rgba(255,255,255,.04);--line:rgba(245,239,224,.12);--cream:#F5EFE0;--muted:#A9A5C6;--amber:#F2B33D;--amber2:#FFC65C;--err:#F87171}
+:root{--bg:#0A0E27;--surface:rgba(255,255,255,.04);--line:rgba(245,239,224,.12);--cream:#F5EFE0;--muted:#A9A5C6;--amber:#F2B33D;--amber2:#FFC65C;--err:#F87171;--indigo:#5B63E8}
 html,body{height:100%;background:var(--bg);color:var(--cream);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);position:relative;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(242,179,61,.07),transparent 70%),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(165,180,255,.06),transparent 65%);pointer-events:none}
-.card{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:360px;padding:40px 32px 36px;background:var(--surface);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
+.card{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:360px;padding:36px 32px 32px;background:var(--surface);border:1px solid var(--line);border-radius:24px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:relative;z-index:1}
 .logo{display:flex;flex-direction:column;align-items:center;gap:10px}
 .logo-mark{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#10163A 0%,#0D1233 100%);border:1px solid rgba(242,179,61,.25);display:flex;align-items:center;justify-content:center}
 .logo-mark svg{width:28px;height:28px}
 .logo-name{font-size:22px;font-weight:700;letter-spacing:.02em;color:var(--cream)}
 .logo-trip{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:-4px}
 .divider{width:100%;height:1px;background:var(--line)}
-.copy{text-align:center;display:flex;flex-direction:column;gap:8px}
-.copy h1{font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--cream)}
+.copy{text-align:center}
+.copy h1{font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--cream);margin-bottom:6px}
 .copy h1 .serif{font-family:"Newsreader",Georgia,serif;font-style:italic;font-weight:500;color:var(--amber2)}
-.copy p{font-size:14px;color:var(--muted);line-height:1.55}
-input[type=email]{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--cream);font-family:inherit;font-size:16px;outline:none;transition:border-color .15s}
-input[type=email]:focus{border-color:rgba(242,179,61,.5)}
-input[type=email]::placeholder{color:rgba(245,239,224,.3)}
-.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border:none;border-radius:12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.02em;text-decoration:none;transition:opacity .15s,transform .1s}
+.copy p{font-size:13.5px;color:var(--muted);line-height:1.55}
+/* tabs */
+.tabs{display:flex;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.tab-btn{flex:1;padding:9px 0;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.01em;background:transparent;color:var(--muted);transition:background .15s,color .15s}
+.tab-btn.active{background:rgba(255,255,255,.09);color:var(--cream)}
+/* panels */
+.panel{display:none;flex-direction:column;gap:12px;width:100%}
+.panel.active{display:flex}
+/* inputs */
+.field{display:flex;flex-direction:column;gap:6px;width:100%}
+.field label{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.field input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--cream);font-family:inherit;font-size:16px;outline:none;transition:border-color .15s}
+.field input:focus{border-color:rgba(242,179,61,.5);background:rgba(255,255,255,.08)}
+.field input::placeholder{color:rgba(245,239,224,.25)}
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px 20px;border:none;border-radius:12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.02em;text-decoration:none;transition:opacity .15s,transform .1s}
 .btn:active{opacity:.85;transform:scale(.98)}
-.btn:disabled{opacity:.5;cursor:default}
-.btn-passkey{background:var(--amber);color:#221A04}
-.btn-oidc{background:rgba(255,255,255,.07);color:var(--cream);border:1px solid var(--line);font-size:13.5px;margin-top:-4px}
-.btn svg{width:18px;height:18px;flex-shrink:0}
-.errmsg{font-size:12.5px;color:var(--err);text-align:center;min-height:18px}
-.footer{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7}
+.btn:disabled{opacity:.5;cursor:default;pointer-events:none}
+.btn-primary{background:var(--amber);color:#221A04}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--cream);border:1px solid var(--line)}
+.btn svg{width:17px;height:17px;flex-shrink:0}
+.errmsg{font-size:12.5px;color:var(--err);text-align:center;min-height:16px;line-height:1.4}
+.footer{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-align:center;line-height:1.7;margin-top:4px}
 </style>
 </head>
 <body>
@@ -362,29 +369,76 @@ input[type=email]::placeholder{color:rgba(245,239,224,.3)}
   <div class="divider"></div>
   <div class="copy">
     <h1>Welcome <span class="serif">back</span></h1>
-    <p>Sign in with your CRCMZ account to access the trip hub.</p>
+    <p>Sign in with your CRCMZ account.</p>
   </div>
-  ${hasPasskey ? `<input type="email" id="em" placeholder="your@email.com" autocomplete="username webauthn" autocapitalize="off" inputmode="email"/>
-  <div class="errmsg" id="errmsg"></div>
-  <button class="btn btn-passkey" id="pkBtn" onclick="passkeyLogin()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-    Sign in with Passkey
-  </button>
-  <a class="btn btn-oidc" href="/auth/login?proceed=1">Use password instead</a>` : `<a class="btn btn-passkey" href="/auth/login?proceed=1">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-    Sign in with CRCMZ
-  </a>`}
-  <div class="footer">CRCMZ · auth.crcmz.me</div>
+
+  ${hasPasskey ? `
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tab-pk" role="tab" aria-selected="true" onclick="switchTab('passkey')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline;margin-right:5px;vertical-align:-2px"><path d="M14 1.5l-1.5 1.5m-5 5a3.5 3.5 0 1 1-5 5 3.5 3.5 0 0 1 5-5zm0 0L10 7m0 0l2 2 3.5-3.5-2-2"/></svg>Passkey
+    </button>
+    <button class="tab-btn" id="tab-pw" role="tab" aria-selected="false" onclick="switchTab('password')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline;margin-right:5px;vertical-align:-2px"><rect x="2" y="7" width="12" height="8" rx="2"/><path d="M5 7V5a3 3 0 1 1 6 0v2"/></svg>Password
+    </button>
+  </div>
+
+  <!-- passkey panel -->
+  <div class="panel active" id="panel-passkey">
+    <div class="field">
+      <label for="em">Email</label>
+      <input type="email" id="em" placeholder="your@email.com" autocomplete="username webauthn" autocapitalize="off" inputmode="email" onkeydown="if(event.key==='Enter')passkeyLogin()"/>
+    </div>
+    <div class="errmsg" id="pk-err"></div>
+    <button class="btn btn-primary" id="pkBtn" onclick="passkeyLogin()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      Sign in with Passkey
+    </button>
+  </div>
+
+  <!-- password panel -->
+  <div class="panel" id="panel-password">
+    <div class="field">
+      <label for="pw-em">Email or username</label>
+      <input type="email" id="pw-em" placeholder="your@email.com" autocomplete="username" autocapitalize="off" inputmode="email" onkeydown="if(event.key==='Enter')document.getElementById('pw-pass').focus()"/>
+    </div>
+    <div class="field">
+      <label for="pw-pass">Password</label>
+      <input type="password" id="pw-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')passwordLogin()"/>
+    </div>
+    <div class="errmsg" id="pw-err"></div>
+    <button class="btn btn-primary" id="pwBtn" onclick="passwordLogin()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Sign in
+    </button>
+  </div>
+  ` : `
+  <div style="width:100%;display:flex;flex-direction:column;gap:12px">
+    <a class="btn btn-primary" href="/auth/login?proceed=1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Sign in with CRCMZ
+    </a>
+  </div>
+  `}
+
+  <div class="footer">CRCMZ · trip.crcmz.me</div>
 </div>
 ${hasPasskey ? `<script>
 function b64url(buf){return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=/g,'')}
 function fromB64url(s){const pad='='.repeat((4-s.length%4)%4);return Uint8Array.from(atob((s+pad).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)).buffer}
-function showErr(msg){document.getElementById('errmsg').textContent=msg}
+
+function switchTab(tab){
+  document.getElementById('tab-pk').classList.toggle('active',tab==='passkey');
+  document.getElementById('tab-pw').classList.toggle('active',tab==='password');
+  document.getElementById('panel-passkey').classList.toggle('active',tab==='passkey');
+  document.getElementById('panel-password').classList.toggle('active',tab==='password');
+  if(tab==='passkey')document.getElementById('em').focus();
+  else document.getElementById('pw-em').focus();
+}
 
 let _conditionalAbort=null;
 async function _begin(identifier,silent){
   const br=await fetch('/auth/passkey/begin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(identifier?{identifier}:{})});
-  if(!br.ok){if(!silent)showErr((await br.json()).error||'Could not start passkey flow.');return null;}
+  if(!br.ok){if(!silent)document.getElementById('pk-err').textContent=(await br.json()).error||'Could not start passkey flow.';return null;}
   const {sessionId,options}=await br.json();
   options.challenge=fromB64url(options.challenge);
   if(options.allowCredentials)options.allowCredentials=options.allowCredentials.map(c=>({...c,id:fromB64url(c.id)}));
@@ -393,14 +447,15 @@ async function _begin(identifier,silent){
 async function _complete(sessionId,cred){
   const assertion={id:cred.id,rawId:b64url(cred.rawId),type:cred.type,response:{clientDataJSON:b64url(cred.response.clientDataJSON),authenticatorData:b64url(cred.response.authenticatorData),signature:b64url(cred.response.signature),userHandle:cred.response.userHandle?b64url(cred.response.userHandle):null}};
   const cr=await fetch('/auth/passkey/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId,assertion})});
-  if(!cr.ok){showErr((await cr.json()).error||'Passkey verification failed.');return;}
-  window.location.href=(await cr.json()).next||'/';
+  if(!cr.ok){document.getElementById('pk-err').textContent=(await cr.json()).error||'Passkey verification failed.';return;}
+  const d=await cr.json();window.location.href=d.next||'/';
 }
 async function passkeyLogin(){
-  if(!window.PublicKeyCredential){showErr('Passkeys not supported in this browser.');return;}
+  if(!window.PublicKeyCredential){document.getElementById('pk-err').textContent='Passkeys not supported in this browser.';return;}
   if(_conditionalAbort){_conditionalAbort.abort();_conditionalAbort=null;}
   const identifier=document.getElementById('em').value.trim();
-  if(!identifier){document.getElementById('em').focus();showErr('Enter your email first.');return;}
+  if(!identifier){document.getElementById('em').focus();document.getElementById('pk-err').textContent='Enter your email first.';return;}
+  document.getElementById('pk-err').textContent='';
   const btn=document.getElementById('pkBtn');
   btn.disabled=true;btn.textContent='Waiting for passkey…';
   try{
@@ -409,8 +464,30 @@ async function passkeyLogin(){
     const cred=await navigator.credentials.get({publicKey:began.options});
     await _complete(began.sessionId,cred);
   }catch(e){
-    if(e.name!=='NotAllowedError')showErr('Passkey error: '+e.message);
-  }finally{btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Sign in with Passkey';}
+    if(e.name!=='NotAllowedError')document.getElementById('pk-err').textContent='Passkey error: '+e.message;
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Sign in with Passkey';
+  }
+}
+async function passwordLogin(){
+  const identifier=document.getElementById('pw-em').value.trim();
+  const password=document.getElementById('pw-pass').value;
+  if(!identifier||!password){document.getElementById('pw-err').textContent='Enter your email and password.';return;}
+  document.getElementById('pw-err').textContent='';
+  const btn=document.getElementById('pwBtn');
+  btn.disabled=true;btn.textContent='Signing in…';
+  try{
+    const r=await fetch('/auth/password/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,password})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('pw-err').textContent=d.error||'Sign in failed.';return;}
+    window.location.href=d.next||'/';
+  }catch(e){
+    document.getElementById('pw-err').textContent='Network error. Try again.';
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Sign in';
+  }
 }
 (async()=>{
   if(!window.PublicKeyCredential)return;
