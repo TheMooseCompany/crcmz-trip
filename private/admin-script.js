@@ -1,8 +1,12 @@
-
 /* ================= ADMIN =================
-   Forms are built once from CONTENT. Each card saves independently:
-   validate → write the section into CONTENT → saveContent → re-render
-   the affected public sections live → show "Saved". */
+   Tabbed console: Deck / Content / Flights / Catalogues / System.
+   Each tab's editors build ONCE, the first time the tab is opened —
+   an admin page load no longer builds ~200 catalogue entries.
+   Saves are unchanged: validate → write the section into CONTENT →
+   saveContent (the whole-object PUT) → re-render the public sections
+   live → show "Saved". Food and Buds are searchable grids whose rows
+   expand into the same full editors the old <details> cards carried;
+   the harvest reads the same field classes from the expanded rows. */
 (function(){
 function $(id){return document.getElementById(id)}
 function val(el){return el?el.value.trim():''}
@@ -21,13 +25,158 @@ function showSaved(key){
 }
 function F(label,inner){return '<div class="adm-f"><label>'+label+'</label>'+inner+'</div>'}
 function inp(cls,value,extra){return '<input class="adm-inp '+cls+'" type="text" value="'+cEsc(value==null?'':value)+'" '+(extra||'')+'>'}
+function fmtTime(t){
+ if(!t)return '';
+ var m=/^(\d{1,2}):(\d{2})/.exec(t); if(!m)return t;
+ var h=Number(m[1]),ap=h>=12?'PM':'AM'; h=h%12; if(h===0)h=12;
+ return h+':'+m[2]+' '+ap;
+}
+function fmtDay(iso){
+ if(!iso)return '';
+ var d=new Date(iso+'T12:00:00');
+ if(isNaN(d.getTime()))return iso;
+ return d.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+}
+function fmtMoney(cents){
+ return '$'+(cents/100).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-/* ---------- Trip ---------- */
-$('admTarget').value=CONTENT.trip.targetISO||'';
-$('admHeroDates').value=CONTENT.trip.heroDates||'';
-$('admNextUp').value=CONTENT.trip.nextUpDefault||'';
+/* ---------- Tabs ---------- */
+var builtTabs={};
+function buildTab(name){
+ if(builtTabs[name])return;
+ builtTabs[name]=true;
+ if(name==='content')buildContent();
+ else if(name==='flights')loadAdminFlights();
+ else if(name==='catalogues')buildCatalogues();
+}
+function switchTab(name){
+ document.querySelectorAll('.adm-tab').forEach(function(t){
+   var on=t.getAttribute('data-atab')===name;
+   t.classList.toggle('on',on); t.setAttribute('aria-selected',on?'true':'false');
+ });
+ document.querySelectorAll('.adm-panel').forEach(function(p){
+   p.hidden=p.getAttribute('data-apanel')!==name;
+ });
+ buildTab(name);
+ if(name==='deck'||name==='system')loadAdminState();
+ var sec=$('admin'); if(sec)sec.scrollIntoView({block:'start'});
+}
+document.querySelectorAll('.adm-tab').forEach(function(t){
+ t.addEventListener('click',function(){switchTab(t.getAttribute('data-atab'));});
+});
+document.querySelectorAll('.adm-irow').forEach(function(r){
+ r.addEventListener('click',function(){switchTab(r.getAttribute('data-goto'));});
+});
 
-/* ---------- Days ---------- */
+/* ---------- Deck + system state ---------- */
+var ADM_STATE=null;
+function setTxt(id,txt){var el=$(id); if(el)el.textContent=txt;}
+function setPill(id,txt,cls){var el=$(id); if(!el)return; el.textContent=txt; el.className='adm-pill'+(cls?' '+cls:'');}
+function renderState(s){
+ ADM_STATE=s;
+ setTxt('admWhoTxt','SIGNED IN AS '+(s.you.name||'').toUpperCase()+' · ADMIN · MOIZ IS THE ONLY OTHER ADMIN');
+ // Content source
+ if(s.content.source==='saved'){
+   setTxt('tileContentV','Saved copy');
+   setTxt('tileContentD','A saved server copy is live'+(s.content.savedAt?(' · saved '+new Date(s.content.savedAt).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})):'')+'. Edits outrank the shipped defaults.');
+   setPill('tileContentPill','LIVE','g');
+ }else{
+   setTxt('tileContentV','Built-in');
+   setTxt('tileContentD','No saved server copy. The site runs the shipped defaults.');
+   setPill('tileContentPill','LIVE','g');
+ }
+ // Flights
+ setPill('tileFlightsPill',String(s.flights.count),'g');
+ if(s.flights.next){
+   var n=s.flights.next;
+   setTxt('tileFlightsV',n.flightNumber||'—');
+   setTxt('tileFlightsD',(n.upcoming?'Next movement: ':'Last movement: ')+(n.person||'')+' · '+(n.originCode||'')+' → '+(n.destinationCode||'')+' · '+fmtDay(n.departureDate)+(n.departureTime?(' · dep '+fmtTime(n.departureTime)):'')+(n.arrivalTime?(' · lands '+fmtTime(n.arrivalTime)):''));
+ }else{
+   setTxt('tileFlightsV','—');
+   setTxt('tileFlightsD','No flights in the store yet.');
+ }
+ // Ledger
+ setTxt('tileLedgerV',fmtMoney(s.ledger.totalCentsCAD));
+ setTxt('tileLedgerD',s.ledger.expenseCount+' expense'+(s.ledger.expenseCount===1?'':'s')+' · '+s.ledger.settlementCount+' settlement'+(s.ledger.settlementCount===1?'':'s')+' recorded.');
+ // Photos
+ setTxt('tilePhotosV',String(s.photos.count));
+ setTxt('tilePhotosD',s.photos.count===1?'Photo on the wall.':'Photos on the wall.');
+ // Keys (presence only)
+ if(s.keys.googlePlaces){ setTxt('tilePlacesV','Photos on'); setTxt('tilePlacesD','Restaurant photos resolve live through Google Places.'); setPill('tilePlacesPill','SET','g'); }
+ else{ setTxt('tilePlacesV','Photos off'); setTxt('tilePlacesD','No Places key on the server — food cards fall back to their stills.'); setPill('tilePlacesPill','MISSING','r'); }
+ if(s.keys.aeroapi){ setTxt('tileAeroV','Status on'); setTxt('tileAeroD','Live flight status can poll AeroAPI.'); setPill('tileAeroPill','SET','g'); }
+ else{ setTxt('tileAeroV','Status off'); setTxt('tileAeroD','Flight status waits on the AeroAPI key.'); setPill('tileAeroPill','MISSING',''); }
+ // Editors index counts (content counts read the local CONTENT copy)
+ setTxt('idxDays',CONTENT.days.length+' days');
+ setTxt('idxStay',CONTENT.trip.heroDates||'');
+ setTxt('idxFood',CONTENT.food.length+' spots · '+CONTENT.foodCats.length+' cats');
+ setTxt('idxBuds',CONTENT.buds.length+' products');
+ setTxt('idxFlights',s.flights.count+' records');
+ setTxt('idxFifa',CONTENT.fifaTeams.length+' teams');
+ setTxt('idxSplit',CONTENT.splitPeople.length+' people');
+ // System detail
+ var rows=[
+  ['Content source',s.content.source==='saved'?('Saved copy live'+(s.content.savedAt?(' · saved '+new Date(s.content.savedAt).toLocaleString('en-CA')):'')):'Built-in defaults (no saved copy)'],
+  ['Flights store',s.flights.count+' records'+(s.flights.next?(' · '+(s.flights.next.upcoming?'next':'last')+': '+s.flights.next.flightNumber+' '+s.flights.next.departureDate):'')],
+  ['Split ledger',s.ledger.expenseCount+' expense'+(s.ledger.expenseCount===1?'':'s')+' · '+s.ledger.settlementCount+' settlement'+(s.ledger.settlementCount===1?'':'s')+' · '+fmtMoney(s.ledger.totalCentsCAD)+' total'],
+  ['Photo wall',s.photos.count+' photos'],
+  ['Google Places key',s.keys.googlePlaces?'Set':'Missing'],
+  ['AeroAPI key',s.keys.aeroapi?'Set':'Missing'],
+  ['Signed in as',(s.you.name||'')+(s.you.person?(' ('+s.you.person+')'):'')],
+ ];
+ var sys=$('admSysList');
+ if(sys)sys.innerHTML=rows.map(function(r){
+   return '<div class="adm-sys-row"><span class="adm-sys-k">'+cEsc(r[0])+'</span><span class="adm-sys-v">'+cEsc(r[1])+'</span></div>';
+ }).join('');
+}
+function loadAdminState(){
+ fetch('/api/admin/state').then(function(r){return r.ok?r.json():null}).then(function(s){
+   if(s)renderState(s);
+ }).catch(function(){});
+}
+var refreshBtn=$('admStateRefresh');
+if(refreshBtn)refreshBtn.addEventListener('click',loadAdminState);
+
+/* ---------- Console activation (first time the view is shown) ---------- */
+var viewEl=$('view-admin');
+function consoleShown(){return !!(viewEl&&!viewEl.hidden);}
+function activateConsole(){buildTab('deck');loadAdminState();}
+if(viewEl){
+ new MutationObserver(function(){if(consoleShown())activateConsole();})
+   .observe(viewEl,{attributes:true,attributeFilter:['hidden']});
+ if(consoleShown())activateConsole();
+}
+
+/* ---------- Content tab builders ---------- */
+function buildContent(){
+ /* Trip */
+ $('admTarget').value=CONTENT.trip.targetISO||'';
+ $('admHeroDates').value=CONTENT.trip.heroDates||'';
+ $('admNextUp').value=CONTENT.trip.nextUpDefault||'';
+ /* Days */
+ $('admDaysList').innerHTML=CONTENT.days.map(dayBlock).join('');
+ /* Stay */
+ var s=CONTENT.stay;
+ $('admStayUrl').value=s.airbnbUrl||''; $('admStayIntro').value=s.intro||'';
+ $('admStayRating').value=s.rating||''; $('admStayHost').value=s.hostLine||'';
+ $('admStaySleeps').value=s.sleeps||''; $('admStayBedrooms').value=s.bedrooms||'';
+ $('admStayBeds').value=s.beds||''; $('admStayBaths').value=s.baths||'';
+ $('admStayCheckIn').value=s.checkIn||''; $('admStayCheckOut').value=s.checkOut||'';
+ $('admPriceNight').value=s.pricePerNight||''; $('admPriceNights').value=s.priceNights||'';
+ $('admPriceDiscount').value=s.priceDiscount||''; $('admPriceTaxes').value=s.priceTaxes||'';
+ $('admPriceTotal').value=s.priceTotal||'';
+ $('admStayRules').value=(s.rules||[]).join('\n');
+ $('admStayAmen').value=(s.amenities||[]).join('\n');
+ $('admStayNote').value=s.detailsNote||'';
+ /* FIFA */
+ $('admFifaList').innerHTML=CONTENT.fifaTeams.map(fifaBlock).join('');
+ /* Split people */
+ $('admSplitList').innerHTML=CONTENT.splitPeople.map(function(p){
+  return '<div class="adm-grid"><div class="adm-f"><label>Name</label>'+inp('p-name',p.name)+'</div>'
+   +'<div class="adm-f"><label>Home currency</label><select class="adm-sel p-home"><option value="CAD"'+(p.home==='CAD'?' selected':'')+'>CAD</option><option value="USD"'+(p.home==='USD'?' selected':'')+'>USD</option></select></div></div>';
+ }).join('');
+}
 function dayBlock(d,i){
  var cin='';
  if(d.cinema&&d.cinema.length){
@@ -48,59 +197,143 @@ function dayBlock(d,i){
   +cin
   +'</div></details>';
 }
-$('admDaysList').innerHTML=CONTENT.days.map(dayBlock).join('');
+var LOGO_OPTS=[['samad','Samad'],['kaptaan','Kaptaan'],['moiz','Moiz'],['moose','Moose'],['killer','Killer'],['deception','Deception']];
+function fifaBlock(t,ti){
+ var members=t.members.map(function(m,mi){
+   var opts=LOGO_OPTS.map(function(o){return '<option value="'+o[0]+'"'+(m.logo===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('');
+   return '<div class="adm-grid">'+F('Member '+(mi+1)+' name',inp('t-mname',m.name))+F('Member '+(mi+1)+' logo','<select class="adm-sel t-mlogo">'+opts+'</select>')+'</div>';
+ }).join('');
+ return '<div class="adm-entry" style="padding:14px 15px 4px"><div class="adm-f"><label>Team '+(ti+1)+' name</label>'+inp('t-def',t.def)+'</div>'+members+'</div>';
+}
 
-/* ---------- Stay ---------- */
-(function(){var s=CONTENT.stay;
- $('admStayUrl').value=s.airbnbUrl||''; $('admStayIntro').value=s.intro||'';
- $('admStayRating').value=s.rating||''; $('admStayHost').value=s.hostLine||'';
- $('admStaySleeps').value=s.sleeps||''; $('admStayBedrooms').value=s.bedrooms||'';
- $('admStayBeds').value=s.beds||''; $('admStayBaths').value=s.baths||'';
- $('admStayCheckIn').value=s.checkIn||''; $('admStayCheckOut').value=s.checkOut||'';
- $('admPriceNight').value=s.pricePerNight||''; $('admPriceNights').value=s.priceNights||'';
- $('admPriceDiscount').value=s.priceDiscount||''; $('admPriceTaxes').value=s.priceTaxes||'';
- $('admPriceTotal').value=s.priceTotal||'';
- $('admStayRules').value=(s.rules||[]).join('\n');
- $('admStayAmen').value=(s.amenities||[]).join('\n');
- $('admStayNote').value=s.detailsNote||'';
-})();
-
-/* ---------- Food ---------- */
-function foodBlock(f){
+/* ---------- Catalogues: Food grid ---------- */
+function halalBadge(note){
+ var n=(note||'').toLowerCase();
+ if(/partial|⚠|ask staff|ask about/.test(n))return {txt:'PARTIAL',cls:'p'};
+ if(/zabihah|hand[- ]slaughter/.test(n))return {txt:'ZABIHAH',cls:'g'};
+ if(/certif/.test(n))return {txt:'CERTIFIED',cls:'g'};
+ if(/fully halal|entire menu is halal|whole menu is halal|100% halal|all halal/.test(n))return {txt:'FULLY',cls:'g'};
+ if(/halal/.test(n))return {txt:'HALAL',cls:'g'};
+ return {txt:'—',cls:''};
+}
+function foodEditorHtml(f){
  var checks=CONTENT.foodCats.map(function(c){
    return '<label class="adm-check"><input type="checkbox" class="f-cat" value="'+c.id+'"'+((f.cats||[]).indexOf(c.id)>=0?' checked':'')+'>'+cEsc(c.label)+'</label>';
  }).join('');
- return '<details class="adm-entry"><summary>'+cEsc(f.name||'New spot')+' <span class="adm-sum-sub">'+cEsc(f.area||'')+'</span></summary><div class="adm-entry-body">'
-  +F('Name',inp('f-name',f.name))
+ return F('Name',inp('f-name',f.name))
   +F('Area',inp('f-area',f.area))
-  +'<div class="adm-grid">'+F('Stars (e.g. 4.7)',inp('f-stars',f.stars,'inputmode="decimal"'))+F('Review count (e.g. 3,221)',inp('f-reviews',f.reviews))+ '</div>'
+  +'<div class="adm-grid">'+F('Stars (e.g. 4.7)',inp('f-stars',f.stars,'inputmode="decimal"'))+F('Review count (e.g. 3,221)',inp('f-reviews',f.reviews))+'</div>'
   +F('Halal note','<textarea class="adm-ta f-note" style="min-height:72px">'+cEsc(f.note||'')+'</textarea>')
   +F('Maps URL',inp('f-url',f.url,'type="url"'))
   +'<div class="adm-f"><label>Categories</label><div class="adm-checks">'+checks+'</div></div>'
-  +'<button type="button" class="adm-del f-del">Delete this spot</button>'
-  +'</div></details>';
+  +'<button type="button" class="adm-del f-del">Delete this spot</button>';
 }
-$('admFoodList').innerHTML=CONTENT.food.map(foodBlock).join('');
-function bindFoodDeletes(){
- document.querySelectorAll('#admFoodList .f-del').forEach(function(b){
-   b.onclick=function(){var d=b.closest('.adm-entry'); if(d)d.remove();};
+function foodRowHtml(f){
+ var badge=halalBadge(f.note);
+ return '<div class="adm-grow" data-frow>'
+  +'<div class="adm-grow-main adm-gcols-food">'
+  +'<label class="adm-gcheck"><input type="checkbox" class="f-sel" aria-label="Select spot"></label>'
+  +'<span class="adm-gc adm-gc-name">'+cEsc(f.name||'New spot')+'</span>'
+  +'<span class="adm-gc adm-gc-area">'+cEsc(f.area||'')+'</span>'
+  +'<span class="adm-gc"><span class="adm-tag '+badge.cls+'">'+badge.txt+'</span></span>'
+  +'<span class="adm-gc adm-gc-num adm-gc-cats">'+((f.cats||[]).length)+'</span>'
+  +'</div>'
+  +'<div class="adm-gexpand adm-entry-body" hidden>'+foodEditorHtml(f)+'</div>'
+  +'</div>';
+}
+function foodRowSync(row){
+ var name=val(row.querySelector('.f-name'))||'New spot';
+ row.querySelector('.adm-gc-name').textContent=name;
+ row.querySelector('.adm-gc-area').textContent=val(row.querySelector('.f-area'));
+ row.querySelector('.adm-gc-cats').textContent=row.querySelectorAll('.f-cat:checked').length;
+ var badge=halalBadge(val(row.querySelector('.f-note')));
+ var tag=row.querySelector('.adm-tag');
+ tag.textContent=badge.txt; tag.className='adm-tag '+badge.cls;
+}
+function foodSelSync(){
+ var n=0;
+ document.querySelectorAll('#admFoodGrid [data-frow]:not([hidden]) .f-sel:checked').forEach(function(){n++;});
+ $('admFoodSelN').textContent=n;
+ $('admFoodSelBar').hidden=n===0;
+ var all=$('admFoodAll');
+ var vis=document.querySelectorAll('#admFoodGrid [data-frow]:not([hidden]) .f-sel');
+ all.checked=vis.length>0&&n===vis.length;
+}
+function foodFilter(){
+ var q=val($('admFoodSearch')).toLowerCase();
+ var cat=$('admFoodCat').value;
+ var rows=document.querySelectorAll('#admFoodGrid [data-frow]'),shown=0;
+ rows.forEach(function(r){
+   var name=val(r.querySelector('.f-name')).toLowerCase();
+   var okQ=!q||name.indexOf(q)>=0;
+   var okC=!cat||cat==='all'||!!r.querySelector('.f-cat[value="'+cat+'"]:checked');
+   r.hidden=!(okQ&&okC);
+   if(r.hidden){var sel=r.querySelector('.f-sel'); if(sel)sel.checked=false;}
+   else shown++;
+ });
+ $('admFoodCount').textContent='Showing '+shown+' of '+rows.length+' spots';
+ foodSelSync();
+}
+function foodCountsOnly(){
+ var rows=document.querySelectorAll('#admFoodGrid [data-frow]');
+ var shown=0; rows.forEach(function(r){if(!r.hidden)shown++;});
+ $('admFoodCount').textContent='Showing '+shown+' of '+rows.length+' spots';
+ foodSelSync();
+}
+function bindFoodGrid(){
+ var grid=$('admFoodGrid');
+ grid.addEventListener('click',function(ev){
+   var del=ev.target.closest?ev.target.closest('.f-del'):null;
+   if(del){var row=del.closest('[data-frow]'); if(row){row.remove(); foodCountsOnly();} return;}
+   if(ev.target.closest&&ev.target.closest('.adm-gexpand'))return;
+   if(ev.target.closest&&ev.target.closest('.adm-gcheck'))return;
+   var main=ev.target.closest?ev.target.closest('.adm-grow-main'):null;
+   if(!main)return;
+   var row=main.closest('[data-frow]');
+   var exp=row.querySelector('.adm-gexpand');
+   var open=exp.hidden;
+   exp.hidden=!open;
+   row.classList.toggle('open',open);
+   if(!open)foodRowSync(row);
+ });
+ grid.addEventListener('change',function(ev){
+   if(ev.target.classList&&ev.target.classList.contains('f-sel'))foodSelSync();
+   var row=ev.target.closest?ev.target.closest('[data-frow]'):null;
+   if(row&&(ev.target.classList.contains('f-cat')))foodRowSync(row);
+ });
+ grid.addEventListener('input',function(ev){
+   var row=ev.target.closest?ev.target.closest('[data-frow]'):null;
+   if(!row)return;
+   if(ev.target.classList.contains('f-name')||ev.target.classList.contains('f-area')||ev.target.classList.contains('f-note'))foodRowSync(row);
+ });
+ $('admFoodSearch').addEventListener('input',foodFilter);
+ $('admFoodCat').addEventListener('change',foodFilter);
+ $('admFoodAll').addEventListener('change',function(){
+   var on=$('admFoodAll').checked;
+   document.querySelectorAll('#admFoodGrid [data-frow]:not([hidden]) .f-sel').forEach(function(c){c.checked=on;});
+   foodSelSync();
+ });
+ $('admFoodBulkDel').addEventListener('click',function(){
+   document.querySelectorAll('#admFoodGrid [data-frow] .f-sel:checked').forEach(function(c){
+     var row=c.closest('[data-frow]'); if(row)row.remove();
+   });
+   foodFilter();
+ });
+ $('admFoodAdd').addEventListener('click',function(){
+   var wrap=document.createElement('div');
+   wrap.innerHTML=foodRowHtml({name:'',area:'',stars:'',reviews:'',note:'',cats:['breakfast'],url:''});
+   var node=wrap.firstChild;
+   grid.appendChild(node);
+   var exp=node.querySelector('.adm-gexpand'); exp.hidden=false; node.classList.add('open');
+   foodFilter();
+   var nm=node.querySelector('.f-name'); if(nm){nm.focus(); nm.scrollIntoView({block:'center'});}
  });
 }
-bindFoodDeletes();
-$('admFoodAdd').addEventListener('click',function(){
- var wrap=document.createElement('div');
- wrap.innerHTML=foodBlock({name:'',area:'',stars:'',reviews:'',note:'',cats:['breakfast'],url:''});
- var node=wrap.firstChild; node.open=true;
- $('admFoodList').appendChild(node); bindFoodDeletes();
- var nm=node.querySelector('.f-name'); if(nm)nm.focus();
-});
 
-/* ---------- Buds ---------- */
-var LOGO_OPTS=[['samad','Samad'],['kaptaan','Kaptaan'],['moiz','Moiz'],['moose','Moose'],['killer','Killer'],['deception','Deception']];
-function budBlock(p){
+/* ---------- Catalogues: Buds grid ---------- */
+function budEditorHtml(p){
  function rng(v){return v?(v.join(' – ')):''}
- return '<details class="adm-entry"><summary>'+cEsc(p.n||'New product')+' <span class="adm-sum-sub">'+cEsc(p.b||'')+'</span></summary><div class="adm-entry-body">'
-  +F('Name',inp('b-name',p.n))
+ return F('Name',inp('b-name',p.n))
   +F('Brand',inp('b-brand',p.b))
   +'<div class="adm-grid">'
   +F('Category','<select class="adm-sel b-cat"><option value="flower"'+(p.c==='flower'?' selected':'')+'>Flower</option><option value="preroll"'+(p.c==='preroll'?' selected':'')+'>Pre-Rolls</option><option value="edible"'+(p.c==='edible'?' selected':'')+'>Edibles</option></select>')
@@ -117,62 +350,140 @@ function budBlock(p){
   +F('HiBuddy URL',inp('b-url',p.u,'type="url"'))
   +F('Photo (image URL, or attach below)',inp('b-img',p.img||''))
   +'<div class="adm-f"><label>Attach a photo</label><input class="adm-inp b-file" type="file" accept="image/*"></div>'
-  +'<button type="button" class="adm-del b-del">Delete this product</button>'
-  +'</div></details>';
+  +'<button type="button" class="adm-del b-del">Delete this product</button>';
 }
-$('admBudsList').innerHTML=CONTENT.buds.map(budBlock).join('');
-function bindBudExtras(){
- document.querySelectorAll('#admBudsList .b-del').forEach(function(b){
-   b.onclick=function(){var d=b.closest('.adm-entry'); if(d)d.remove();};
+function budThcText(p){
+ if(!p.t)return '—';
+ var unit=p.c==='edible'?' mg':'%';
+ return (p.t[0]===p.t[1]?String(p.t[0]):(p.t[0]+'–'+p.t[1]))+unit;
+}
+function budRowHtml(p){
+ return '<div class="adm-grow" data-brow>'
+  +'<div class="adm-grow-main adm-gcols-buds">'
+  +'<label class="adm-gcheck"><input type="checkbox" class="b-sel" aria-label="Select product"></label>'
+  +'<span class="adm-gc adm-gc-name">'+cEsc(p.n||'New product')+'</span>'
+  +'<span class="adm-gc adm-gc-brand">'+cEsc(p.b||'')+'</span>'
+  +'<span class="adm-gc adm-gc-thc">'+budThcText(p)+'</span>'
+  +'<span class="adm-gc adm-gc-num adm-gc-price">'+(p.p==null?'—':('$'+Number(p.p).toFixed(2)))+'</span>'
+  +'</div>'
+  +'<div class="adm-gexpand adm-entry-body" hidden>'+budEditorHtml(p)+'</div>'
+  +'</div>';
+}
+function budRowSync(row){
+ row.querySelector('.adm-gc-name').textContent=val(row.querySelector('.b-name'))||'New product';
+ row.querySelector('.adm-gc-brand').textContent=val(row.querySelector('.b-brand'));
+ var c=row.querySelector('.b-cat').value,unit=c==='edible'?' mg':'%';
+ var lo=val(row.querySelector('.b-thcmin')),hi=val(row.querySelector('.b-thcmax')),txt='—';
+ if(lo!==''||hi!==''){ if(lo==='')lo=hi; if(hi==='')hi=lo; txt=(String(lo)===String(hi)?String(lo):(lo+'–'+hi))+unit; }
+ row.querySelector('.adm-gc-thc').textContent=txt;
+ var pr=val(row.querySelector('.b-price'));
+ row.querySelector('.adm-gc-price').textContent=(pr===''||isNaN(Number(pr)))?'—':('$'+Number(pr).toFixed(2));
+}
+function budSelSync(){
+ var n=0;
+ document.querySelectorAll('#admBudsGrid [data-brow]:not([hidden]) .b-sel:checked').forEach(function(){n++;});
+ $('admBudsSelN').textContent=n;
+ $('admBudsSelBar').hidden=n===0;
+ var all=$('admBudsAll');
+ var vis=document.querySelectorAll('#admBudsGrid [data-brow]:not([hidden]) .b-sel');
+ all.checked=vis.length>0&&n===vis.length;
+}
+function budFilter(){
+ var q=val($('admBudsSearch')).toLowerCase();
+ var rows=document.querySelectorAll('#admBudsGrid [data-brow]'),shown=0;
+ rows.forEach(function(r){
+   var name=val(r.querySelector('.b-name')).toLowerCase();
+   r.hidden=!(!q||name.indexOf(q)>=0);
+   if(r.hidden){var sel=r.querySelector('.b-sel'); if(sel)sel.checked=false;}
+   else shown++;
  });
- document.querySelectorAll('#admBudsList .b-file').forEach(function(inpEl){
-   inpEl.onchange=function(){
-     var f=inpEl.files&&inpEl.files[0]; if(!f)return;
-     var block=inpEl.closest('.adm-entry-body'); if(!block)return;
-     var target=block.querySelector('.b-img');
-     var rd=new FileReader();
-     rd.onload=function(){
-       var img=new Image();
-       img.onload=function(){
-         var scale=Math.min(1,800/Math.max(img.width,img.height));
-         var cv=document.createElement('canvas');
-         cv.width=Math.round(img.width*scale); cv.height=Math.round(img.height*scale);
-         cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-         try{target.value=cv.toDataURL('image/jpeg',0.82);}catch(e){}
-       };
-       img.src=rd.result;
+ $('admBudsCount').textContent='Showing '+shown+' of '+rows.length+' products';
+ budSelSync();
+}
+function bindBudFile(row){
+ var inpEl=row.querySelector('.b-file');
+ if(!inpEl||inpEl._bound)return; inpEl._bound=true;
+ inpEl.addEventListener('change',function(){
+   var f=inpEl.files&&inpEl.files[0]; if(!f)return;
+   var target=row.querySelector('.b-img');
+   var rd=new FileReader();
+   rd.onload=function(){
+     var img=new Image();
+     img.onload=function(){
+       var scale=Math.min(1,800/Math.max(img.width,img.height));
+       var cv=document.createElement('canvas');
+       cv.width=Math.round(img.width*scale); cv.height=Math.round(img.height*scale);
+       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+       try{target.value=cv.toDataURL('image/jpeg',0.82);}catch(e){}
      };
-     rd.readAsDataURL(f);
+     img.src=rd.result;
    };
+   rd.readAsDataURL(f);
  });
 }
-bindBudExtras();
-$('admBudsAdd').addEventListener('click',function(){
- var wrap=document.createElement('div');
- wrap.innerHTML=budBlock({n:'',b:'',c:'flower',s:[],t:null,cb:null,p:null,st:null,r:null,i:false,u:'',img:''});
- var node=wrap.firstChild; node.open=true;
- $('admBudsList').appendChild(node); bindBudExtras();
- var nm=node.querySelector('.b-name'); if(nm)nm.focus();
-});
-
-/* ---------- FIFA ---------- */
-function fifaBlock(t,ti){
- var members=t.members.map(function(m,mi){
-   var opts=LOGO_OPTS.map(function(o){return '<option value="'+o[0]+'"'+(m.logo===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('');
-   return '<div class="adm-grid">'+F('Member '+(mi+1)+' name',inp('t-mname',m.name))+F('Member '+(mi+1)+' logo','<select class="adm-sel t-mlogo">'+opts+'</select>')+'</div>';
- }).join('');
- return '<div class="adm-entry" style="padding:14px 15px 4px"><div class="adm-f"><label>Team '+(ti+1)+' name</label>'+inp('t-def',t.def)+'</div>'+members+'</div>';
+function bindBudGrid(){
+ var grid=$('admBudsGrid');
+ grid.addEventListener('click',function(ev){
+   var del=ev.target.closest?ev.target.closest('.b-del'):null;
+   if(del){var row=del.closest('[data-brow]'); if(row){row.remove(); budFilter();} return;}
+   if(ev.target.closest&&ev.target.closest('.adm-gexpand'))return;
+   if(ev.target.closest&&ev.target.closest('.adm-gcheck'))return;
+   var main=ev.target.closest?ev.target.closest('.adm-grow-main'):null;
+   if(!main)return;
+   var row=main.closest('[data-brow]');
+   var exp=row.querySelector('.adm-gexpand');
+   var open=exp.hidden;
+   exp.hidden=!open;
+   row.classList.toggle('open',open);
+   if(!open)budRowSync(row);
+ });
+ grid.addEventListener('change',function(ev){
+   if(ev.target.classList&&ev.target.classList.contains('b-sel'))budSelSync();
+ });
+ grid.addEventListener('input',function(ev){
+   var row=ev.target.closest?ev.target.closest('[data-brow]'):null;
+   if(!row)return;
+   var cl=ev.target.classList;
+   if(cl.contains('b-name')||cl.contains('b-brand')||cl.contains('b-thcmin')||cl.contains('b-thcmax')||cl.contains('b-price'))budRowSync(row);
+ });
+ grid.addEventListener('change',function(ev){
+   var row=ev.target.closest?ev.target.closest('[data-brow]'):null;
+   if(row&&ev.target.classList.contains('b-cat'))budRowSync(row);
+ });
+ $('admBudsSearch').addEventListener('input',budFilter);
+ $('admBudsAll').addEventListener('change',function(){
+   var on=$('admBudsAll').checked;
+   document.querySelectorAll('#admBudsGrid [data-brow]:not([hidden]) .b-sel').forEach(function(c){c.checked=on;});
+   budSelSync();
+ });
+ $('admBudsBulkDel').addEventListener('click',function(){
+   document.querySelectorAll('#admBudsGrid [data-brow] .b-sel:checked').forEach(function(c){
+     var row=c.closest('[data-brow]'); if(row)row.remove();
+   });
+   budFilter();
+ });
+ $('admBudsAdd').addEventListener('click',function(){
+   var wrap=document.createElement('div');
+   wrap.innerHTML=budRowHtml({n:'',b:'',c:'flower',s:[],t:null,cb:null,p:null,st:null,r:null,i:false,u:'',img:''});
+   var node=wrap.firstChild;
+   grid.appendChild(node); bindBudFile(node);
+   var exp=node.querySelector('.adm-gexpand'); exp.hidden=false; node.classList.add('open');
+   budFilter();
+   var nm=node.querySelector('.b-name'); if(nm){nm.focus(); nm.scrollIntoView({block:'center'});}
+ });
 }
-$('admFifaList').innerHTML=CONTENT.fifaTeams.map(fifaBlock).join('');
-
-/* ---------- Split people ---------- */
-$('admSplitList').innerHTML=CONTENT.splitPeople.map(function(p){
- return '<div class="adm-grid"><div class="adm-f"><label>Name</label>'+inp('p-name',p.name)+'</div>'
-  +'<div class="adm-f"><label>Home currency</label><select class="adm-sel p-home"><option value="CAD"'+(p.home==='CAD'?' selected':'')+'>CAD</option><option value="USD"'+(p.home==='USD'?' selected':'')+'>USD</option></select></div></div>';
-}).join('');
+function buildCatalogues(){
+ $('admFoodCat').innerHTML='<option value="all">All cats</option>'+CONTENT.foodCats.map(function(c){
+   return '<option value="'+c.id+'">'+cEsc(c.label)+'</option>';
+ }).join('');
+ $('admFoodGrid').innerHTML=CONTENT.food.map(foodRowHtml).join('');
+ bindFoodGrid(); foodFilter();
+ $('admBudsGrid').innerHTML=CONTENT.buds.map(budRowHtml).join('');
+ document.querySelectorAll('#admBudsGrid [data-brow]').forEach(bindBudFile);
+ bindBudGrid(); budFilter();
+}
 
 /* ---------- Saves ---------- */
-function blockErr(msg){return msg}
 document.querySelectorAll('[data-save]').forEach(function(btn){
  btn.addEventListener('click',function(){
   var key=btn.getAttribute('data-save');
@@ -230,7 +541,7 @@ document.querySelectorAll('[data-save]').forEach(function(btn){
   }
   if(key==='food'){
     var food=[],err='';
-    document.querySelectorAll('#admFoodList .adm-entry').forEach(function(b,i){
+    document.querySelectorAll('#admFoodGrid [data-frow]').forEach(function(b,i){
       var name=val(b.querySelector('.f-name'));
       if(!name){err='Spot '+(i+1)+': the name cannot be empty.';return;}
       var url=val(b.querySelector('.f-url'));
@@ -252,7 +563,7 @@ document.querySelectorAll('[data-save]').forEach(function(btn){
   if(key==='buds'){
     var buds=[],err='';
     function numOrNull(b,cls){var x=val(b.querySelector(cls)); if(x==='')return null; var n=Number(x); return isNaN(n)?undefined:n;}
-    document.querySelectorAll('#admBudsList .adm-entry').forEach(function(b,i){
+    document.querySelectorAll('#admBudsGrid [data-brow]').forEach(function(b,i){
       if(err)return;
       var name=val(b.querySelector('.b-name'));
       if(!name){err='Product '+(i+1)+': the name cannot be empty.';return;}
@@ -341,6 +652,9 @@ document.querySelectorAll('[data-save]').forEach(function(btn){
         .catch(function(){serr='Save failed.';saved++;if(saved===pending)showErr('flights',serr);});
     });
   }
+  // Any successful save can change the Deck's state (a content save
+  // flips the source tile to "Saved copy"); refresh it quietly.
+  setTimeout(loadAdminState,900);
  });
 });
 
@@ -426,7 +740,6 @@ function loadAdminFlights(){
     bindFlightDeletes(); bindFlightParses();
   }).catch(function(){});
 }
-loadAdminFlights();
 $('admFlightsAdd').addEventListener('click',function(){
   var wrap=document.createElement('div');
   wrap.innerHTML=flightBlock({id:'',person:'Moiz',flightNumber:'',airline:'',origin:'',originCode:'',

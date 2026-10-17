@@ -902,6 +902,67 @@ async function passwordLogin(){
     res.json({ ok: true });
   });
 
+  // ---------- Admin console state (admin-gated, read-only) ----------
+  // The Deck renders from this one payload: which content source is
+  // live, the flights store + next movement, the Split ledger summary,
+  // the photo wall count, and key PRESENCE (booleans only — key values
+  // never leave the server). Same gate as content writes.
+  app.get('/api/admin/state', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) {
+      return res.status(403).json({ error: 'Only Mutasif and Moiz can view admin state.' });
+    }
+    // Content source: a saved data/content.json outranks the shipped
+    // defaults; savedAt is the file's mtime (writeContent does not
+    // stamp the payload itself).
+    let content = { source: 'defaults', savedAt: null };
+    if (readContent()) {
+      let savedAt = null;
+      try { savedAt = fs.statSync(CONTENT_PATH).mtime.toISOString(); } catch { /* stat raced a write */ }
+      content = { source: 'saved', savedAt };
+    }
+    // Flights: count + next movement (earliest upcoming departure;
+    // if every flight is in the past, the most recent one, flagged).
+    const flights = readFlights();
+    const now = Date.now();
+    const timed = flights
+      .map((f) => {
+        const t = Date.parse(`${f.departureDate}T${f.departureTime || '00:00'}:00`);
+        return { f, t: Number.isNaN(t) ? Infinity : t };
+      })
+      .sort((a, b) => a.t - b.t);
+    const upNext = timed.find((x) => x.t >= now);
+    const pick = upNext || timed[timed.length - 1] || null;
+    const next = pick ? {
+      person: pick.f.person,
+      flightNumber: pick.f.flightNumber,
+      originCode: pick.f.originCode,
+      destinationCode: pick.f.destinationCode,
+      departureDate: pick.f.departureDate,
+      departureTime: pick.f.departureTime,
+      arrivalTime: pick.f.arrivalTime,
+      upcoming: !!upNext,
+    } : null;
+    // Split ledger summary (raw store totals; balances stay client-side).
+    const ledger = readLedger();
+    // Photo wall count — same visibility rule as GET /api/photos.
+    const index = readIndex();
+    const photoCount = Object.values(index)
+      .filter((m) => !m.hidden && (m.immichId || fs.existsSync(path.join(UPLOADS_DIR, m.name))))
+      .length;
+    res.json({
+      you: { name: displayName(req.session.user), person: matchPerson(req.session.user) },
+      content,
+      flights: { count: flights.length, next },
+      ledger: {
+        expenseCount: ledger.expenses.length,
+        settlementCount: ledger.settlements.length,
+        totalCentsCAD: ledger.expenses.reduce((s, e) => s + (e.amountCentsCAD || 0), 0),
+      },
+      photos: { count: photoCount },
+      keys: { googlePlaces: !!PLACES_KEY, aeroapi: !!process.env.AEROAPI_KEY },
+    });
+  });
+
   // ---------- Buds AI recommendation ----------
   app.post('/api/buds/recommend', requireAuth, async (req, res) => {
     const { feeling } = req.body || {};
