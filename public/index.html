@@ -85,6 +85,10 @@ nav>*{pointer-events:auto}
    sized from the phrase length so "HAVE YOU EVER" fits a phone. */
 .bigword span.hack{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;letter-spacing:.04em;white-space:nowrap;
   font-size:min(168px,calc(92vw / (var(--len,7) * 0.64)));text-shadow:0 0 40px rgba(242,179,61,.35),0 0 2px rgba(165,180,255,.6)}
+.bigword span.hack i{font-style:normal}
+.bigword span.hack .n{opacity:.4}
+.bigword span.hack .w{color:var(--amber2);text-shadow:0 0 18px rgba(242,179,61,.75)}
+.bigword span.hack .f{color:var(--cream)}
 .bigword small{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.4em;color:var(--amber2);margin-top:14px;text-transform:uppercase}
 .hero-layer{opacity:1;pointer-events:none;justify-content:flex-start;padding-top:13vh}
 .hero-layer .label{margin-bottom:14px}
@@ -1811,7 +1815,7 @@ flash of Home. The router clears the tag when it takes over. */
     <div class="cine-rail" aria-hidden="true"><i id="cineRailFill" style="transform: scaleY(0);"></i></div>
 
     <div class="layer bigword" id="bigWord" style="opacity: 0; transform: scale(0.93);">
-      <span class="hack" aria-hidden="true" style="--len:4">HAVE</span>
+      <span class="hack" aria-hidden="true" style="--len:18"></span>
       <small>51.05° N · 114.07° W</small>
     </div>
 
@@ -2905,37 +2909,57 @@ var cityEls={CA:document.getElementById('cityCA'),YVR:document.getElementById('c
   TX:document.getElementById('cityTX'),YYC:document.getElementById('cityYYC')};
 var shadowCA=planeCA.querySelector('ellipse'),shadowTX=planeTX.querySelector('ellipse');
 function clamp01(x){return x<0?0:x>1?1:x}
-/* Big-word hacker text: the phrase follows scroll through the word's window
-   (HAVE, YOU, EVER, HAVE YOU EVER, then RUN IT BACK to land), each new phrase
-   decodes left to right out of random glyphs, and a resolved phrase keeps
-   glitching the odd letter. Ticks only while the word is on screen. */
-var HACK_SEQ=[[0,'HAVE'],[0.2,'YOU'],[0.4,'EVER'],[0.6,'HAVE YOU EVER'],[0.78,'RUN IT BACK']];
+/* Big-word hacker text: a long line of constantly changing random glyphs.
+   As you scroll through the word's window HAVE, YOU and EVER each surface
+   out of the noise at their own spot and dissolve again (scroll-driven, so
+   scrolling back reverses it), then the whole line decodes into
+   RUN IT BACK BOYZ and stays. Ticks only while the word is on screen. */
+var HACK_L=18,HACK_FINAL='RUN IT BACK BOYZ',HACK_FINAL_AT=0.72;
+var HACK_WORDS=[{w:'HAVE',at:1,a:0.04,b:0.26},{w:'YOU',at:12,a:0.26,b:0.48},{w:'EVER',at:6,a:0.48,b:0.70}];
 var HACK_G='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&@!?<>/=+*';
 var hackEl=bigWord.querySelector('.hack');
-var hack={target:'',from:0,shown:'',raf:0,vis:false,last:0,gl:[]};
+var hack={q:0,vis:false,raf:0,last:0,noise:[],finalFrom:0,shown:''};
+function hackGlyph(){return HACK_G.charAt((Math.random()*HACK_G.length)|0)}
 function hackUpdate(q,visible){
  if(!hackEl)return;
- var t=HACK_SEQ[0][1];
- for(var k=0;k<HACK_SEQ.length;k++)if(q>=HACK_SEQ[k][0])t=HACK_SEQ[k][1];
- if(t!==hack.target){hack.target=t;hack.from=performance.now();hack.gl=[];hackEl.style.setProperty('--len',t.length)}
- hack.vis=visible;
- if(REDUCED){if(hack.shown!==t){hack.shown=t;hackEl.textContent=t}return}
+ if(q>=HACK_FINAL_AT&&hack.q<HACK_FINAL_AT)hack.finalFrom=performance.now();
+ hack.q=q;hack.vis=visible;
+ if(REDUCED){if(hack.shown!==HACK_FINAL){hack.shown=HACK_FINAL;hackEl.textContent=HACK_FINAL}return}
  if(visible&&!hack.raf)hack.raf=requestAnimationFrame(hackTick);
 }
 function hackTick(now){
  hack.raf=0;
  if(!hack.vis)return;
- if(now-hack.last>=45){
+ if(now-hack.last>=50){
    hack.last=now;
-   var t=hack.target,el=now-hack.from,out='',settleAt=140+45*t.length;
-   if(el>settleAt&&Math.random()<0.14){var j=(Math.random()*t.length)|0;if(t[j]!==' ')hack.gl[j]=now+90}
-   for(var i=0;i<t.length;i++){
-     var c=t[i];
-     if(c===' '){out+=' ';continue}
-     var scrambling=el<140+45*i||(hack.gl[i]&&hack.gl[i]>now);
-     out+=scrambling?HACK_G.charAt((Math.random()*HACK_G.length)|0):c;
+   var L=HACK_L,cls=[],ch=[],q=hack.q,i;
+   for(i=0;i<L;i++){if(!hack.noise[i]||Math.random()<0.45)hack.noise[i]=hackGlyph();ch[i]=hack.noise[i];cls[i]='n'}
+   if(q>=HACK_FINAL_AT){
+     var pad=Math.floor((L-HACK_FINAL.length)/2),el=now-hack.finalFrom;
+     for(i=0;i<L;i++){
+       var fi=i-pad,fc=fi>=0&&fi<HACK_FINAL.length?HACK_FINAL[fi]:' ';
+       if(el>120+38*i){ch[i]=fc;cls[i]='f'}
+       else if(fc===' '&&el>60+38*i){ch[i]=' '}
+     }
+   }else{
+     HACK_WORDS.forEach(function(W){
+       if(q<W.a||q>W.b)return;
+       /* Decode in over the first quarter, hold, dissolve over the last quarter. */
+       var t=(q-W.a)/(W.b-W.a),n=W.w.length;
+       var shown=t<0.25?Math.ceil(n*t/0.25):t>0.75?Math.ceil(n*(1-t)/0.25):n;
+       for(var k=0;k<n;k++){var j=W.at+k;if(j>=L)break;
+         if(k<shown){ch[j]=W.w[k];cls[j]='w'}else{ch[j]=hackGlyph();cls[j]='w'}}
+     });
    }
-   if(out!==hack.shown){hack.shown=out;hackEl.textContent=out}
+   var html='',run='',rc=null;
+   for(i=0;i<=L;i++){
+     if(i===L||cls[i]!==rc){
+       if(run)html+='<i class="'+rc+'">'+run.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</i>';
+       if(i===L)break;run='';rc=cls[i];
+     }
+     run+=ch[i]===' '?'\u00a0':ch[i];
+   }
+   if(html!==hack.shown){hack.shown=html;hackEl.innerHTML=html}
  }
  hack.raf=requestAnimationFrame(hackTick);
 }
