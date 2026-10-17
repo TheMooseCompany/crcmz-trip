@@ -786,7 +786,14 @@ async function passkeyLogin(){
       return res.status(400).json({ error: 'feeling required' });
     if (feeling.length > 500)
       return res.status(400).json({ error: 'too long' });
-    const c = readContent();
+    let c = readContent();
+    if (!c) {
+      // content.json may have been renamed; try the stale backup
+      try {
+        const stalePath = path.join(path.dirname(CONTENT_PATH), 'content.json.stale');
+        c = JSON.parse(fs.readFileSync(stalePath, 'utf8'));
+      } catch { /* no fallback either */ }
+    }
     const buds = (c && Array.isArray(c.buds)) ? c.buds : [];
     if (buds.length === 0) return res.status(503).json({ error: 'No buds data available.' });
     const budsSummary = buds.map((b) => {

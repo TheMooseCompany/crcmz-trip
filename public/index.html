@@ -858,14 +858,18 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 /* Buds AI recommendation widget */
 .buds-ai-wrap{margin:20px 0 4px;display:flex;flex-direction:column;gap:12px}
 .buds-ai-box{position:relative;border-radius:18px;padding:2px;z-index:0}
-.buds-ai-glow{position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,#f72585,#7209b7,#3a86ff,#4cc9f0,#f8961e,#f72585);background-size:300% 300%;animation:aiGlow 4s linear infinite;z-index:0}
+/* thin animated border ring */
+.buds-ai-glow{position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,#f72585,#7209b7,#3a86ff,#4cc9f0,#f8961e,#f72585);background-size:300% 300%;animation:aiGlow 3.5s linear infinite;z-index:0}
+/* diffuse aurora bloom behind the box */
+.buds-ai-box::before{content:'';position:absolute;inset:-14px;border-radius:28px;background:linear-gradient(135deg,#f72585cc,#7209b7aa,#3a86ffcc,#4cc9f0aa,#f8961ecc,#f72585cc);background-size:300% 300%;animation:aiGlow 3.5s linear infinite;filter:blur(18px);opacity:.55;z-index:-1;pointer-events:none}
 @keyframes aiGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.buds-ai-inner{position:relative;z-index:1;border-radius:16px;background:rgba(8,11,30,.96);display:flex;align-items:stretch;overflow:hidden}
-.buds-ai-input{flex:1;background:transparent;border:none;color:var(--cream);font-family:inherit;font-size:15px;padding:14px 14px 14px 18px;resize:none;outline:none;min-height:54px;line-height:1.5}
-.buds-ai-input::placeholder{color:rgba(245,239,224,.3)}
-.buds-ai-send{flex-shrink:0;background:rgba(255,255,255,.08);border:none;border-left:1px solid rgba(255,255,255,.08);color:var(--cream);cursor:pointer;padding:0 18px;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:.03em;transition:background .15s;white-space:nowrap}
-.buds-ai-send:hover{background:rgba(255,255,255,.15)}
-.buds-ai-send:disabled{opacity:.45;cursor:default}
+.buds-ai-inner{position:relative;z-index:1;border-radius:16px;background:rgba(8,11,30,.97);display:flex;align-items:center;overflow:hidden}
+.buds-ai-input{flex:1;background:transparent;border:none;color:var(--cream);font-family:inherit;font-size:15px;padding:14px 10px 14px 18px;resize:none;outline:none;min-height:54px;max-height:54px;line-height:1.45;overflow:hidden}
+.buds-ai-input::placeholder{color:rgba(245,239,224,.28)}
+.buds-ai-send{flex-shrink:0;background:rgba(255,255,255,.07);border:none;border-left:1px solid rgba(255,255,255,.08);color:var(--cream);cursor:pointer;padding:0;width:52px;height:54px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.buds-ai-send:hover{background:rgba(255,255,255,.14)}
+.buds-ai-send:disabled{opacity:.4;cursor:default}
+.buds-ai-send svg{width:20px;height:20px;flex-shrink:0}
 .buds-ai-err{color:#F87171;font-size:13px;padding:2px 2px;display:none}
 .buds-ai-err.show{display:block}
 .buds-ai-result{display:none;background:linear-gradient(145deg,rgba(28,36,84,.72),rgba(10,14,39,.85));border:1px solid rgba(245,239,224,.14);border-radius:16px;padding:18px 18px 14px;font-size:14px;line-height:1.65;color:var(--cream)}
@@ -2053,8 +2057,8 @@ flash of Home. The router clears the tag when it takes over. */
       <div class="buds-ai-box">
         <div class="buds-ai-glow" aria-hidden="true"></div>
         <div class="buds-ai-inner">
-          <textarea id="budsAiInput" class="buds-ai-input" placeholder="How are you feeling? Tell the AI — energetic, chill, sleepy, hungry, social…" rows="2" aria-label="Describe how you're feeling for AI suggestions"></textarea>
-          <button id="budsAiBtn" class="buds-ai-send" type="button">Ask AI</button>
+          <textarea id="budsAiInput" class="buds-ai-input" placeholder="How are you feeling right now?" rows="1" aria-label="Describe how you're feeling for AI suggestions"></textarea>
+          <button id="budsAiBtn" class="buds-ai-send" type="button" aria-label="Ask AI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6.5L20 11l-6 2-2 6.5-2-6.5L4 11l6-1.5Z"/><path d="M19 3l1 2.5L22.5 6l-2.5 1L19 9.5 18 7l-2.5-1L18 5Z"/></svg></button>
         </div>
       </div>
       <div id="budsAiErr" class="buds-ai-err" role="alert"></div>
@@ -4206,7 +4210,8 @@ renderBuds();
   var listEl=document.getElementById('budsAiList');
   if(!btn)return;
   function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
-  function setLoading(on){btn.disabled=on;btn.textContent=on?'…':'Ask AI';}
+  var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6.5L20 11l-6 2-2 6.5-2-6.5L4 11l6-1.5Z"/><path d="M19 3l1 2.5L22.5 6l-2.5 1L19 9.5 18 7l-2.5-1L18 5Z"/></svg>';
+  function setLoading(on){btn.disabled=on;btn.innerHTML=on?'<span style="font-size:18px;line-height:1">·</span>':ICON;}
   function showErr(msg){errBox.textContent=msg;errBox.classList.add('show');resBox.classList.remove('show');}
   function showResult(data){
     sumEl.textContent=data.summary||'';
