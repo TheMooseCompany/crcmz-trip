@@ -81,6 +81,10 @@ nav>*{pointer-events:auto}
 .readout .amb{color:var(--amber2)}
 .bigword{justify-content:center}
 .bigword span{font-size:clamp(56px,13vw,168px);font-weight:700;letter-spacing:.06em;line-height:1;color:var(--cream);text-shadow:0 0 60px rgba(242,179,61,.35)}
+/* Hacker text: monospace so the scramble never changes the word's width;
+   sized from the phrase length so "HAVE YOU EVER" fits a phone. */
+.bigword span.hack{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;letter-spacing:.04em;white-space:nowrap;
+  font-size:min(168px,calc(92vw / (var(--len,7) * 0.64)));text-shadow:0 0 40px rgba(242,179,61,.35),0 0 2px rgba(165,180,255,.6)}
 .bigword small{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.4em;color:var(--amber2);margin-top:14px;text-transform:uppercase}
 .hero-layer{opacity:1;pointer-events:none;justify-content:flex-start;padding-top:13vh}
 .hero-layer .label{margin-bottom:14px}
@@ -1807,7 +1811,7 @@ flash of Home. The router clears the tag when it takes over. */
     <div class="cine-rail" aria-hidden="true"><i id="cineRailFill" style="transform: scaleY(0);"></i></div>
 
     <div class="layer bigword" id="bigWord" style="opacity: 0; transform: scale(0.93);">
-      <span>CALGARY</span>
+      <span class="hack" aria-hidden="true" style="--len:4">HAVE</span>
       <small>51.05° N · 114.07° W</small>
     </div>
 
@@ -2793,6 +2797,7 @@ function renderProgress(p){
  if(wantPulses!==pulsesOn){pulsesOn=wantPulses;setPulses(wantPulses)}
  var bw=(p>0.42&&p<0.85)?Math.min(1,Math.min((p-0.42)/0.08,(0.85-p)/0.06)):0;
  bigWord.style.opacity=bw.toFixed(2);
+ hackUpdate((p-0.42)/(0.85-0.42),bw>0.01);
  bigWord.style.transform='scale('+(0.93+0.07*bw).toFixed(3)+')';
  heroLayer.classList.toggle('landed',i===4);
  /* Hero cross-fades (owner's recording fix): successive hero states
@@ -2900,6 +2905,40 @@ var cityEls={CA:document.getElementById('cityCA'),YVR:document.getElementById('c
   TX:document.getElementById('cityTX'),YYC:document.getElementById('cityYYC')};
 var shadowCA=planeCA.querySelector('ellipse'),shadowTX=planeTX.querySelector('ellipse');
 function clamp01(x){return x<0?0:x>1?1:x}
+/* Big-word hacker text: the phrase follows scroll through the word's window
+   (HAVE, YOU, EVER, HAVE YOU EVER, then RUN IT BACK to land), each new phrase
+   decodes left to right out of random glyphs, and a resolved phrase keeps
+   glitching the odd letter. Ticks only while the word is on screen. */
+var HACK_SEQ=[[0,'HAVE'],[0.2,'YOU'],[0.4,'EVER'],[0.6,'HAVE YOU EVER'],[0.78,'RUN IT BACK']];
+var HACK_G='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&@!?<>/=+*';
+var hackEl=bigWord.querySelector('.hack');
+var hack={target:'',from:0,shown:'',raf:0,vis:false,last:0,gl:[]};
+function hackUpdate(q,visible){
+ if(!hackEl)return;
+ var t=HACK_SEQ[0][1];
+ for(var k=0;k<HACK_SEQ.length;k++)if(q>=HACK_SEQ[k][0])t=HACK_SEQ[k][1];
+ if(t!==hack.target){hack.target=t;hack.from=performance.now();hack.gl=[];hackEl.style.setProperty('--len',t.length)}
+ hack.vis=visible;
+ if(REDUCED){if(hack.shown!==t){hack.shown=t;hackEl.textContent=t}return}
+ if(visible&&!hack.raf)hack.raf=requestAnimationFrame(hackTick);
+}
+function hackTick(now){
+ hack.raf=0;
+ if(!hack.vis)return;
+ if(now-hack.last>=45){
+   hack.last=now;
+   var t=hack.target,el=now-hack.from,out='',settleAt=140+45*t.length;
+   if(el>settleAt&&Math.random()<0.14){var j=(Math.random()*t.length)|0;if(t[j]!==' ')hack.gl[j]=now+90}
+   for(var i=0;i<t.length;i++){
+     var c=t[i];
+     if(c===' '){out+=' ';continue}
+     var scrambling=el<140+45*i||(hack.gl[i]&&hack.gl[i]>now);
+     out+=scrambling?HACK_G.charAt((Math.random()*HACK_G.length)|0):c;
+   }
+   if(out!==hack.shown){hack.shown=out;hackEl.textContent=out}
+ }
+ hack.raf=requestAnimationFrame(hackTick);
+}
 /* Position along the route: linear until 70%, then a C1 Hermite ease so the
    approach slows smoothly into a landing roll (no speed jump at 70%). */
 function flightU(t){if(t<=0.7)return t;var x=(t-0.7)/0.3;return 0.7+0.3*(x+0.8*x*x-0.8*x*x*x)}
