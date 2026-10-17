@@ -1813,7 +1813,13 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
 <script>/* Boot view (deep links): tag the hash's view before any view
 markup parses, so the first paint is the requested view, never a
 flash of Home. The router clears the tag when it takes over. */
-(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','split','tourney','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();</script>
+(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','split','tourney','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();
+/* On-device perf probe gate (diagnostics; diagnosis findings §6):
+   with no flag this is a localStorage read and nothing else — no
+   request, no DOM. ?probe=1 arms it (the flag, not the query, is
+   what survives the Zitadel login redirect), ?probe=off disarms it.
+   /assets/probe.js is fetched only when armed. */
+(function(){try{var q=location.search||'';if(/[?&]probe=off(\b|&)/.test(q)){localStorage.removeItem('crcmz-probe');return;}if(/[?&]probe=1(\b|&)/.test(q))localStorage.setItem('crcmz-probe','1');if(localStorage.getItem('crcmz-probe')==='1'){var s=document.createElement('script');s.src='/assets/probe.js';s.async=true;document.head.appendChild(s);}}catch(e){}})();</script>
 
 <nav>
   <a class="nav-brand" href="#top">CRCMZ&nbsp;TRIP</a>
@@ -5824,7 +5830,7 @@ if(document.body.getAttribute('data-view')==='buds')renderBuds();
        a.__cov=cov;
        var rot=(a.__rot||0)*(1-cov);
        a.style.transform='rotate('+rot.toFixed(3)+'deg) scale('+(1-0.05*cov).toFixed(4)+')';
-       a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')';
+       if(!(window.__PROBE&&window.__PROBE.nofilter))a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')'; /* probe nofilter ablation skips this write */
      }
    }
    var g=stack.querySelector('.bp-pass.gold');
@@ -6466,7 +6472,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
        a.__cov=cov;
        var rot=(a.__rot||0)*(1-cov);
        a.style.transform='rotate('+rot.toFixed(3)+'deg) scale('+(1-0.05*cov).toFixed(4)+')';
-       a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')';
+       if(!(window.__PROBE&&window.__PROBE.nofilter))a.style.filter='brightness('+(1-0.22*cov).toFixed(3)+')'; /* probe nofilter ablation skips this write */
      }
    }
    if(window.scrollY!==lastY){ lastY=window.scrollY; raf=requestAnimationFrame(frame); }
