@@ -31,6 +31,12 @@
      4-colour palette, used for status semantics and nothing else.
      --live is THE live colour everywhere (Launcher dot, Poll, flights). */
   --ok:#4ADE80; --warn:#FB923C; --danger:#B03A2E; --err:#F87171; --live:#4ADE80; --info:#60A5FA; --departed:#C084FC;
+  /* Glass tokens (React Bits review, 2026-10-17): ONE blur language for
+     every glass surface — the dock runs the full token, the top nav and
+     the Photos album bar run the soft token. Surfaces reference the
+     token, never a literal, so the glass system moves as one. */
+  --glass-blur:blur(24px) saturate(180%);
+  --glass-blur-soft:blur(14px) saturate(150%);
   /* Type roles (critique P2-1/P2-2): mono (IBM Plex Mono) holds three
      sanctioned roles — data-mono (the T-minus pill + aligned numeric
      columns), label-mono (small caps section labels + badges) and
@@ -154,7 +160,7 @@ nav>*{pointer-events:auto}
 #view-photos .photo-head h2 .serif{color:var(--peri)}
 .photo-count{margin:0;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .photo-count b{color:var(--cream);font-weight:700;font-variant-numeric:tabular-nums}
-.photo-album-bar{display:flex;align-items:center;gap:14px;min-height:78px;margin-top:18px;padding:10px 12px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.018));color:var(--cream);text-decoration:none;box-shadow:var(--shadow-card);-webkit-tap-highlight-color:transparent}
+.photo-album-bar{display:flex;align-items:center;gap:14px;min-height:78px;margin-top:18px;padding:10px 12px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));color:var(--cream);text-decoration:none;box-shadow:var(--shadow-card);-webkit-tap-highlight-color:transparent;backdrop-filter:var(--glass-blur-soft);-webkit-backdrop-filter:var(--glass-blur-soft)}
 .photo-album-bar:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .photo-album-cover{width:58px;height:58px;flex:0 0 58px;border-radius:12px;object-fit:cover;background:#10101c}
 .photo-album-main{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
@@ -539,7 +545,7 @@ body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view=
    visible on device as square "shoulders" around the pill — while the
    drop-shadow follows the 30px border-radius silhouette. The inset
    highlight stays as a box-shadow (it paints inside the radius). */
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);filter:drop-shadow(0 14px 20px rgba(2,3,10,.45));padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));top:auto;z-index:120;width:min(540px,calc(100% - 16px));display:flex;gap:2px;border-radius:30px;background:linear-gradient(160deg,rgba(26,30,58,.62),rgba(10,12,28,.55));backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);filter:drop-shadow(0 14px 20px rgba(2,3,10,.45));padding:8px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
 .tabbar::-webkit-scrollbar{display:none}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:rgba(10,12,28,.93)}}
 .view{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
@@ -1636,7 +1642,7 @@ body[data-view="food"] footer a{color:var(--peri)}
    inflating card text; anchored sections land below the header band. */
 :root{--header-h:calc(58px + env(safe-area-inset-top,0px))}
 html{scroll-padding-top:calc(var(--header-h) + 14px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-nav:not(.tabbar){min-height:var(--header-h);padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;align-items:center;background:linear-gradient(180deg,rgba(6,8,24,.96),rgba(6,8,24,.92));-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);border-bottom:1px solid rgba(245,239,224,.09);box-shadow:0 10px 28px rgba(3,4,12,.28)}
+nav:not(.tabbar){min-height:var(--header-h);padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;align-items:center;background:linear-gradient(180deg,rgba(6,8,24,.96),rgba(6,8,24,.92));-webkit-backdrop-filter:var(--glass-blur-soft);backdrop-filter:var(--glass-blur-soft);border-bottom:1px solid rgba(245,239,224,.09);box-shadow:0 10px 28px rgba(3,4,12,.28)}
 body[data-view="food"] nav:not(.tabbar){background:linear-gradient(180deg,rgba(6,8,24,.96),rgba(6,8,24,.92))}
 body[data-view="split"] nav:not(.tabbar),body[data-view="admin"] nav:not(.tabbar){background:rgba(245,239,224,.96);border-bottom-color:rgba(23,20,37,.10);box-shadow:0 10px 28px rgba(23,20,37,.08)}
 .hero-layer{padding-top:calc(var(--header-h) + 5vh)}
@@ -1672,6 +1678,86 @@ img{max-width:100%}
 #cinematic.landed-fit .stage{position:relative;height:auto}
 #cinematic.landed-fit .hero-layer{position:relative;inset:auto}
 
+/* ================= React Bits polish pass (owner order, 2026-10-17) =================
+   Surface treatments from the application review. Every item is paint,
+   never geometry: the frozen cinematic, stacks and view layouts are
+   untouched — these rules restyle text, borders, glass and press
+   states on the existing boxes. */
+
+/* 2 · Shiny Text on the T-MINUS pill: a light band sweeps the amber
+   glyphs. The text lives in .nav-cd-tx so the pill's own fill stays a
+   normal background. Falls back to flat amber2 where background-clip
+   is unsupported. */
+.nav-cd-tx{display:inline-block}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .nav-cd-tx{background-image:linear-gradient(115deg,var(--amber2) 0%,var(--amber2) 38%,#FFF6DA 50%,var(--amber2) 62%,var(--amber2) 100%);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:cdShine 3.4s linear infinite}
+}
+@keyframes cdShine{0%{background-position:190% 0}100%{background-position:-90% 0}}
+
+/* 1 · MetallicPaint on the CRCMZ wordmark: liquid silver chrome (the
+   media kit's silver identity) flowing across the hero title's first
+   line. Static mid-flow gradient under reduced motion; flat cream
+   where background-clip is unsupported. The drop-shadow filter
+   follows the clipped glyph shape — the inherited text-shadow would
+   bleed through the transparent fill. */
+.ht-chrome{display:inline-block;text-shadow:none;filter:drop-shadow(0 4px 24px rgba(6,8,24,.55))}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .ht-chrome{background-image:linear-gradient(100deg,#79839F 0%,#C6CEDF 20%,#FFFFFF 37%,#9AA6C6 50%,#EDF1FA 63%,#79839F 80%,#B9C3DA 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:chromeFlow 7.5s ease-in-out infinite alternate}
+}
+@keyframes chromeFlow{from{background-position:0% 0}to{background-position:100% 0}}
+
+/* 4 · Electric Border on the SKIP pill: one calm indigo arc travelling
+   a 2px ring (tuned-hero values: #6D7CFF glow, pale #D7DEFF core).
+   Where @property is unsupported the arc simply rests, lit. */
+@property --eb-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+#skip::after{content:"";position:absolute;inset:-2px;border-radius:999px;padding:2px;background:conic-gradient(from var(--eb-a,0deg),transparent 0deg,transparent 235deg,rgba(109,124,255,.55) 285deg,#D7DEFF 318deg,rgba(109,124,255,.55) 348deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;filter:drop-shadow(0 0 6px rgba(109,124,255,.5));animation:ebSpin 6.5s linear infinite;pointer-events:none}
+@keyframes ebSpin{to{--eb-a:360deg}}
+
+/* 10 · Frozen starfield: a screen-space layer of STATIC stars in the
+   stage sky (the scene's own map-space #stars layer is untouched).
+   No animation of any kind; identical under reduced motion. */
+.starfield{position:absolute;inset:0;pointer-events:none;opacity:.5;background-repeat:no-repeat;background-image:radial-gradient(1.6px 1.6px at 8% 14%,rgba(245,239,224,.85) 50%,transparent 52%),radial-gradient(1.1px 1.1px at 22% 30%,rgba(245,239,224,.6) 50%,transparent 52%),radial-gradient(1.3px 1.3px at 36% 8%,rgba(214,222,255,.7) 50%,transparent 52%),radial-gradient(1px 1px at 47% 24%,rgba(245,239,224,.55) 50%,transparent 52%),radial-gradient(1.5px 1.5px at 58% 12%,rgba(245,239,224,.8) 50%,transparent 52%),radial-gradient(1px 1px at 66% 34%,rgba(245,239,224,.5) 50%,transparent 52%),radial-gradient(1.4px 1.4px at 74% 18%,rgba(214,222,255,.65) 50%,transparent 52%),radial-gradient(1px 1px at 83% 28%,rgba(245,239,224,.6) 50%,transparent 52%),radial-gradient(1.6px 1.6px at 91% 10%,rgba(245,239,224,.85) 50%,transparent 52%),radial-gradient(1px 1px at 15% 44%,rgba(245,239,224,.45) 50%,transparent 52%),radial-gradient(1.1px 1.1px at 88% 46%,rgba(245,239,224,.5) 50%,transparent 52%),radial-gradient(1px 1px at 52% 42%,rgba(245,239,224,.4) 50%,transparent 52%),radial-gradient(1.2px 1.2px at 30% 52%,rgba(245,239,224,.35) 50%,transparent 52%),radial-gradient(1px 1px at 70% 56%,rgba(245,239,224,.35) 50%,transparent 52%)}
+
+/* 5 · Ghost stroke numerals: the days-remaining figure, huge and
+   outlined, behind the countdown strip. Clipped by the block, purely
+   decorative (aria-hidden), mirrors #cd-d from the same tick. */
+.cd-block{position:relative;overflow:hidden}
+.cd-ghost{position:absolute;top:44%;right:-4px;transform:translateY(-50%);font-size:148px;line-height:.9;font-weight:700;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:1.5px rgba(165,180,255,.13);font-variant-numeric:tabular-nums;pointer-events:none;z-index:0}
+.cd-block>.label,.cd-block>.cd-strip,.cd-block>#cd-msg{position:relative;z-index:1}
+@media(max-width:370px){.cd-ghost{font-size:128px}}
+
+/* 6 · Dock magnification, adapted to touch: icons swell on press
+   (and sit a touch larger on the active tab). Transforms only — the
+   tab row's layout and the icon-only system are unchanged. */
+.tabbar .tab svg{transition:transform .28s var(--ease)}
+.tabbar .tab.on svg{transform:scale(1.07)}
+.tabbar .tab:active svg{transform:scale(1.24)}
+
+/* 8 · Launcher press-glow: on press, each tile lights in its OWN tint
+   (ring + outer wash + inner wash ride the tile's --tint vars). The
+   existing :active scale(.97) keeps doing the press motion. */
+.nav-tile{transition:transform .3s var(--ease),opacity .3s var(--ease),box-shadow .25s var(--ease)}
+.nav-tile:active{box-shadow:0 0 0 1px var(--tintline),0 14px 30px rgba(2,3,10,.4),0 18px 42px -10px var(--wash),inset 0 0 26px var(--wash),inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* 7 · Packing stepper: a stage track under the category chips. The
+   fill runs to the selected stage, dots mark the stages the thumb
+   has passed, and the thumb glides to the tapped category (synced
+   from the same click that sets the filter). */
+.pack-cats{position:relative;padding-bottom:17px}
+.pack-step{position:absolute;left:0;bottom:1px;height:12px;width:100%;pointer-events:none}
+.pack-step-track{position:absolute;left:0;top:5px;height:2px;border-radius:2px;background:rgba(245,239,224,.12)}
+.pack-step-fill{position:absolute;left:0;top:5px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--amber2));transition:width .5s var(--ease)}
+.pack-step-dot{position:absolute;top:3.5px;width:5px;height:5px;border-radius:50%;background:rgba(245,239,224,.25);transform:translateX(-50%);transition:background .3s}
+.pack-step-dot.on{background:var(--amber2)}
+.pack-step-thumb{position:absolute;top:0;left:0;width:12px;height:12px;border-radius:50%;background:var(--amber);border:2px solid #0A0E27;box-shadow:0 0 0 1.5px var(--amber2),0 2px 8px rgba(2,3,10,.5);transform:translateX(-50%);transition:left .5s var(--ease)}
+
+@media (prefers-reduced-motion: reduce){
+  .nav-cd-tx,.ht-chrome,#skip::after{animation:none}
+  .ht-chrome{background-position:40% 0}
+  .tabbar .tab svg{transition:none}
+  .pack-step-fill,.pack-step-thumb{transition:none}
+}
+
 </style>
 <style>@keyframes pulseRing{0%{transform:scale(.4);opacity:.85}100%{transform:scale(3.2);opacity:0}}</style></head>
 <body class="live-drive" data-view="home">
@@ -1684,7 +1770,7 @@ flash of Home. The router clears the tag when it takes over. */
   <a class="nav-brand" href="#top">CRCMZ&nbsp;TRIP</a>
   <div class="nav-links">
     <a href="#stay">Stay</a><a href="#days">Days</a><a href="#tourney">Tourney</a>
-    <span class="nav-cd" id="navCd">T-MINUS 12D 15H 05M</span>
+    <span class="nav-cd" id="navCd"><span class="nav-cd-tx" id="navCdTx">T-MINUS 12D 15H 05M</span></span>
   </div>
 </nav>
 
@@ -1815,6 +1901,7 @@ flash of Home. The router clears the tag when it takes over. */
         
       </g>
     </svg>
+    <div class="starfield" aria-hidden="true"></div>
     <div class="stage-vignette"></div>
     <div class="cine-rail" aria-hidden="true"><i id="cineRailFill" style="transform: scaleY(0);"></i></div>
 
@@ -1826,7 +1913,7 @@ flash of Home. The router clears the tag when it takes over. */
     <div class="layer hero-layer" id="heroLayer" style="pointer-events: none;">
       <div class="hero-scrim" id="heroScrim" aria-hidden="true"></div>
       <div class="label">Night Flight · CRCMZ Boyz</div>
-      <h1 class="hero-title" aria-label="CRCMZ Trip 2.0">CRCMZ<br><span class="ht-trip">TRIP<span class="stamp" id="stamp20" aria-hidden="true">2.0</span></span></h1>
+      <h1 class="hero-title" aria-label="CRCMZ Trip 2.0"><span class="ht-chrome">CRCMZ</span><br><span class="ht-trip">TRIP<span class="stamp" id="stamp20" aria-hidden="true">2.0</span></span></h1>
       <div class="hero-late" style="opacity: 0; transform: translateY(22px);">
         <p class="hero-dates" id="heroDates">Oct 29 - Nov 1 | Calgary</p>
         <p class="next-up" id="nextUp">Moiz lands Thu · Samad lands Fri · Movie + crew meetup Sat</p>
@@ -1873,6 +1960,7 @@ flash of Home. The router clears the tag when it takes over. */
      screen and ghosted against it mid-scroll, so it is removed. -->
   <section id="tripProgress"><div class="wrap">
     <div class="cd-block reveal" id="cdBlock">
+      <div class="cd-ghost" id="cdGhost" aria-hidden="true">12</div>
       <div class="label">The Countdown</div>
       <div class="cd-strip" id="cdGrid" role="timer" aria-label="Countdown to October 29, 2026">
         <div class="cd-cell"><b id="cd-d">12</b><span>Days</span></div><i aria-hidden="true">·</i>
@@ -1966,6 +2054,7 @@ flash of Home. The router clears the tag when it takes over. */
       <div class="pack-top"><span class="label">Gear Check</span><span class="pack-count" id="packCount">—</span></div>
       <div class="pack-prog"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div>
       <div class="pack-cats" id="packCats">
+        <span class="pack-step" id="packStep" aria-hidden="true"><span class="pack-step-track" id="packStepTrack"></span><span class="pack-step-fill" id="packStepFill"></span><span class="pack-step-thumb" id="packStepThumb"></span></span>
         <button class="pack-cat-btn on" data-cat="all">All</button>
         <button class="pack-cat-btn" data-cat="clothes">Clothes</button>
         <button class="pack-cat-btn" data-cat="electronics">Electronics</button>
@@ -2213,7 +2302,7 @@ flash of Home. The router clears the tag when it takes over. */
 </main>
 
 <footer><div class="wrap">
-  <span class="foot-brand"><img class="foot-logo" src="assets/crcmz.png" alt="CRCMZ logo" loading="lazy"><span>Designed by Moose. Deployed by Soup</span></span>
+  <span class="foot-brand"><img class="foot-logo" src="assets/crcmz-crest.png" alt="CRCMZ crest" loading="lazy"><span>Designed by Moose. Deployed by Soup</span></span>
   <span><a href="https://crcmz.me" target="_blank" rel="noopener">crcmz.me</a></span>
 </div></footer>
 <nav class="tabbar" aria-label="Trip sections">
@@ -2552,15 +2641,17 @@ function updateRecapChamp(){
 function tick(){
  var now=Date.now(),diff=TARGET-now;
  var dEl=document.getElementById('cd-d'),hEl=document.getElementById('cd-h'),mEl=document.getElementById('cd-m'),sEl=document.getElementById('cd-s'),msg=document.getElementById('cd-msg'),nav=document.getElementById('navCd');
+ var navTx=document.getElementById('navCdTx')||nav,gEl=document.getElementById('cdGhost');
  if(diff<=0){
    dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent="00";
+   if(gEl)gEl.textContent="00";
    if(now<END){
      msg.textContent="The boys are in Calgary.";
-     nav.textContent="● IN CALGARY";
+     navTx.textContent="● IN CALGARY";
      var nu=nextUpText();
      if(nu&&nextUpEl.innerHTML!==nu){nextUpEl.innerHTML=nu;nextUpEl.hidden=false}
    }else{
-     nav.textContent="WEEKEND COMPLETE";
+     navTx.textContent="WEEKEND COMPLETE";
      msg.style.display='none'; cdGrid.style.display='none'; nextUpEl.hidden=true;
      var cdBlk=document.getElementById('cdBlock'); if(cdBlk)cdBlk.style.display='none';
      recapEl.hidden=false; updateRecapChamp();
@@ -2569,7 +2660,8 @@ function tick(){
  }
  var d=Math.floor(diff/86400000),h=Math.floor(diff/3600000)%24,m=Math.floor(diff/60000)%60,s=Math.floor(diff/1000)%60;
  dEl.textContent=pad(d);hEl.textContent=pad(h);mEl.textContent=pad(m);sEl.textContent=pad(s);
- nav.textContent="T-MINUS "+d+"D "+pad(h)+"H "+pad(m)+"M";
+ if(gEl)gEl.textContent=pad(d);
+ navTx.textContent="T-MINUS "+d+"D "+pad(h)+"H "+pad(m)+"M";
  var preMsg=CONTENT.trip.nextUpDefault||'';
  if(nextUpEl.textContent!==preMsg){nextUpEl.textContent=preMsg;nextUpEl.hidden=false;}
 }
@@ -4157,7 +4249,7 @@ function renderSplit(){
  var total=spState.expenses.reduce(function(s,e){return s+e.amountCentsCAD},0);
  /* --- ink strip: trip total + your position as one pill --- */
  var stripTotal=document.getElementById('spStripTotal');
- if(stripTotal)stripTotal.textContent=spFmt(total);
+ if(stripTotal){stripTotal.textContent=spFmt(total);stripTotal.setAttribute('data-cuamt',total);}
  var stripMeta=document.getElementById('spStripMeta');
  if(stripMeta)stripMeta.textContent='Trip total · '+spState.expenses.length+' expense'+(spState.expenses.length===1?'':'s');
  var pill=document.getElementById('spPill');
@@ -4166,7 +4258,7 @@ function renderSplit(){
    if(myBal===null){pill.hidden=true;pill.innerHTML='';}
    else{
      pill.hidden=false;
-     pill.innerHTML=myBal>0?('<small>You</small>+'+spFmt(myBal)):(myBal<0?('<small>You</small>\u2212'+spFmt(-myBal)):'You\u2019re square');
+     pill.innerHTML=myBal>0?('<small>You</small>+<span data-cuamt="'+myBal+'">'+spFmt(myBal)+'</span>'):(myBal<0?('<small>You</small>\u2212<span data-cuamt="'+(-myBal)+'">'+spFmt(-myBal)+'</span>'):'You\u2019re square');
    }
  }
  /* --- settle board: the table is the page --- */
@@ -4184,7 +4276,7 @@ function renderSplit(){
        +'<span class="nb-rk">'+('0'+(i+1)).slice(-2)+'</span>'
        +spAvatar(t.from,'nb-av')
        +'<span class="nb-nm">'+esc(t.from)+'<span class="nb-to">\u2192'+spAvatar(t.to,'nb-av nb-toav')+'</span></span>'
-       +'<span class="nb-amt">'+spFmt(t.amountCentsCAD)+'</span>'
+       +'<span class="nb-amt" data-cuamt="'+t.amountCentsCAD+'">'+spFmt(t.amountCentsCAD)+'</span>'
        +'<button type="button" class="nb-chip" data-settle="'+i+'">Mark paid</button></div>';
    }).join('');
    spSettleEl.querySelectorAll('[data-settle]').forEach(function(btn){
@@ -4254,7 +4346,39 @@ function renderSplit(){
       if(prevBadge){ prevBadge.textContent=spFmt(big.amountCentsCAD); prevBadge.hidden=false; } }
     else { prev.textContent='All settled'; if(prevBadge)prevBadge.hidden=true; }
   }
+ spCountUpSweep(false);
 }
+/* ---------- CountUp (React Bits review): the Split figures count up
+   on view entry and whenever the ledger re-renders at a new value.
+   The CAD/USD toggle re-renders too, so it re-runs the sweep and the
+   final frame always lands on spFmt's exact string. While the Split
+   view is hidden the sweep only records targets — the template has
+   already written the correct figures. Reduced motion: no sweep. */
+function spCountUp(el,target,fromZero){
+ if(REDUCED){el._cuVal=target;return;}
+ var from=fromZero?0:(typeof el._cuVal==='number'?el._cuVal:0);
+ el._cuVal=target;
+ if(from===target){el.textContent=spFmt(target);return;}
+ if(el._cuRaf)cancelAnimationFrame(el._cuRaf);
+ var t0=performance.now(),dur=720;
+ var step=function(t){
+   var p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);
+   el.textContent=spFmt(Math.round(from+(target-from)*e));
+   if(p<1)el._cuRaf=requestAnimationFrame(step);
+   else el.textContent=spFmt(target);
+ };
+ el._cuRaf=requestAnimationFrame(step);
+}
+function spCountUpSweep(fromZero){
+ var root=document.getElementById('view-split'); if(!root)return;
+ var els=root.querySelectorAll('[data-cuamt]');
+ if(document.body.getAttribute('data-view')!=='split'){
+   els.forEach(function(el){el._cuVal=+el.getAttribute('data-cuamt');});
+   return;
+ }
+ els.forEach(function(el){spCountUp(el,+el.getAttribute('data-cuamt'),fromZero);});
+}
+document.addEventListener('viewchange',function(e){if(e.detail==='split')spCountUpSweep(true);});
 document.querySelectorAll('#spCurSeg button').forEach(function(b){
  b.addEventListener('click',function(){spState.viewCur=b.getAttribute('data-cur');spSaveViewCur();renderSplit();});
 });
@@ -4940,6 +5064,7 @@ renderBuds();
    var list=document.getElementById('packList');
    if(!list)return;
    packProgress();
+   packStepSync();
    var visible=_packCatFilter==='all'?_packItems:_packItems.filter(function(i){return i.category===_packCatFilter;});
    if(!visible.length){
      list.innerHTML='<p class="pack-empty">'
@@ -5000,8 +5125,41 @@ renderBuds();
      _packCatFilter=btn.getAttribute('data-cat');
      catBtns.forEach(function(b){b.classList.toggle('on',b===btn);});
      renderPack();
+     packStepSync();
    });
  });
+ /* Stepper sync (React Bits review): the stage track under the chips
+    draws the chips' own state as stages — the fill runs to the active
+    chip, dots mark the stages passed, the thumb glides on the same
+    click that sets the filter. Positions are measured from the active
+    chip's geometry, so the stepper can never disagree with the chips.
+    A hidden view measures 0 and is skipped; entering the Pack view
+    re-syncs on the next frame. */
+ function packStepSync(){
+   var cats=document.getElementById('packCats'); if(!cats||!cats.clientWidth)return;
+   var btns=cats.querySelectorAll('.pack-cat-btn'); if(!btns.length)return;
+   var step=document.getElementById('packStep'); if(!step)return;
+   var act=cats.querySelector('.pack-cat-btn.on')||btns[0];
+   var track=document.getElementById('packStepTrack'),fill=document.getElementById('packStepFill'),thumb=document.getElementById('packStepThumb');
+   if(track)track.style.width=cats.scrollWidth+'px';
+   var cx=act.offsetLeft+act.offsetWidth/2;
+   if(fill)fill.style.width=cx+'px';
+   if(thumb)thumb.style.left=cx+'px';
+   var ai=Array.prototype.indexOf.call(btns,act);
+   var dots=step.querySelectorAll('.pack-step-dot');
+   if(dots.length!==btns.length){
+     dots.forEach(function(d){d.remove();});
+     btns.forEach(function(){var s=document.createElement('span');s.className='pack-step-dot';step.appendChild(s);});
+     dots=step.querySelectorAll('.pack-step-dot');
+   }
+   btns.forEach(function(b,i){
+     var d=dots[i]; if(!d)return;
+     d.style.left=(b.offsetLeft+b.offsetWidth/2)+'px';
+     d.classList.toggle('on',i<=ai);
+   });
+ }
+ document.addEventListener('viewchange',function(e){if(e.detail==='pack')requestAnimationFrame(packStepSync);});
+ window.addEventListener('resize',function(){packStepSync();});
  function fetchPack(){
    fetch('/api/packing').then(function(r){return r.json();}).then(function(j){
      _packItems=j.items||[];renderPack();
