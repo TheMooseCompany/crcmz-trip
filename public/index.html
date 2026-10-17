@@ -855,6 +855,28 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 #view-split::before{background:radial-gradient(560px 340px at 86% 6%,rgba(165,180,255,.14),transparent 65%),radial-gradient(640px 420px at 8% 55%,rgba(242,179,61,.13),transparent 65%)}
 #view-fifa::before{background:radial-gradient(640px 400px at 16% 10%,rgba(165,180,255,.12),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(51,65,154,.22),transparent 70%)}
 #view-buds::before{background:radial-gradient(600px 380px at 84% 12%,rgba(242,179,61,.10),transparent 65%),radial-gradient(620px 420px at 12% 78%,rgba(165,180,255,.10),transparent 65%)}
+/* Buds AI recommendation widget */
+.buds-ai-wrap{margin:20px 0 4px;display:flex;flex-direction:column;gap:12px}
+.buds-ai-box{position:relative;border-radius:18px;padding:2px;z-index:0}
+.buds-ai-glow{position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,#f72585,#7209b7,#3a86ff,#4cc9f0,#f8961e,#f72585);background-size:300% 300%;animation:aiGlow 4s linear infinite;z-index:0}
+@keyframes aiGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.buds-ai-inner{position:relative;z-index:1;border-radius:16px;background:rgba(8,11,30,.96);display:flex;align-items:stretch;overflow:hidden}
+.buds-ai-input{flex:1;background:transparent;border:none;color:var(--cream);font-family:inherit;font-size:15px;padding:14px 14px 14px 18px;resize:none;outline:none;min-height:54px;line-height:1.5}
+.buds-ai-input::placeholder{color:rgba(245,239,224,.3)}
+.buds-ai-send{flex-shrink:0;background:rgba(255,255,255,.08);border:none;border-left:1px solid rgba(255,255,255,.08);color:var(--cream);cursor:pointer;padding:0 18px;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:.03em;transition:background .15s;white-space:nowrap}
+.buds-ai-send:hover{background:rgba(255,255,255,.15)}
+.buds-ai-send:disabled{opacity:.45;cursor:default}
+.buds-ai-err{color:#F87171;font-size:13px;padding:2px 2px;display:none}
+.buds-ai-err.show{display:block}
+.buds-ai-result{display:none;background:linear-gradient(145deg,rgba(28,36,84,.72),rgba(10,14,39,.85));border:1px solid rgba(245,239,224,.14);border-radius:16px;padding:18px 18px 14px;font-size:14px;line-height:1.65;color:var(--cream)}
+.buds-ai-result.show{display:block}
+.buds-ai-label{display:flex;align-items:center;gap:7px;margin-bottom:12px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--peri)}
+.buds-ai-summary{color:var(--amber2);margin-bottom:12px;font-size:14.5px}
+.buds-ai-item{margin-bottom:10px}
+.buds-ai-item:last-child{margin-bottom:0}
+.buds-ai-item strong{color:var(--cream);font-weight:700}
+.buds-ai-item .bai-brand{color:var(--muted);font-size:12.5px;margin-left:4px}
+.buds-ai-item .bai-why{display:block;color:rgba(245,239,224,.72);font-size:13.5px;margin-top:2px}
 #view-admin::before{background:radial-gradient(560px 340px at 12% 6%,rgba(242,179,61,.13),transparent 65%),radial-gradient(600px 400px at 90% 50%,rgba(165,180,255,.10),transparent 65%)}
 @keyframes ambDrift{from{transform:translate3d(-1.2%,0,0) scale(1)}to{transform:translate3d(1.6%,-1.4%,0) scale(1.05)}}
 /* --- Days: boarding-pass stack (sticky pile, Concept 01) ---
@@ -2027,6 +2049,21 @@ flash of Home. The router clears the tag when it takes over. */
 <!-- ================= BUDS ================= -->
   <section id="buds"><div class="wrap">
     <div class="sec-head reveal"><div class="label peri">07 · Buds</div><h2>Calgary menus, <span class="serif">one list.</span></h2><p>Calgary cannabis, one list. Snapshot from hibuddy.ca, Oct 15, 2026 — stock moves fast; check the store before you go.</p></div>
+    <div class="buds-ai-wrap reveal">
+      <div class="buds-ai-box">
+        <div class="buds-ai-glow" aria-hidden="true"></div>
+        <div class="buds-ai-inner">
+          <textarea id="budsAiInput" class="buds-ai-input" placeholder="How are you feeling? Tell the AI — energetic, chill, sleepy, hungry, social…" rows="2" aria-label="Describe how you're feeling for AI suggestions"></textarea>
+          <button id="budsAiBtn" class="buds-ai-send" type="button">Ask AI</button>
+        </div>
+      </div>
+      <div id="budsAiErr" class="buds-ai-err" role="alert"></div>
+      <div id="budsAiResult" class="buds-ai-result" aria-live="polite">
+        <div class="buds-ai-label"><svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>AI Recommendation</div>
+        <div id="budsAiSummary" class="buds-ai-summary"></div>
+        <div id="budsAiList"></div>
+      </div>
+    </div>
     <div class="buds-ctrls">
       <div class="buds-bar">
         <div class="bud-dd" id="budsDd"><button type="button" class="bud-dd-btn" id="budsDdBtn" aria-haspopup="listbox" aria-expanded="false"><span class="bud-dd-k">Show</span><span class="bud-dd-cur">All</span><span class="bud-dd-n">93</span><svg class="bud-dd-car" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="bud-dd-panel" role="listbox" aria-label="Buds categories" hidden><button type="button" role="option" aria-selected="true" class="bud-dd-opt on" data-cat="all"><span>All</span><span class="bud-dd-cnt">93</span></button><button type="button" role="option" aria-selected="false" class="bud-dd-opt" data-cat="flower"><span>Flower</span><span class="bud-dd-cnt">40</span></button><button type="button" role="option" aria-selected="false" class="bud-dd-opt" data-cat="preroll"><span>Pre-Rolls</span><span class="bud-dd-cnt">28</span></button><button type="button" role="option" aria-selected="false" class="bud-dd-opt" data-cat="edible"><span>Edibles</span><span class="bud-dd-cnt">25</span></button></div></div>
@@ -4159,6 +4196,41 @@ document.getElementById('budsInfTgl').addEventListener('click',function(){
 });
 document.getElementById('budsSort').addEventListener('change',function(){budsState.sort=this.value;renderBuds();});
 renderBuds();
+// --- Buds AI recommendation ---
+(function(){
+  var btn=document.getElementById('budsAiBtn');
+  var inp=document.getElementById('budsAiInput');
+  var resBox=document.getElementById('budsAiResult');
+  var errBox=document.getElementById('budsAiErr');
+  var sumEl=document.getElementById('budsAiSummary');
+  var listEl=document.getElementById('budsAiList');
+  if(!btn)return;
+  function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+  function setLoading(on){btn.disabled=on;btn.textContent=on?'…':'Ask AI';}
+  function showErr(msg){errBox.textContent=msg;errBox.classList.add('show');resBox.classList.remove('show');}
+  function showResult(data){
+    sumEl.textContent=data.summary||'';
+    var html=(data.suggestions||[]).map(function(s){
+      return '<div class="buds-ai-item"><strong>'+esc(s.name)+'</strong><span class="bai-brand">'+esc(s.brand)+'</span><span class="bai-why">'+esc(s.why)+'</span></div>';
+    }).join('');
+    listEl.innerHTML=html;
+    resBox.classList.add('show');
+    errBox.classList.remove('show');
+  }
+  btn.addEventListener('click',async function(){
+    var feeling=(inp.value||'').trim();
+    if(!feeling){inp.focus();return;}
+    setLoading(true);
+    try{
+      var r=await fetch('/api/buds/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({feeling:feeling})});
+      var j=await r.json();
+      if(!r.ok||!j.ok)return showErr(j&&j.error?j.error:'Something went wrong — try again.');
+      showResult(j);
+    }catch(e){showErr('Could not reach the AI — try again.');}
+    finally{setLoading(false);}
+  });
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();btn.click();}});
+})();
 </script>
 <!--ADMIN_SCRIPT-->
 <script>

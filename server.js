@@ -779,6 +779,66 @@ async function passkeyLogin(){
     res.json({ ok: true });
   });
 
+  // ---------- Buds AI recommendation ----------
+  app.post('/api/buds/recommend', requireAuth, async (req, res) => {
+    const { feeling } = req.body || {};
+    if (!feeling || typeof feeling !== 'string' || !feeling.trim())
+      return res.status(400).json({ error: 'feeling required' });
+    if (feeling.length > 500)
+      return res.status(400).json({ error: 'too long' });
+    const c = readContent();
+    const buds = (c && Array.isArray(c.buds)) ? c.buds : [];
+    if (buds.length === 0) return res.status(503).json({ error: 'No buds data available.' });
+    const budsSummary = buds.map((b) => {
+      const thcStr = Array.isArray(b.t) ? `${b.t[0]}-${b.t[1]}% THC` : '';
+      const cbdStr = Array.isArray(b.cb) && (b.cb[0] > 0 || b.cb[1] > 0) ? ` / ${b.cb[0]}-${b.cb[1]}% CBD` : '';
+      const type = b.c === 'edible' ? 'edible' : (b.c === 'preroll' ? 'pre-roll' : (b.i ? 'indica' : 'sativa/hybrid'));
+      const rating = b.r ? ` ★${b.r}` : '';
+      const inStock = (b.st || 0) > 0 ? 'yes' : 'no';
+      return `- ${b.n} (${b.b}, ${type}${thcStr ? ', ' + thcStr : ''}${cbdStr}${rating}, $${b.p}/g, stock: ${inStock})`;
+    }).join('\n');
+    const aiBase = (process.env.AI_BASE_URL || 'http://192.168.4.38:1234/v1').replace(/\/$/, '');
+    const aiModel = process.env.AI_MODEL || 'Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-8bit';
+    const aiKey = process.env.OLLAMA_API_KEY || '';
+    const userMsg = `You are a knowledgeable cannabis guide helping friends on a trip to Calgary.
+
+Available products:
+${budsSummary}
+
+The user says: "${feeling.trim()}"
+
+Suggest 2-3 products from the list that best match how they're feeling. Only recommend products where stock is "yes". For each, write 1-2 sentences explaining why it fits.
+
+Return ONLY a valid JSON object with no explanation or markdown:
+{"summary":"1-sentence overall note","suggestions":[{"name":"exact product name","brand":"brand name","why":"reason it fits"}]}`;
+    try {
+      const aiHeaders = { 'Content-Type': 'application/json' };
+      if (aiKey) aiHeaders['Authorization'] = `Bearer ${aiKey}`;
+      const r = await fetch(`${aiBase}/chat/completions`, {
+        method: 'POST',
+        headers: aiHeaders,
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [{ role: 'user', content: userMsg }],
+          temperature: 0.4,
+          max_tokens: 600,
+          chat_template_kwargs: { enable_thinking: false },
+        }),
+        signal: AbortSignal.timeout(90000),
+      });
+      if (!r.ok) return res.status(502).json({ error: 'AI server error' });
+      const data = await r.json();
+      let content = (data.choices?.[0]?.message?.content || '').trim();
+      content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      const match = content.match(/\{[\s\S]*\}/);
+      if (!match) return res.status(500).json({ error: 'AI did not return JSON' });
+      const parsed = JSON.parse(match[0]);
+      res.json({ ok: true, summary: parsed.summary || '', suggestions: parsed.suggestions || [] });
+    } catch (e) {
+      res.status(500).json({ error: e.message || 'recommend failed' });
+    }
+  });
+
   // Link previews: chat/social crawlers (WhatsApp, iMessage, Telegram,
   // Discord, Slack…) cannot log in, so bot user-agents receive a tiny public
   // document carrying only the Open Graph tags, and the preview image is
