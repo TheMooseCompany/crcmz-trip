@@ -5008,6 +5008,7 @@ renderBuds();
    });
  }
  fetchPack();
+ window.__packRefresh=fetchPack;
  var packInput=document.getElementById('packInput');
  var packSubmit=document.getElementById('packSubmit');
  function addPackItem(){
@@ -5205,6 +5206,7 @@ renderBuds();
      renderPollActive();
    });
  }
+ window.__pollRefresh=fetchPollData;
 })();
 
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -5621,5 +5623,295 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 
 
 
+
+<!-- ================= TRIP AI (floating assistant) ================= -->
+<style>
+.ai-fab{position:fixed;right:max(18px,calc((100vw - 760px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:130;
+  height:54px;padding:0 18px 0 14px;border:0;border-radius:27px;display:flex;align-items:center;gap:8px;cursor:pointer;
+  font:600 14px/1 "Space Grotesk",system-ui,sans-serif;letter-spacing:.02em;color:#1B1405;
+  background:linear-gradient(135deg,#FFC65C 0%,#F2B33D 45%,#A5B4FF 130%);
+  box-shadow:0 10px 30px rgba(242,179,61,.35),0 2px 8px rgba(3,4,12,.4),inset 0 1px 0 rgba(255,255,255,.45);
+  transform:translateY(16px) scale(.85);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,1.4,.3,1),opacity .25s ease}
+.ai-fab.on{transform:none;opacity:1;pointer-events:auto}
+.ai-fab svg{width:22px;height:22px}
+.ai-fab:focus-visible{outline:2px solid var(--peri);outline-offset:3px}
+body[data-view="photos"] .ai-fab{bottom:calc(176px + env(safe-area-inset-bottom,0px))}
+body.ai-open .ai-fab{opacity:0;pointer-events:none}
+.ai-panel{position:fixed;z-index:140;display:flex;flex-direction:column;overflow:hidden;color:var(--cream);padding:0;margin:0;
+  left:10px;right:10px;top:calc(var(--header-h) + 8px);bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  border-radius:26px;background:linear-gradient(165deg,#161C47 0%,#0D1133 55%,#0A0D27 100%);
+  border:1px solid rgba(165,180,255,.22);box-shadow:0 30px 80px rgba(2,3,10,.65),0 0 0 1px rgba(242,179,61,.06)}
+@media(min-width:761px){.ai-panel{left:auto;top:auto;right:max(18px,calc((100vw - 760px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));width:420px;height:min(680px,calc(100vh - 140px))}}
+.ai-panel[hidden]{display:none}
+.ai-blob{position:absolute;inset:-30%;pointer-events:none;opacity:.55;filter:blur(40px);
+  background:radial-gradient(40% 35% at 30% 25%,rgba(242,179,61,.35),transparent 70%),radial-gradient(45% 40% at 75% 70%,rgba(165,180,255,.30),transparent 70%)}
+.ai-head{position:relative;display:flex;align-items:center;gap:10px;padding:14px 12px 12px 16px;border-bottom:1px solid var(--line)}
+.ai-orb{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;color:#1B1405;background:linear-gradient(135deg,#FFC65C,#A5B4FF)}
+.ai-orb svg{width:18px;height:18px}
+.ai-title{flex:1;min-width:0}.ai-title b{display:block;font-size:16px;letter-spacing:.01em}.ai-title span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.ai-ib{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--cream);display:grid;place-items:center;cursor:pointer}
+.ai-ib svg{width:18px;height:18px}.ai-ib:focus-visible{outline:2px solid var(--peri);outline-offset:2px}
+.ai-log{position:relative;flex:1;overflow-y:auto;padding:16px 14px 8px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain;scroll-behavior:smooth}
+.ai-msg{max-width:88%;font-size:15px;line-height:1.5;word-wrap:break-word}
+.ai-msg.u{align-self:flex-end;background:linear-gradient(135deg,rgba(242,179,61,.95),rgba(255,198,92,.95));color:#1B1405;padding:10px 14px;border-radius:18px 18px 6px 18px;font-weight:500}
+.ai-msg.a{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--line);padding:11px 14px;border-radius:18px 18px 18px 6px}
+.ai-msg.a p{margin:0 0 8px}.ai-msg.a p:last-child{margin:0}.ai-msg.a ul{margin:4px 0 8px;padding-left:18px}.ai-msg.a li{margin:3px 0}
+.ai-msg.a a{color:var(--amber2);text-decoration:underline;text-underline-offset:2px}.ai-msg.a b{color:#fff}
+.ai-msg.err{border-color:rgba(248,113,113,.4);color:#FCA5A5}
+.ai-status{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:2px 4px}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--amber2);animation:aiPulse 1s ease-in-out infinite}
+@keyframes aiPulse{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+.ai-caret{display:inline-block;width:7px;height:15px;margin-left:2px;vertical-align:-2px;background:var(--amber2);animation:aiPulse .9s infinite}
+.ai-prop{align-self:stretch;border:1px solid var(--line-amber);background:rgba(242,179,61,.07);border-radius:16px;padding:12px 14px}
+.ai-prop .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2);font-weight:700}
+.ai-prop .s{font-weight:600;margin:6px 0 4px;font-size:15px}
+.ai-prop ul{margin:4px 0 10px;padding-left:18px;color:var(--muted);font-size:13.5px}
+.ai-prop .row{display:flex;gap:8px}
+.ai-btn{min-height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--cream);font:600 14px "Space Grotesk",system-ui,sans-serif;cursor:pointer}
+.ai-btn.go{background:var(--amber);color:#1B1405;border-color:transparent}
+.ai-btn:disabled{opacity:.5;cursor:default}
+.ai-prop .res{font-size:13.5px;margin-top:8px}.ai-prop .res.ok{color:#86EFAC}.ai-prop .res.bad{color:#FCA5A5}
+.ai-empty{margin:auto 0;padding:8px 2px}
+.ai-empty h3{margin:0 0 6px;font-size:22px;line-height:1.2}.ai-empty h3 .serif{font-family:"Newsreader",Georgia,serif;font-style:italic;font-weight:500;color:var(--amber2)}
+.ai-empty p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.5}
+.ai-sugs{display:flex;flex-wrap:wrap;gap:8px}
+.ai-sug{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--cream);border-radius:999px;padding:9px 13px;font:500 13.5px "Space Grotesk",system-ui,sans-serif;cursor:pointer;text-align:left}
+.ai-sug:focus-visible{outline:2px solid var(--peri);outline-offset:2px}
+.ai-foot{position:relative;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end;background:rgba(6,8,24,.5)}
+.ai-in{flex:1;min-height:46px;max-height:132px;resize:none;border-radius:16px;border:1px solid rgba(165,180,255,.25);background:rgba(255,255,255,.05);color:var(--cream);padding:12px 14px;font:16px/1.4 "Space Grotesk",system-ui,sans-serif;outline:none}
+.ai-in:focus{border-color:rgba(242,179,61,.6)}
+.ai-in::placeholder{color:rgba(245,239,224,.4)}
+.ai-send{width:46px;height:46px;flex:none;border-radius:14px;border:0;display:grid;place-items:center;cursor:pointer;color:#1B1405;background:linear-gradient(135deg,#FFC65C,#F2B33D)}
+.ai-send svg{width:20px;height:20px}.ai-send:disabled{opacity:.45;cursor:default}.ai-send.stop{background:rgba(255,255,255,.12);color:var(--cream)}
+.ai-scrim{position:fixed;inset:0;z-index:135;background:rgba(3,4,12,.45);opacity:0;transition:opacity .3s ease;pointer-events:none}
+body.ai-open .ai-scrim{opacity:1;pointer-events:auto}
+@media(min-width:761px){body.ai-open .ai-scrim{background:rgba(3,4,12,.2)}}
+@media (prefers-reduced-motion: reduce){.ai-fab{transition:opacity .15s}.ai-dot,.ai-caret{animation:none}}
+</style>
+<button type="button" class="ai-fab" id="aiFab" aria-haspopup="dialog" aria-controls="aiPanel" aria-label="Ask the trip AI">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4Z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/></svg>
+  <span>Ask AI</span>
+</button>
+<div class="ai-scrim" id="aiScrim"></div>
+<section class="ai-panel" id="aiPanel" role="dialog" aria-modal="true" aria-labelledby="aiTitle" hidden>
+  <div class="ai-blob" aria-hidden="true"></div>
+  <header class="ai-head">
+    <div class="ai-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4Z"/></svg></div>
+    <div class="ai-title"><b id="aiTitle">Trip AI</b><span id="aiSub">Knows the whole trip · can make changes</span></div>
+    <button type="button" class="ai-ib" id="aiNew" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+    <button type="button" class="ai-ib" id="aiClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="ai-log" id="aiLog" aria-live="polite"></div>
+  <form class="ai-foot" id="aiForm">
+    <textarea class="ai-in" id="aiIn" rows="1" maxlength="2000" placeholder="Ask or tell me what to change…" aria-label="Message Trip AI"></textarea>
+    <button type="submit" class="ai-send" id="aiSend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+  </form>
+</section>
+<script>
+/* ============ TRIP AI ============
+   A floating Ask AI button appears once you're past the opening dive (or
+   tap Skip to the hub) and stays for the session. It morphs like liquid
+   into the assistant panel. Answers stream from the local model; any change
+   comes back as a proposal card and only happens when you tap Apply. */
+(function(){
+  var fab=document.getElementById('aiFab'),panel=document.getElementById('aiPanel'),scrim=document.getElementById('aiScrim');
+  var log=document.getElementById('aiLog'),form=document.getElementById('aiForm'),inp=document.getElementById('aiIn'),sendBtn=document.getElementById('aiSend');
+  if(!fab||!panel)return;
+  var RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var KEY='crcmz-ai-chat',UNLOCK='crcmz-ai-unlocked',REOPEN='crcmz-ai-reopen';
+  var msgs=[];try{msgs=JSON.parse(sessionStorage.getItem(KEY)||'[]')}catch(e){}
+  var busy=false,ctrl=null;
+
+  /* ----- when the button appears ----- */
+  var cine=document.getElementById('cinematic');
+  function unlocked(){try{return sessionStorage.getItem(UNLOCK)==='1'}catch(e){return false}}
+  function unlock(){try{sessionStorage.setItem(UNLOCK,'1')}catch(e){} fab.classList.add('on')}
+  function checkUnlock(){
+    if(unlocked()){fab.classList.add('on');return}
+    var view=document.body.getAttribute('data-view')||'home';
+    if(view!=='home')return unlock();
+    if(!cine)return unlock();
+    var total=cine.offsetHeight-window.innerHeight;
+    var p=total>0?(-cine.getBoundingClientRect().top/total):1;
+    if(p>=0.87)unlock(); /* the point where Skip to the hub has faded out */
+  }
+  var skip=document.getElementById('skip'); if(skip)skip.addEventListener('click',function(){setTimeout(unlock,400)});
+  var ucQ=false;window.addEventListener('scroll',function(){if(ucQ||unlocked())return;ucQ=true;requestAnimationFrame(function(){ucQ=false;checkUnlock()})},{passive:true});
+  document.addEventListener('viewchange',checkUnlock);
+  checkUnlock();
+
+  /* ----- liquid open / close ----- */
+  function fabBox(){var f=fab.getBoundingClientRect(),p=panel.getBoundingClientRect();
+    return {t:f.top-p.top,r:p.right-f.right,b:p.bottom-f.bottom,l:f.left-p.left,rad:f.height/2}}
+  function openPanel(focus){
+    if(!panel.hidden)return;
+    panel.hidden=false;document.body.classList.add('ai-open');render();
+    if(!RM&&panel.animate){
+      var b=fabBox(),c0='inset('+b.t+'px '+b.r+'px '+b.b+'px '+b.l+'px round '+b.rad+'px)';
+      panel.animate([
+        {clipPath:c0,offset:0},
+        {clipPath:'inset('+(b.t*.42)+'px '+(b.r*.2)+'px '+(b.b*.6)+'px '+(b.l*.35)+'px round 46px 64px 38px 58px)',offset:.45},
+        {clipPath:'inset(-6px -4px -2px -6px round 30px 22px 34px 26px)',offset:.78},
+        {clipPath:'inset(0px 0px 0px 0px round 26px)',offset:1}
+      ],{duration:620,easing:'cubic-bezier(.22,.9,.24,1)'});
+      var blob=panel.querySelector('.ai-blob');
+      if(blob)blob.animate([{transform:'scale(.35) rotate(-20deg)',opacity:0},{transform:'scale(1.08) rotate(8deg)',opacity:.75,offset:.6},{transform:'none',opacity:.55}],{duration:900,easing:'cubic-bezier(.2,.8,.2,1)'});
+      [].forEach.call(panel.querySelectorAll('.ai-head,.ai-log,.ai-foot'),function(el,i){el.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:320,delay:200+i*50,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'})});
+    }
+    if(focus!==false)setTimeout(function(){inp.focus({preventScroll:true})},RM?0:380);
+  }
+  function closePanel(){
+    if(panel.hidden)return;
+    var done=function(){panel.hidden=true;document.body.classList.remove('ai-open');fab.focus({preventScroll:true})};
+    if(RM||!panel.animate)return done();
+    var b=fabBox();
+    var a=panel.animate([
+      {clipPath:'inset(0px 0px 0px 0px round 26px)'},
+      {clipPath:'inset('+(b.t*.4)+'px '+(b.r*.25)+'px '+(b.b*.55)+'px '+(b.l*.3)+'px round 52px 40px 60px 44px)',offset:.5},
+      {clipPath:'inset('+b.t+'px '+b.r+'px '+b.b+'px '+b.l+'px round '+b.rad+'px)'}
+    ],{duration:380,easing:'cubic-bezier(.55,0,.35,1)'});
+    document.body.classList.remove('ai-open');
+    a.onfinish=done;
+  }
+  fab.addEventListener('click',function(){openPanel()});
+  scrim.addEventListener('click',closePanel);
+  document.getElementById('aiClose').addEventListener('click',closePanel);
+  document.getElementById('aiNew').addEventListener('click',function(){if(busy&&ctrl)ctrl.abort();msgs=[];save();render();inp.focus()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!panel.hidden)closePanel()});
+  /* keep the input above the phone keyboard */
+  if(window.visualViewport){var vv=window.visualViewport;var fit=function(){if(panel.hidden||window.innerWidth>=761){panel.style.bottom='';return}var kb=window.innerHeight-vv.height-vv.offsetTop;panel.style.bottom=(kb>80?kb+8:10)+'px'};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
+
+  /* ----- rendering ----- */
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function md(src){
+    var lines=esc(src).split('\n'),html='',list=false;
+    function inline(t){return t.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>')}
+    lines.forEach(function(l){
+      var m=l.match(/^\s*[-•*]\s+(.*)$/);
+      if(m){if(!list){html+='<ul>';list=true}html+='<li>'+inline(m[1])+'</li>';return}
+      if(list){html+='</ul>';list=false}
+      if(l.trim())html+='<p>'+inline(l)+'</p>';
+    });
+    if(list)html+='</ul>';
+    return html;
+  }
+  function suggestions(){
+    var v=document.body.getAttribute('data-view')||'home';
+    var by={split:['Who owes who right now?','Add $60 Uber paid by me, split everyone','What did we spend the most on?'],
+      food:['Best shawarma near the stay?','Somewhere good for breakfast Saturday','Top 3 Afghan spots'],
+      buds:['Something chill for movie night','Best value pre-rolls in stock','Highest rated edible'],
+      pack:['What do I still need to pack?','Add phone charger and power bank for me','Is anything unassigned?'],
+      poll:['What\'s winning the poll?','Start a poll: dinner Saturday, Shawarma vs Afghan vs Pizza'],
+      tourney:['Who has the most kills?','Who\'s leading the tourney?','Show the leaderboard'],
+      photos:['What\'s the plan today?','Weather for the weekend?']};
+    return by[v]||['What\'s the plan for Saturday?','Who owes who?','Weather for the trip','Best halal food near the stay'];
+  }
+  function render(){
+    if(!msgs.length){
+      log.innerHTML='<div class="ai-empty"><h3>Ask me <span class="serif">anything.</span></h3><p>The itinerary, food, buds, the Split, packing, polls, flights, the squad. Ask a question or tell me what to change, and I\'ll show you before anything is saved.</p><div class="ai-sugs">'+suggestions().map(function(s){return '<button type="button" class="ai-sug">'+esc(s)+'</button>'}).join('')+'</div></div>';
+      [].forEach.call(log.querySelectorAll('.ai-sug'),function(b){b.addEventListener('click',function(){inp.value=b.textContent;submit()})});
+      return;
+    }
+    log.innerHTML='';
+    msgs.forEach(function(m,i){log.appendChild(node(m,i))});
+    log.scrollTop=log.scrollHeight;
+  }
+  function node(m,i){
+    var el=document.createElement('div');
+    if(m.role==='user'){el.className='ai-msg u';el.textContent=m.content;return el}
+    if(m.role==='proposal'){
+      el.className='ai-prop';
+      el.innerHTML='<div class="k">Proposed change</div><div class="s">'+esc(m.summary)+'</div>'+(m.items&&m.items.length?'<ul>'+m.items.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'')
+        +(m.state==='applied'?'<div class="res ok">Applied ✓</div>':m.state==='cancelled'?'<div class="res">Cancelled</div>':m.state==='error'?'<div class="res bad">'+esc(m.error||'Failed')+'</div>':'')
+        +(!m.state||m.state==='error'?'<div class="row"><button type="button" class="ai-btn go">Apply</button><button type="button" class="ai-btn">Cancel</button></div>':'');
+      var bs=el.querySelectorAll('.ai-btn');
+      if(bs[0])bs[0].addEventListener('click',function(){apply(i,bs)});
+      if(bs[1])bs[1].addEventListener('click',function(){m.state='cancelled';save();render()});
+      return el;
+    }
+    el.className='ai-msg a'+(m.error?' err':'');
+    el.innerHTML=md(m.content||'');
+    return el;
+  }
+  function save(){try{sessionStorage.setItem(KEY,JSON.stringify(msgs.slice(-40)))}catch(e){}}
+  inp.addEventListener('input',function(){inp.style.height='auto';inp.style.height=Math.min(132,inp.scrollHeight)+'px'});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();submit()}});
+  form.addEventListener('submit',function(e){e.preventDefault();if(busy){if(ctrl)ctrl.abort();return}submit()});
+  function setBusy(on){busy=on;sendBtn.classList.toggle('stop',on);sendBtn.setAttribute('aria-label',on?'Stop':'Send');
+    sendBtn.innerHTML=on?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>'}
+
+  /* ----- chat ----- */
+  async function submit(){
+    var text=inp.value.trim(); if(!text||busy)return;
+    inp.value='';inp.style.height='auto';
+    msgs.push({role:'user',content:text});save();render();
+    var live=document.createElement('div');live.className='ai-msg a';live.innerHTML='<span class="ai-caret"></span>';
+    var status=document.createElement('div');status.className='ai-status';status.innerHTML='<span class="ai-dot"></span><span>Thinking…</span>';
+    log.appendChild(status);log.scrollTop=log.scrollHeight;
+    var acc='',got=false,proposals=[],heard=false;
+    var warm=setTimeout(function(){if(!heard)status.lastChild.textContent='Warming up the AI, first answer takes a moment…'},8000);
+    setBusy(true);ctrl=new AbortController();
+    try{
+      var history=msgs.filter(function(m){return m.role==='user'||m.role==='assistant'}).slice(-14).map(function(m){return {role:m.role,content:m.content}});
+      var r=await fetch('/api/assistant/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:history,view:document.body.getAttribute('data-view')||'home'}),signal:ctrl.signal});
+      if(r.status===401){location.href='/auth/login';return}
+      if(!r.ok||!r.body){var j={};try{j=await r.json()}catch(e){}throw new Error(j.error||'The assistant is unavailable right now.')}
+      var rd=r.body.getReader(),dec=new TextDecoder(),buf='';
+      for(;;){
+        var x=await rd.read(); if(x.done)break;
+        buf+=dec.decode(x.value,{stream:true});
+        var parts=buf.split('\n\n');buf=parts.pop();
+        parts.forEach(function(chunk){
+          var line=chunk.trim(); if(line.indexOf('data:')!==0)return;
+          var ev;try{ev=JSON.parse(line.slice(5))}catch(e){return}
+          heard=true;
+          if(ev.type==='status'){status.lastChild.textContent=ev.text+'…'}
+          else if(ev.type==='delta'){if(!got){got=true;log.insertBefore(live,status)}acc+=ev.text;live.innerHTML=md(acc)+'<span class="ai-caret"></span>';log.scrollTop=log.scrollHeight}
+          else if(ev.type==='reset'){acc='';if(got){live.remove();got=false}}
+          else if(ev.type==='proposal'){proposals.push({role:'proposal',id:ev.id,summary:ev.summary,items:ev.items})}
+          else if(ev.type==='done'){acc=ev.text||acc}
+          else if(ev.type==='error'){throw new Error(ev.text)}
+        });
+      }
+      if(acc.trim())msgs.push({role:'assistant',content:acc.trim()});
+      proposals.forEach(function(p){msgs.push(p)});
+      if(!acc.trim()&&!proposals.length)msgs.push({role:'assistant',content:'Hmm, I came up empty there. Try rephrasing?',error:true});
+    }catch(e){
+      if(e.name==='AbortError'){if(acc.trim())msgs.push({role:'assistant',content:acc.trim()+' …'})}
+      else msgs.push({role:'assistant',content:e.message||'Something went wrong.',error:true});
+    }finally{
+      clearTimeout(warm);setBusy(false);ctrl=null;save();render();
+    }
+  }
+
+  /* ----- apply a proposal, then refresh what it touched ----- */
+  async function apply(i,bs){
+    var m=msgs[i]; if(!m)return;
+    [].forEach.call(bs,function(b){b.disabled=true}); bs[0].textContent='Applying…';
+    try{
+      var r=await fetch('/api/assistant/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:m.id})});
+      var j={};try{j=await r.json()}catch(e){}
+      if(!r.ok)throw new Error(j.error||'That change was rejected.');
+      m.state='applied';save();render();
+      var ref=j.refresh||[];
+      if(ref.indexOf('split')>=0&&window.spFetchLedger)spFetchLedger();
+      if(ref.indexOf('packing')>=0&&window.__packRefresh)window.__packRefresh();
+      if(ref.indexOf('poll')>=0&&window.__pollRefresh)window.__pollRefresh();
+      if(ref.indexOf('flights')>=0&&window.__flRefresh)window.__flRefresh();
+      if(ref.indexOf('content')>=0&&j.content){
+        /* Site content renders at load: store it, then reload on this tab with the chat reopened. */
+        try{localStorage.setItem('crcmz-content-v1',JSON.stringify(j.content));sessionStorage.setItem(REOPEN,'1')}catch(e){}
+        var v=document.body.getAttribute('data-view')||'home';
+        msgs.push({role:'assistant',content:'Saved. Reloading so you can see it…'});save();
+        setTimeout(function(){if(v!=='home'&&location.hash!=='#'+v)location.hash=v;location.reload()},700);
+      }
+    }catch(e){m.state='error';m.error=e.message;save();render()}
+  }
+
+  try{if(sessionStorage.getItem(REOPEN)==='1'){sessionStorage.removeItem(REOPEN);unlock();setTimeout(function(){openPanel(false)},900)}}catch(e){}
+})();
+</script>
 
 </body></html>

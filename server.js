@@ -1951,6 +1951,22 @@ ${text.trim()}`;
     res.json({ ok: true });
   });
 
+  // ---------- Trip AI (assistant.js) ----------
+  // With no content.json the page renders its built-in defaults; the assistant
+  // reads (and edits from) the same copy so it always sees what the page shows.
+  let defaultContentCache;
+  function defaultContent() {
+    if (defaultContentCache !== undefined) return defaultContentCache;
+    defaultContentCache = null;
+    try {
+      const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+      const m = html.match(/var CONTENT_DEFAULT\s*=\s*(\{.*\});\s*$/m);
+      if (m) defaultContentCache = JSON.parse(m[1]);
+    } catch (e) { console.error('[crcmz-trip] could not read content defaults:', e.message); }
+    return defaultContentCache;
+  }
+  require('./assistant.js')(app, { requireAuth, isAdminUser, matchPerson, displayName, activePeople, port: PORT, readContent, defaultContent });
+
   // The admin console is NOT part of the public page. public/index.html
   // is a template carrying three placeholders; the dock button, the admin
   // view and the admin script live in private/ and are injected only for
