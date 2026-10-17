@@ -33,12 +33,13 @@
   --peri:#A5B4FF; /* periwinkle accent — stamp + micro-highlights only */
   --ease:cubic-bezier(.32,.72,.24,1); /* one motion system: iOS standard ease-out */
   /* Kinetics spring tokens (Motion Tools review, Oct 17 — Kinetics by
-     Colorion spring families as cubic-bezier approximations of spring
-     physics). They retime EXISTING transitions/animations only: feel
-     changes, endpoints/geometry/durations' targets never do. No JS
-     spring loops anywhere — these are pure compositor easings. */
-  --spring:cubic-bezier(.3,1.45,.44,1);      /* settle w/ a hint of overshoot: expands, digit rolls */
-  --spring-soft:cubic-bezier(.25,1.08,.35,1);/* near-flat settle: presses, chevrons, dims */
+     Colorion, VERBATIM published curves, corrected in the follow-up:
+     EXPAND = spring(320, 24); GLIDE = glide(0.4s)). They retime EXISTING
+     transitions/animations only: feel changes, endpoints/geometry never
+     do. No JS spring loops anywhere — pure compositor easings. */
+  --spring:cubic-bezier(.34,1.56,.64,1);     /* EXPAND: expands, digit rolls, room/lens entrances */
+  --glide:cubic-bezier(.65,0,.35,1);         /* GLIDE: progress fills, steppers, long settles */
+  --spring-soft:var(--glide);                /* presses, chevrons, dims ride the glide curve */
   --cream:#F5EFE0; --muted:#A9A5C6; --muted2:#8E89B8;
   /* V3 light palette (warm paper) — measured on #F5EFE0: ink 15.7:1,
      paper-mut 7.3:1, paper-mut2 6.2:1, amber-deep 5.0:1 — all AA */
@@ -199,6 +200,7 @@ nav>*{pointer-events:auto}
 .photo-fab{position:fixed;right:max(18px,calc((100vw - 760px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:115;width:58px;height:58px;border:0;border-radius:50%;background:var(--amber);color:#221A04;font:inherit;font-size:32px;font-weight:500;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 32px rgba(0,0,0,.5),0 0 0 6px rgba(10,14,42,.35);-webkit-tap-highlight-color:transparent}
 .photo-fab[hidden],body:not([data-view="photos"]) .photo-fab{display:none!important}
 .photo-fab:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.photo-fab.added{background:var(--live);font-size:26px}
 @media(max-width:380px){.photo-head-top{gap:8px}.photo-dates{font-size:10px}.photo-refresh{font-size:12px}.photo-album-cover{width:52px;height:52px;flex-basis:52px}.photo-album-name{font-size:17px}}
 .pv{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;animation:pvIn .18s ease-out}
 @keyframes pvIn{from{opacity:0}to{opacity:1}}
@@ -1085,7 +1087,7 @@ body.reduced .days-layout{display:block}
 .tp-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .tp-phase{font-size:12px;letter-spacing:.18em;color:var(--amber2);font-weight:600}
 .tp-bar{position:relative;height:6px;border-radius:99px;background:rgba(245,239,224,.12);margin:16px 0 10px}
-.tp-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));width:100%;transform:scaleX(0);transform-origin:left center;transition:transform .8s var(--ease)}
+.tp-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));width:100%;transform:scaleX(0);transform-origin:left center;transition:transform .8s var(--glide)}
 .tp-tick{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;border:2px solid var(--muted2);background:var(--sky2);transform:translate(-50%,-50%)}
 .tp-tick.on{border-color:var(--amber);background:var(--amber)}
 .tp-bar.tp-countdown .tp-tick{display:none}
@@ -1108,8 +1110,12 @@ body.reduced .days-layout{display:block}
 .pack-card{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(165deg,#14193B,#0A0D23);padding:18px 20px 16px;box-shadow:var(--shadow-card);margin-top:14px}
 .pack-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .pack-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--amber2)}
-.pack-prog{height:3px;border-radius:99px;background:rgba(255,255,255,.08);margin:0 0 12px;overflow:hidden}
-.pack-prog-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left center;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));transition:transform .5s var(--ease)}
+.pack-prog{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.pack-prog-track{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.pack-prog-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left center;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--peri));transition:transform .5s var(--glide)}
+.pack-dots{display:inline-flex;gap:5px;flex:none}
+.pack-dots i{width:7px;height:7px;border-radius:50%;background:rgba(245,239,224,.16);transition:transform .3s var(--glide),background-color .3s var(--glide)}
+.pack-dots i.on{background:var(--amber);transform:scale(1.25)}
 .pack-cats{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
 .pack-cats::-webkit-scrollbar{display:none}
 .pack-cat-btn{flex:none;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s,color .15s}
@@ -1773,10 +1779,10 @@ img{max-width:100%}
 .pack-cats{position:relative;padding-bottom:17px}
 .pack-step{position:absolute;left:0;bottom:1px;height:12px;width:100%;pointer-events:none}
 .pack-step-track{position:absolute;left:0;top:5px;height:2px;border-radius:2px;background:rgba(245,239,224,.12)}
-.pack-step-fill{position:absolute;left:0;top:5px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--amber2));transition:width .5s var(--ease)}
+.pack-step-fill{position:absolute;left:0;top:5px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--amber2));transition:width .5s var(--glide)}
 .pack-step-dot{position:absolute;top:3.5px;width:5px;height:5px;border-radius:50%;background:rgba(245,239,224,.25);transform:translateX(-50%);transition:background .3s}
 .pack-step-dot.on{background:var(--amber2)}
-.pack-step-thumb{position:absolute;top:0;left:0;width:12px;height:12px;border-radius:50%;background:var(--amber);border:2px solid #0A0E27;box-shadow:0 0 0 1.5px var(--amber2),0 2px 8px rgba(2,3,10,.5);transform:translateX(-50%);transition:left .5s var(--ease)}
+.pack-step-thumb{position:absolute;top:0;left:0;width:12px;height:12px;border-radius:50%;background:var(--amber);border:2px solid #0A0E27;box-shadow:0 0 0 1.5px var(--amber2),0 2px 8px rgba(2,3,10,.5);transform:translateX(-50%);transition:left .5s var(--glide)}
 
 @media (prefers-reduced-motion: reduce){
   .nav-cd-tx,.ht-chrome,#skip::after{animation:none}
@@ -2079,7 +2085,7 @@ flash of Home. The router clears the tag when it takes over. */
     <div class="sec-head reveal" style="padding-bottom:0"><div class="label">Packing List</div><h2>Don't forget <span class="serif">a thing.</span></h2></div>
     <div class="pack-card reveal" id="packCard">
       <div class="pack-top"><span class="label">Gear Check</span><span class="pack-count" id="packCount">—</span></div>
-      <div class="pack-prog"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div>
+      <div class="pack-prog"><div class="pack-prog-track"><div class="pack-prog-fill" id="packProgFill" style="width:0%"></div></div><span class="pack-dots" id="packDots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
       <div class="pack-cats" id="packCats">
         <span class="pack-step" id="packStep" aria-hidden="true"><span class="pack-step-track" id="packStepTrack"></span><span class="pack-step-fill" id="packStepFill"></span><span class="pack-step-thumb" id="packStepThumb"></span></span>
         <button class="pack-cat-btn on" data-cat="all">All</button>
@@ -2413,7 +2419,23 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-flash{animation:tkflash 1.2s ease}
 @keyframes tkflash{0%{background:rgba(74,222,128,.22)}100%{background:transparent}}
 #tourneyContent .tk-newtag{font-size:8px;font-weight:700;letter-spacing:.1em;color:#0B1510;background:var(--tk-green);border-radius:4px;padding:2px 4px;margin-left:6px;vertical-align:2px}
-@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-lens{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}#tourneyContent .tk-fx,#tourneyContent .tk-srow,#tourneyContent .tk-chip{transition:none}}
+/* BUMP (MicroKit-style pop): points inside a flashed standings row jump once — transform only */
+#tourneyContent .tk-srow.tk-flash .tk-pts{animation:tkbump .55s cubic-bezier(.2,.9,.25,1)}
+@keyframes tkbump{0%{transform:none}35%{transform:scale(1.22) translateY(-4px)}100%{transform:none}}
+/* bug-strip marquee: only when the diff queue holds 2+ facts. CSS
+   translateX loop over duplicated content; the strip lives inside
+   #view-tourney (display:none elsewhere) and pauses on tap / hidden tab */
+#tourneyContent .tk-mq{overflow:hidden;flex:1;min-width:0}
+#tourneyContent .tk-mq-in{display:inline-block;white-space:nowrap;font-size:12.5px;font-weight:600;line-height:1.4;animation:tkmq 14s linear infinite}
+#tourneyContent .tk-mq-in b{letter-spacing:.06em}
+#tourneyContent .tk-mq.tk-paused .tk-mq-in,#tourneyContent.tk-doc-hidden .tk-mq-in{animation-play-state:paused}
+@keyframes tkmq{to{transform:translateX(-50%)}}
+#tourneyContent .tk-mq-row{font-size:12.5px;font-weight:600;line-height:1.45}
+#tourneyContent .tk-mq-row b{letter-spacing:.06em}
+/* skeleton pulse: opacity only, no gradient sweep */
+#tourneyContent .tk-gb,#tourneyContent .tk-gc{animation:tkskel 1.1s ease-in-out infinite}
+@keyframes tkskel{0%,100%{opacity:.45}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-lens{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}#tourneyContent .tk-fx,#tourneyContent .tk-srow,#tourneyContent .tk-chip{transition:none}#tourneyContent .tk-mq-in,#tourneyContent .tk-gb,#tourneyContent .tk-gc,#tourneyContent .tk-srow.tk-flash .tk-pts{animation:none}}
 </style>
 
   <section id="tourney"><div class="wrap">
@@ -3658,6 +3680,8 @@ fcRenderAll();
           lens:null,   // entrant id
           log:null,    // game-log key: tid|entrantId
           strip:null,  // {kind,label,text}
+          queue:[],    // full sorted diff queue behind the strip (marquee at 2+)
+          mqPaused:false,
           flash:[],    // keys flashed on this render (or NEW-tagged)
           mePerson:null };
   var timer=null;
@@ -3804,7 +3828,7 @@ fcRenderAll();
 
   /* ---------- bug strip: derived from the payload diff ---------- */
   function deriveStrip(prevList,nextList){
-    if(!prevList)return null;
+    if(!prevList){S.queue=[];return null}
     var ev=[];
     function findTour(list,id){for(var i=0;i<(list||[]).length;i++)if(list[i].id===id)return list[i];return null}
     nextList.forEach(function(t){
@@ -3843,8 +3867,9 @@ fcRenderAll();
         }
       }
     });
-    if(!ev.length)return null;
+    if(!ev.length){S.queue=[];return null}
     ev.sort(function(a,b){return a.p-b.p});
+    S.queue=ev;
     return ev[0];
   }
   function statusStrip(list){
@@ -4122,6 +4147,17 @@ fcRenderAll();
   function stripHTML(){
     var s=S.strip;
     if(!s)return '';
+    var q=S.queue||[];
+    if(q.length>=2){
+      if(REDUCED){
+        /* reduced motion: the same facts as a static stacked list */
+        return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span><span class="tk-st">'
+          +q.map(function(f){return '<div class="tk-mq-row"><b>'+h(f.label)+'</b> '+h(f.text)+'</div>'}).join('')+ntag('strip')+'</span></div>';
+      }
+      var half=q.map(function(f){return '<b>'+h(f.label)+'</b> '+h(f.text)}).join(' ▲ ')+' ▲ ';
+      return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span>'
+        +'<span class="tk-mq'+(S.mqPaused?' tk-paused':'')+'"><span class="tk-mq-in">'+half+half+'</span></span></div>';
+    }
     return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span><span class="tk-st">'+h(s.text)+ntag('strip')+'</span></div>';
   }
   function lensHTML(list,st){
@@ -4192,19 +4228,21 @@ fcRenderAll();
     fetch('/api/tourney',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
       var list=d.tournaments||[];
       if(d.error&&!list.length){ /* soft failure: keep last good payload */
+        S.queue=[];S.mqPaused=false;
         if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
         else if(S.feed==='loading'){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
         return;
       }
       var ev=deriveStrip(S.payload,list);
-      if(ev){S.strip={kind:ev.kind,label:ev.label,text:ev.text};S.flash=ev.flash||['strip']}
-      else {S.strip=statusStrip(list);S.flash=[]}
+      if(ev){S.strip={kind:ev.kind,label:ev.label,text:ev.text};S.flash=ev.flash||['strip'];S.mqPaused=false}
+      else {S.strip=statusStrip(list);S.flash=[];S.mqPaused=false}
       S.payload=list;S.feed='live';S.lastOk=clockHM();
       if(S.lens&&!lensStillValid(list))S.lens=null;
       var live=list.filter(function(t){return t.status==='active'});
       if(prevLine)prevLine.textContent=live.length?live.length+' live now':(list.length?'Latest results':'No active tournaments');
       render();
     }).catch(function(){
+      S.queue=[];S.mqPaused=false;
       if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
       else if(el){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
     });
@@ -4215,6 +4253,7 @@ fcRenderAll();
     return ok;
   }
   document.addEventListener('viewchange',function(e){clearInterval(timer);if(e.detail==='tourney'){load();timer=setInterval(load,20000)}});
+  document.addEventListener('visibilitychange',function(){if(el)el.classList.toggle('tk-doc-hidden',!!document.hidden)});
   if(document.body.getAttribute('data-view')==='tourney'){load();timer=setInterval(load,20000)}
   load();
   fetch('/api/me',{headers:{'Accept':'application/json'}}).then(function(r){return r.json()}).then(function(j){
@@ -4228,6 +4267,8 @@ fcRenderAll();
     var chipEl=t.closest?t.closest('[data-lens]'):null;
     if(chipEl){var id=chipEl.getAttribute('data-lens');S.lens=(S.lens===id)?null:id;render();return}
     if(t.closest&&t.closest('[data-clear]')){S.lens=null;render();return}
+    var mqEl=t.closest?t.closest('.tk-mq'):null;
+    if(mqEl){S.mqPaused=!S.mqPaused;mqEl.classList.toggle('tk-paused',S.mqPaused);return}
     if(t.closest&&t.closest('[data-close]')){S.room=null;render();return}
     if(t.closest&&t.closest('.tk-room'))return;   /* taps inside a room don't close it */
     if(t.closest&&t.closest('.tk-cta'))return;    /* let the link work */
@@ -4775,7 +4816,12 @@ applyRoute();
         if(r.status===401){ window.location.href='/auth/login'; throw new Error('auth'); }
         return r.json().then(function(j){ if(!r.ok) throw new Error((j&&j.error)||'Upload failed.'); return j; });
       })
-      .then(function(){ setStatus('Added to the wall.'); input.value=''; loadWall(true); })
+      .then(function(){
+        setStatus('PHOTO ADDED'); input.value=''; loadWall(true);
+        /* MicroKit icon-swap: the + deals over to a check while the add lands */
+        if(fab){ fab.textContent='✓'; fab.classList.add('added');
+          setTimeout(function(){ fab.textContent='+'; fab.classList.remove('added'); },2200); }
+      })
       .catch(function(err){
         if(err&&err.message==='auth') return;
         setStatus(err.message||'Upload failed. Try again.');
@@ -5342,7 +5388,23 @@ if(spSheetEl){
    spAddExpense({payer:spDraft.payer,desc:document.getElementById('spDesc').value.trim()||'Expense',
      currency:spDraft.currency,origCents:spDraft.cents,mode:spDraft.mode,
      parts:spDraftPartsList(),pct:spDraft.pct,exact:spDraft.exact,receiptBlob:spDraft.receiptBlob})
-   .then(function(){ closeSpSheet(); return spFetchLedger(); })
+   .then(function(){
+     /* MicroKit letter-swap: the label re-deals letter-by-letter to
+        ADDED ✓, holds a beat, then the sheet closes as before */
+     var dealDone=function(){ closeSpSheet(); spFetchLedger(); saveBtn.textContent='Save expense'; };
+     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){
+       saveBtn.textContent='ADDED ✓'; setTimeout(dealDone,350); return;
+     }
+     var txt='ADDED ✓';
+     saveBtn.innerHTML=txt.split('').map(function(ch,i){
+       return '<span style="display:inline-block;opacity:0;transform:translateY(7px) rotateX(65deg);transition:opacity .4s cubic-bezier(.2,.9,.25,1) '+(i*22)+'ms,transform .4s cubic-bezier(.2,.9,.25,1) '+(i*22)+'ms">'+(ch===' '?'&nbsp;':ch)+'</span>';
+     }).join('');
+     requestAnimationFrame(function(){ requestAnimationFrame(function(){
+       var sp=saveBtn.querySelectorAll('span');
+       for(var k=0;k<sp.length;k++){ sp[k].style.opacity='1'; sp[k].style.transform='none'; }
+     });});
+     setTimeout(dealDone,txt.length*22+650);
+   })
    .catch(function(err){
      saveBtn.disabled=false;
      if(err&&err.message==='auth')return;
@@ -5826,6 +5888,9 @@ renderBuds();
    if(prev)prev.textContent=total?done+' of '+total+' packed':'Nothing added yet';
    if(prevBadge){ prevBadge.textContent=pct+'%'; prevBadge.hidden=!total; }
    if(prevBar)prevBar.style.transform='scaleX('+(pct/100)+')';
+   var dots=document.getElementById('packDots');
+   if(dots){var filled=total?Math.round(done/total*5):0;
+     for(var di=0;di<dots.children.length;di++)dots.children[di].classList.toggle('on',di<filled);}
  }
  function renderPack(){
    var list=document.getElementById('packList');
