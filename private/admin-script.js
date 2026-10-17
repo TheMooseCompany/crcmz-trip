@@ -25,6 +25,39 @@ function showSaved(key){
 }
 function F(label,inner){return '<div class="adm-f"><label>'+label+'</label>'+inner+'</div>'}
 function inp(cls,value,extra){return '<input class="adm-inp '+cls+'" type="text" value="'+cEsc(value==null?'':value)+'" '+(extra||'')+'>'}
+/* Copy fields whose values can outgrow one line are TEXTAREAS, not
+   inputs: iOS paints only the slice of an <input> value that fits
+   its width, so long lines (next-up, stay intro, names, URLs) were
+   silently clipped regardless of the box armour. txa() builds the
+   single-line-intent variant — class hooks identical to the inputs
+   they replace, so harvest/validation paths are untouched; Enter is
+   suppressed on .adm-one (below) so the saved value stays one line,
+   exactly as it did in an <input>. admGrowTa sizes the box to its
+   content: the whole value shows at rest, no inner scrollbar. */
+function txa(cls,value,extra){return '<textarea class="adm-ta adm-tauto adm-one '+cls+'" rows="1" '+(extra||'')+'>'+cEsc(value==null?'':value)+'</textarea>'}
+function admGrowTa(el){
+ if(!el||el.tagName!=='TEXTAREA')return;
+ el.style.height='auto';
+ el.style.height=(el.scrollHeight+2)+'px';
+}
+function admGrowAll(scope){
+ (scope||document).querySelectorAll('textarea.adm-tauto').forEach(function(el){
+   if(el.getClientRects().length)admGrowTa(el);
+ });
+}
+document.addEventListener('input',function(ev){
+ var t=ev.target;
+ if(t&&t.classList&&t.classList.contains('adm-tauto'))admGrowTa(t);
+});
+document.addEventListener('keydown',function(ev){
+ var t=ev.target;
+ if(ev.key==='Enter'&&t&&t.classList&&t.classList.contains('adm-one'))ev.preventDefault();
+});
+document.addEventListener('toggle',function(ev){
+ var d=ev.target;
+ if(d&&d.open)admGrowAll(d);
+},true);
+window.addEventListener('resize',function(){admGrowAll(document);});
 function fmtTime(t){
  if(!t)return '';
  var m=/^(\d{1,2}):(\d{2})/.exec(t); if(!m)return t;
@@ -60,6 +93,7 @@ function switchTab(name){
  });
  buildTab(name);
  if(name==='deck'||name==='system')loadAdminState();
+ requestAnimationFrame(function(){admGrowAll(document);});
  var sec=$('admin'); if(sec)sec.scrollIntoView({block:'start'});
 }
 document.querySelectorAll('.adm-tab').forEach(function(t){
@@ -176,12 +210,13 @@ function buildContent(){
   return '<div class="adm-grid"><div class="adm-f"><label>Name</label>'+inp('p-name',p.name)+'</div>'
    +'<div class="adm-f"><label>Home currency</label><select class="adm-sel p-home"><option value="CAD"'+(p.home==='CAD'?' selected':'')+'>CAD</option><option value="USD"'+(p.home==='USD'?' selected':'')+'>USD</option></select></div></div>';
  }).join('');
+ admGrowAll(document);
 }
 function dayBlock(d,i){
  var cin='';
  if(d.cinema&&d.cinema.length){
    cin='<div class="adm-f"><label>Cinema links (Saturday)</label>'+d.cinema.map(function(m){
-     return '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><input class="adm-inp d-cin-label" type="text" value="'+cEsc(m.label)+'" placeholder="Label" style="flex:1;min-width:130px"><input class="adm-inp d-cin-url" type="url" value="'+cEsc(m.url)+'" placeholder="https://…" style="flex:2;min-width:180px"></div>';
+     return '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><textarea class="adm-ta adm-tauto adm-one d-cin-label" rows="1" placeholder="Label" style="flex:1;min-width:130px">'+cEsc(m.label)+'</textarea><textarea class="adm-ta adm-tauto adm-one d-cin-url" rows="1" placeholder="https://…" style="flex:2;min-width:180px">'+cEsc(m.url)+'</textarea></div>';
    }).join('')+'</div>';
  }
  return '<details class="adm-entry" '+(i===0?'open':'')+'><summary>Day '+(i+1)+' — '+cEsc(d.title||'')+' <span class="adm-sum-sub">'+cEsc(d.dow||'')+' '+cEsc(d.dnum||'')+'</span></summary><div class="adm-entry-body">'
@@ -191,9 +226,9 @@ function dayBlock(d,i){
   +F('Month label',inp('d-dmon',d.dmon))
   +F('Date', '<input class="adm-inp d-date" type="date" value="'+cEsc(d.dateISO||'')+'">')
   +'</div>'
-  +F('Chip',inp('d-chip',d.chip))
-  +F('Title',inp('d-title',d.title))
-  +F('Bullets (one per line)','<textarea class="adm-ta d-bullets">'+cEsc((d.bullets||[]).join('\n'))+'</textarea>')
+  +F('Chip',txa('d-chip',d.chip))
+  +F('Title',txa('d-title',d.title))
+  +F('Bullets (one per line)','<textarea class="adm-ta adm-tauto d-bullets">'+cEsc((d.bullets||[]).join('\n'))+'</textarea>')
   +cin
   +'</div></details>';
 }
@@ -220,11 +255,11 @@ function foodEditorHtml(f){
  var checks=CONTENT.foodCats.map(function(c){
    return '<label class="adm-check"><input type="checkbox" class="f-cat" value="'+c.id+'"'+((f.cats||[]).indexOf(c.id)>=0?' checked':'')+'>'+cEsc(c.label)+'</label>';
  }).join('');
- return F('Name',inp('f-name',f.name))
-  +F('Area',inp('f-area',f.area))
+ return F('Name',txa('f-name',f.name))
+  +F('Area',txa('f-area',f.area))
   +'<div class="adm-grid">'+F('Stars (e.g. 4.7)',inp('f-stars',f.stars,'inputmode="decimal"'))+F('Review count (e.g. 3,221)',inp('f-reviews',f.reviews))+'</div>'
-  +F('Halal note','<textarea class="adm-ta f-note" style="min-height:72px">'+cEsc(f.note||'')+'</textarea>')
-  +F('Maps URL',inp('f-url',f.url,'type="url"'))
+  +F('Halal note','<textarea class="adm-ta adm-tauto f-note" style="min-height:72px">'+cEsc(f.note||'')+'</textarea>')
+  +F('Maps URL',txa('f-url',f.url))
   +'<div class="adm-f"><label>Categories</label><div class="adm-checks">'+checks+'</div></div>'
   +'<button type="button" class="adm-del f-del">Delete this spot</button>';
 }
@@ -294,6 +329,7 @@ function bindFoodGrid(){
    var open=exp.hidden;
    exp.hidden=!open;
    row.classList.toggle('open',open);
+   if(open)admGrowAll(row);
    if(!open)foodRowSync(row);
  });
  grid.addEventListener('change',function(ev){
@@ -325,7 +361,7 @@ function bindFoodGrid(){
    var node=wrap.firstChild;
    grid.appendChild(node);
    var exp=node.querySelector('.adm-gexpand'); exp.hidden=false; node.classList.add('open');
-   foodFilter();
+   foodFilter(); admGrowAll(node);
    var nm=node.querySelector('.f-name'); if(nm){nm.focus(); nm.scrollIntoView({block:'center'});}
  });
 }
@@ -333,7 +369,7 @@ function bindFoodGrid(){
 /* ---------- Catalogues: Buds grid ---------- */
 function budEditorHtml(p){
  function rng(v){return v?(v.join(' – ')):''}
- return F('Name',inp('b-name',p.n))
+ return F('Name',txa('b-name',p.n))
   +F('Brand',inp('b-brand',p.b))
   +'<div class="adm-grid">'
   +F('Category','<select class="adm-sel b-cat"><option value="flower"'+(p.c==='flower'?' selected':'')+'>Flower</option><option value="preroll"'+(p.c==='preroll'?' selected':'')+'>Pre-Rolls</option><option value="edible"'+(p.c==='edible'?' selected':'')+'>Edibles</option></select>')
@@ -347,8 +383,12 @@ function budEditorHtml(p){
   +F('Rating (e.g. 4.5)',inp('b-rating',p.r==null?'':p.r,'inputmode="decimal"'))
   +'</div>'
   +'<div class="adm-f"><label class="adm-toggle"><input type="checkbox" class="b-inf"'+(p.i?' checked':'')+'> Infused</label></div>'
-  +F('HiBuddy URL',inp('b-url',p.u,'type="url"'))
-  +F('Photo (image URL, or attach below)',inp('b-img',p.img||''))
+  +F('HiBuddy URL',txa('b-url',p.u))
+  /* Photo slot stays a BOUNDED textarea (not adm-tauto): an attached
+     photo stores a data URI here — machine data, not copy — so the
+     box wraps URLs fully but caps at two rows instead of growing to
+     fit a ~50 KB base64 string down the page. */
+  +F('Photo (image URL, or attach below)','<textarea class="adm-ta b-img" rows="2" style="min-height:64px;resize:none">'+cEsc(p.img||'')+'</textarea>')
   +'<div class="adm-f"><label>Attach a photo</label><input class="adm-inp b-file" type="file" accept="image/*"></div>'
   +'<button type="button" class="adm-del b-del">Delete this product</button>';
 }
@@ -435,6 +475,7 @@ function bindBudGrid(){
    var open=exp.hidden;
    exp.hidden=!open;
    row.classList.toggle('open',open);
+   if(open)admGrowAll(row);
    if(!open)budRowSync(row);
  });
  grid.addEventListener('change',function(ev){
@@ -468,7 +509,7 @@ function bindBudGrid(){
    var node=wrap.firstChild;
    grid.appendChild(node); bindBudFile(node);
    var exp=node.querySelector('.adm-gexpand'); exp.hidden=false; node.classList.add('open');
-   budFilter();
+   budFilter(); admGrowAll(node);
    var nm=node.querySelector('.b-name'); if(nm){nm.focus(); nm.scrollIntoView({block:'center'});}
  });
 }
@@ -684,7 +725,7 @@ function flightBlock(f,i){
     +'<div class="adm-grid">'+F('Cabin',inp('fl-cabin',f.cabin))+F('Terminal',inp('fl-term',f.terminal))+'</div>'
     +'<div class="adm-grid">'+F('Gate (if known)',inp('fl-gate',f.gate))+F('Status','<select class="adm-sel fl-status">'+statusOpts+'</select>')+'</div>'
     +'<div class="adm-f"><label class="adm-toggle"><input type="checkbox" class="fl-wifi"'+(f.hasWifi?' checked':'')+'> Wi-Fi on board</label></div>'
-    +F('Notes (shown on card)',inp('fl-notes',f.notes))
+    +F('Notes (shown on card)',txa('fl-notes',f.notes))
     +'<input type="hidden" class="fl-id" value="'+cEsc(f.id||'')+'">'
     +'<button type="button" class="adm-del fl-del">Delete this flight</button>'
     +'</div></details>';
@@ -724,6 +765,7 @@ function bindFlightParses(){
           set('.fl-aircraft',f.aircraft); set('.fl-cabin',f.cabin);
           set('.fl-term',f.terminal); set('.fl-gate',f.gate);
           set('.fl-notes',f.notes);
+          admGrowAll(entry);
           var wifi=entry.querySelector('.fl-wifi');if(wifi&&f.hasWifi!=null)wifi.checked=!!f.hasWifi;
           if(status)status.textContent='✓ Done — check fields then save';
           txt.value='';
@@ -737,7 +779,7 @@ function loadAdminFlights(){
     _adminFlights=j.flights||[];
     var list=$('admFlightsList');
     if(list)list.innerHTML=_adminFlights.map(flightBlock).join('');
-    bindFlightDeletes(); bindFlightParses();
+    bindFlightDeletes(); bindFlightParses(); admGrowAll(list);
   }).catch(function(){});
 }
 $('admFlightsAdd').addEventListener('click',function(){
@@ -746,7 +788,7 @@ $('admFlightsAdd').addEventListener('click',function(){
     destination:'Calgary',destinationCode:'YYC',departureDate:'',departureTime:'',arrivalTime:'',
     duration:'',aircraft:'',cabin:'Economy',hasWifi:true,status:'scheduled',gate:'',terminal:'',notes:''},0);
   var node=wrap.firstChild; node.open=true;
-  $('admFlightsList').appendChild(node); bindFlightDeletes(); bindFlightParses();
+  $('admFlightsList').appendChild(node); bindFlightDeletes(); bindFlightParses(); admGrowAll(node);
   var fn=node.querySelector('.fl-parse-txt'); if(fn)fn.focus();
 });
 

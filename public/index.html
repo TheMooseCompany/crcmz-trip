@@ -1439,6 +1439,14 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 #view-admin .adm-tag.p{background:rgba(242,179,61,.28);color:var(--amber-deep)}
 #view-admin .adm-gexpand{border-top:1px solid var(--line-d);background:rgba(255,253,246,.6);border-radius:0 0 12px 12px}
 #view-admin .adm-gexpand[hidden]{display:none}
+/* Auto-growing copy fields: wherever a value can outgrow a single
+   line (Next-Up, stay intro, names, URLs, notes), the field is a
+   textarea, not an <input> — iOS paints only the slice of an input's
+   value that fits its width, so long lines were silently clipped no
+   matter what the box armour did. Height is driven by admin-script.js
+   (admGrowTa) so the whole value shows at rest; resize:none +
+   overflow:hidden keep the box exactly as tall as its content. */
+#view-admin textarea.adm-tauto{resize:none;overflow:hidden;min-height:48px}
 .sh-label{font-size:12px;letter-spacing:.08em}
 .seg button{font-size:12px;letter-spacing:.08em}
 .p-chip .p-share{font-family:"Space Grotesk",sans-serif;font-variant-numeric:tabular-nums}

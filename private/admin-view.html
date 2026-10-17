@@ -46,8 +46,8 @@
     <div class="card adm-card">
       <div class="label" style="margin-bottom:10px">Trip</div>
       <div class="adm-f"><label for="admTarget">Countdown target</label><input class="adm-inp" type="datetime-local" id="admTarget"></div>
-      <div class="adm-f"><label for="admHeroDates">Hero dates line</label><input class="adm-inp" type="text" id="admHeroDates"></div>
-      <div class="adm-f"><label for="admNextUp">Next-up line (before the trip)</label><input class="adm-inp" type="text" id="admNextUp"></div>
+      <div class="adm-f"><label for="admHeroDates">Hero dates line</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admHeroDates"></textarea></div>
+      <div class="adm-f"><label for="admNextUp">Next-up line (before the trip)</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admNextUp"></textarea></div>
       <p class="adm-err" data-err="trip" hidden=""></p>
       <div class="adm-save-row"><button type="button" class="adm-save" data-save="trip">Save trip</button><span class="adm-saved" data-saved="trip" hidden="">Saved</span></div>
     </div>
@@ -62,18 +62,18 @@
 
     <div class="card adm-card">
       <div class="label" style="margin-bottom:10px">The Stay</div>
-      <div class="adm-f"><label for="admStayUrl">Airbnb URL</label><input class="adm-inp" type="url" id="admStayUrl"></div>
-      <div class="adm-f"><label for="admStayIntro">Intro line</label><input class="adm-inp" type="text" id="admStayIntro"></div>
-      <div class="adm-f"><label for="admStayRating">Rating badge</label><input class="adm-inp" type="text" id="admStayRating"></div>
-      <div class="adm-f"><label for="admStayHost">Host line</label><input class="adm-inp" type="text" id="admStayHost"></div>
+      <div class="adm-f"><label for="admStayUrl">Airbnb URL</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayUrl"></textarea></div>
+      <div class="adm-f"><label for="admStayIntro">Intro line</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayIntro"></textarea></div>
+      <div class="adm-f"><label for="admStayRating">Rating badge</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayRating"></textarea></div>
+      <div class="adm-f"><label for="admStayHost">Host line</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayHost"></textarea></div>
       <div class="adm-grid">
         <div class="adm-f"><label for="admStaySleeps">Sleeps (guests)</label><input class="adm-inp" type="text" inputmode="decimal" id="admStaySleeps"></div>
         <div class="adm-f"><label for="admStayBedrooms">Bedrooms</label><input class="adm-inp" type="text" inputmode="decimal" id="admStayBedrooms"></div>
         <div class="adm-f"><label for="admStayBeds">Beds</label><input class="adm-inp" type="text" inputmode="decimal" id="admStayBeds"></div>
         <div class="adm-f"><label for="admStayBaths">Baths</label><input class="adm-inp" type="text" inputmode="decimal" id="admStayBaths"></div>
       </div>
-      <div class="adm-f"><label for="admStayCheckIn">Check-in window</label><input class="adm-inp" type="text" id="admStayCheckIn"></div>
-      <div class="adm-f"><label for="admStayCheckOut">Check-out</label><input class="adm-inp" type="text" id="admStayCheckOut"></div>
+      <div class="adm-f"><label for="admStayCheckIn">Check-in window</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayCheckIn"></textarea></div>
+      <div class="adm-f"><label for="admStayCheckOut">Check-out</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayCheckOut"></textarea></div>
       <div class="adm-grid">
         <div class="adm-f"><label for="admPriceNight">Price per night</label><input class="adm-inp" type="text" inputmode="decimal" id="admPriceNight" placeholder="Leave blank to hide"></div>
         <div class="adm-f"><label for="admPriceNights">Nights</label><input class="adm-inp" type="text" inputmode="numeric" id="admPriceNights" placeholder="Leave blank to hide"></div>
@@ -81,9 +81,9 @@
         <div class="adm-f"><label for="admPriceTaxes">Taxes &amp; fees</label><input class="adm-inp" type="text" inputmode="decimal" id="admPriceTaxes"></div>
         <div class="adm-f"><label for="admPriceTotal">Total</label><input class="adm-inp" type="text" inputmode="decimal" id="admPriceTotal"></div>
       </div>
-      <div class="adm-f"><label for="admStayRules">House rules (one per line)</label><textarea class="adm-ta" id="admStayRules"></textarea></div>
-      <div class="adm-f"><label for="admStayAmen">Amenities (one per line)</label><textarea class="adm-ta" id="admStayAmen"></textarea></div>
-      <div class="adm-f"><label for="admStayNote">House-details closing note</label><input class="adm-inp" type="text" id="admStayNote"></div>
+      <div class="adm-f"><label for="admStayRules">House rules (one per line)</label><textarea class="adm-ta adm-tauto" id="admStayRules"></textarea></div>
+      <div class="adm-f"><label for="admStayAmen">Amenities (one per line)</label><textarea class="adm-ta adm-tauto" id="admStayAmen"></textarea></div>
+      <div class="adm-f"><label for="admStayNote">House-details closing note</label><textarea class="adm-ta adm-tauto adm-one" rows="1" id="admStayNote"></textarea></div>
       <p class="adm-err" data-err="stay" hidden=""></p>
       <div class="adm-save-row"><button type="button" class="adm-save" data-save="stay">Save stay</button><span class="adm-saved" data-saved="stay" hidden="">Saved</span></div>
     </div>
