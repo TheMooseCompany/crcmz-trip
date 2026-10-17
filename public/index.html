@@ -5,9 +5,6 @@
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:,">
 <title>CRCMZ Trip</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
 /* Newsreader italic is self-hosted (critique P2-5): a glyph subset of
    Google's latin variable file (basic latin + punctuation + ★/✓),
@@ -17,6 +14,18 @@
    pinning it would freeze the optical size and change how every
    serif accent renders — a frozen-baseline call, not a diet fix. */
 @font-face{font-family:"Newsreader";src:url("assets/fonts/newsreader-it.woff2") format("woff2");font-style:italic;font-weight:500;font-display:swap}
+/* Space Grotesk + IBM Plex Mono self-hosted (perf audit win 2): the same
+   latin subsets Google Fonts served, now from /assets/fonts — one less
+   third-party origin on the critical path. Space Grotesk is a variable
+   file (wght 300-700); Google's own CSS pointed every weight at this one
+   file, so the four rules below mirror that exactly. */
+@font-face{font-family:"Space Grotesk";src:url("assets/fonts/space-grotesk-var.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url("assets/fonts/space-grotesk-var.woff2") format("woff2");font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url("assets/fonts/space-grotesk-var.woff2") format("woff2");font-style:normal;font-weight:600;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url("assets/fonts/space-grotesk-var.woff2") format("woff2");font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("assets/fonts/ibm-plex-mono-400.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("assets/fonts/ibm-plex-mono-500.woff2") format("woff2");font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("assets/fonts/ibm-plex-mono-600.woff2") format("woff2");font-style:normal;font-weight:600;font-display:swap}
 :root{
   --sky:#0A0E27; --sky2:#0D1233; --deep:#060818; --panel:#10163A; --panel2:#141B45;
   --line:rgba(245,239,224,.12); --line-amber:rgba(242,179,61,.45);
@@ -6465,10 +6474,18 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   photoEl.insertBefore(strip,photoEl.firstChild);
   rebuildDots(); syncUI();
  }
- function wireAll(){document.querySelectorAll('#foodList article.nm-card[data-place-slug]').forEach(wire)}
+ var armed=false;
+ function wireAll(){if(!armed)return;document.querySelectorAll('#foodList article.nm-card[data-place-slug]').forEach(wire)}
  // renderFood() rebuilds #foodList on every filter change - re-wire then.
  new MutationObserver(wireAll).observe(document.getElementById('foodList'),{childList:true});
- wireAll();
+ // Perf (audit win 1): this sweep used to fire ~98 meta fetches at boot,
+ // on Home, for a view the user may never open. It now arms on the first
+ // Food view entry; once armed the behaviour above is unchanged. A
+ // direct #food boot routes before this script runs, so check the
+ // current view as well as listening for the change.
+ function arm(){if(armed)return;armed=true;wireAll()}
+ if(document.body.getAttribute('data-view')==='food')arm();
+ document.addEventListener('viewchange',function(e){if(e.detail==='food')arm()});
 })();
 </script>
 

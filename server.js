@@ -2001,7 +2001,18 @@ ${text.trim()}`;
     res.set('Cache-Control', 'no-cache');
     res.type('html').send(renderPage(req.session.user));
   });
-  app.use(requireAuth, express.static(path.join(__dirname, 'public'), { index: false }));
+  app.use(requireAuth, express.static(path.join(__dirname, 'public'), {
+    index: false,
+    // Perf (audit win 3): /assets/** gets a real cache lifetime so repeat
+    // visits skip revalidating art/fonts/images through the tunnel.
+    // Filenames are stable (not content-hashed), so no `immutable`.
+    // HTML is served by the route above and stays no-cache.
+    setHeaders(res, filePath) {
+      if (filePath.includes(path.sep + 'assets' + path.sep)) {
+        res.setHeader('Cache-Control', 'public, max-age=604800');
+      }
+    },
+  }));
 
   app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
 
