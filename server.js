@@ -7,6 +7,12 @@ const express = require('express');
 const session = require('express-session');
 const { Issuer, generators } = require('openid-client');
 const multer = require('multer');
+// Photo Wall thumbnails (Oct 17): sharp generates grid-sized derivatives
+// of local uploads. Loaded defensively — if the native binary is ever
+// unavailable, /uploads-thumb falls back to the original bytes and the
+// wall keeps working, just heavier.
+let sharpLib = null;
+try { sharpLib = require('sharp'); } catch { sharpLib = null; }
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
@@ -609,7 +615,7 @@ async function passwordLogin(){
           : `/uploads/${encodeURIComponent(m.name)}`;
         const thumb = m.immichId
           ? `/album/asset/${m.immichId}/thumbnail`
-          : `/uploads/${encodeURIComponent(m.name)}`;
+          : `/uploads-thumb/${encodeURIComponent(m.name)}`;
         return {
           name: m.name,
           originalName: m.originalName,
@@ -673,6 +679,43 @@ async function passwordLogin(){
     const filePath = path.join(UPLOADS_DIR, name);
     if (!fs.existsSync(filePath)) return res.status(404).type('text/plain').send('Not found');
     res.sendFile(filePath);
+  });
+
+  // Photo Wall grid thumbnails (Oct 17, audit #4): the grid previously
+  // loaded the full originals (its `thumb` URL WAS the original).
+  // Derivatives are generated lazily on first request with sharp,
+  // cached on the same data volume under thumbs/, and the originals
+  // above remain what the viewer opens. Upload names are unique per
+  // upload, so a cached derivative never needs invalidating.
+  const THUMB_DIR = path.join(UPLOADS_DIR, 'thumbs');
+  try { fs.mkdirSync(THUMB_DIR, { recursive: true }); } catch { /* retried per request */ }
+  const thumbInflight = new Map();
+  app.get('/uploads-thumb/:name', requireAuth, async (req, res) => {
+    const name = path.basename(req.params.name); // traversal guard
+    const index = readIndex();
+    if (!index[name]) return res.status(404).type('text/plain').send('Not found');
+    const filePath = path.join(UPLOADS_DIR, name);
+    if (!fs.existsSync(filePath)) return res.status(404).type('text/plain').send('Not found');
+    if (!sharpLib || !IMAGE_EXT.has(path.extname(name).toLowerCase())) return res.sendFile(filePath);
+    const thumbPath = path.join(THUMB_DIR, `${name}.jpg`);
+    try {
+      if (!fs.existsSync(thumbPath)) {
+        if (!thumbInflight.has(name)) {
+          thumbInflight.set(name, (async () => {
+            const buf = await sharpLib(filePath).rotate()
+              .resize(480, 480, { fit: 'inside', withoutEnlargement: true })
+              .jpeg({ quality: 78 }).toBuffer();
+            const tmp = `${thumbPath}.tmp-${process.pid}`;
+            fs.writeFileSync(tmp, buf);
+            fs.renameSync(tmp, thumbPath);
+          })().finally(() => thumbInflight.delete(name)));
+        }
+        await thumbInflight.get(name);
+      }
+      res.set('Cache-Control', 'private, max-age=604800');
+      res.type('image/jpeg');
+      return res.sendFile(thumbPath);
+    } catch { return res.sendFile(filePath); }
   });
 
   // ---------- Split ledger (auth required) ----------
@@ -885,10 +928,24 @@ async function passwordLogin(){
     const p = matchPerson(user);
     return !!p && ADMIN_PEOPLE.includes(p);
   }
+  // Content epoch heal (Oct 17): the shipped defaults carry an epoch;
+  // a saved file stamped below it is a stale whole-object copy (the
+  // 50-spot list) and is treated as absent everywhere — GET serves null,
+  // the admin state reads 'defaults', activePeople falls back — so a
+  // stale save can never resurrect old content fleet-wide. New saves
+  // are stamped with the shipped epoch in the PUT handler.
+  function shippedEpoch() {
+    const d = defaultContent();
+    return d && typeof d.epoch === 'number' ? d.epoch : 0;
+  }
   function readContent() {
     try {
       const parsed = JSON.parse(fs.readFileSync(CONTENT_PATH, 'utf8'));
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        const se = shippedEpoch();
+        if (se > 0 && (parsed.epoch || 0) < se) return null;
+        return parsed;
+      }
     } catch { /* no content stored yet */ }
     return null;
   }
@@ -927,6 +984,7 @@ async function passwordLogin(){
     if (!Array.isArray(c.days) || !Array.isArray(c.food) || !Array.isArray(c.buds) || !Array.isArray(c.splitPeople)) {
       return res.status(400).json({ error: 'Content sections days/food/buds/splitPeople must be arrays.' });
     }
+    c.epoch = shippedEpoch();
     writeContent(c);
     res.json({ ok: true });
   });
