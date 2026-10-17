@@ -1199,8 +1199,19 @@ body.reduced .days-layout{display:block}
 .fl-tail{flex:0 0 auto;height:120px}
 .fl-card{position:sticky;top:calc(var(--header-h) + 10px + var(--i,0)*var(--fl-peek));z-index:calc(2 + var(--i,0));
   border:1px solid var(--line);border-radius:16px;color:var(--cream);
-  background:linear-gradient(165deg,#0D1533,#0A0D23);box-shadow:var(--shadow-card);
-  transform-origin:50% 0;will-change:transform,filter;overflow:hidden}
+  /* PAINT HARDENING (owner recording #4, Oct 16): the fill is ONE
+     solid colour — the old two-stop gradient (#0D1533 -> #0A0D23)
+     composited to rgb(12,17,43) at mid-face, which is exactly this
+     solid — and the cards carry no will-change layer promotion.
+     On the owner's iPhone the gradient + promoted-layer cocktail
+     let covered cards' print read through the covering card while
+     the pile formed under momentum scroll (WKWebView compositing);
+     a flat solid fill is the cheapest paint a covering card can
+     have, and it occludes by construction. Border, shadow, accents
+     and the face layout are unchanged; the driver's recede
+     (transform / brightness on covered cards) is unchanged. */
+  background:#0C112B;box-shadow:var(--shadow-card);
+  transform-origin:50% 0;overflow:hidden}
 .fl-in{padding:11px 14px 10px;position:relative}
 .fl-top{display:flex;align-items:center;gap:8px;min-height:20px}
 .fl-id{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;color:var(--cream);white-space:nowrap}
