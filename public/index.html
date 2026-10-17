@@ -856,7 +856,7 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 #view-fifa::before{background:radial-gradient(640px 400px at 16% 10%,rgba(165,180,255,.12),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(51,65,154,.22),transparent 70%)}
 #view-buds::before{background:radial-gradient(600px 380px at 84% 12%,rgba(242,179,61,.10),transparent 65%),radial-gradient(620px 420px at 12% 78%,rgba(165,180,255,.10),transparent 65%)}
 /* Buds AI recommendation widget */
-.buds-ai-wrap{margin:20px 0 4px;display:flex;flex-direction:column;gap:12px}
+.buds-ai-wrap{margin:20px 0 24px;display:flex;flex-direction:column;gap:12px}
 .buds-ai-box{position:relative;border-radius:18px;padding:2px;z-index:0}
 /* thin animated border ring */
 .buds-ai-glow{position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,#f72585,#7209b7,#3a86ff,#4cc9f0,#f8961e,#f72585);background-size:300% 300%;animation:aiGlow 3.5s linear infinite;z-index:0}
@@ -881,6 +881,10 @@ body.live-drive #arcLayer,body.live-drive #labelLayer,body.live-drive #stars{tra
 .buds-ai-item strong{color:var(--cream);font-weight:700}
 .buds-ai-item .bai-brand{color:var(--muted);font-size:12.5px;margin-left:4px}
 .buds-ai-item .bai-why{display:block;color:rgba(245,239,224,.72);font-size:13.5px;margin-top:2px}
+.bai-link{color:var(--amber2);text-decoration:none;font-weight:700}
+.bai-link:hover{text-decoration:underline}
+@keyframes baiSpin{to{transform:rotate(360deg)}}
+.bai-spin{animation:baiSpin .75s linear infinite;display:block}
 #view-admin::before{background:radial-gradient(560px 340px at 12% 6%,rgba(242,179,61,.13),transparent 65%),radial-gradient(600px 400px at 90% 50%,rgba(165,180,255,.10),transparent 65%)}
 @keyframes ambDrift{from{transform:translate3d(-1.2%,0,0) scale(1)}to{transform:translate3d(1.6%,-1.4%,0) scale(1.05)}}
 /* --- Days: boarding-pass stack (sticky pile, Concept 01) ---
@@ -4210,12 +4214,14 @@ renderBuds();
   if(!btn)return;
   function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
   var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 6.5L20 11l-6 2-2 6.5-2-6.5L4 11l6-1.5Z"/><path d="M19 3l1 2.5L22.5 6l-2.5 1L19 9.5 18 7l-2.5-1L18 5Z"/></svg>';
-  function setLoading(on){btn.disabled=on;btn.innerHTML=on?'<span style="font-size:18px;line-height:1">·</span>':ICON;}
+  var SPINNER='<svg class="bai-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8" stroke-opacity=".2"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>';
+  function setLoading(on){btn.disabled=on;btn.innerHTML=on?SPINNER:ICON;}
   function showErr(msg){errBox.textContent=msg;errBox.classList.add('show');resBox.classList.remove('show');}
   function showResult(data){
     sumEl.textContent=data.summary||'';
     var html=(data.suggestions||[]).map(function(s){
-      return '<div class="buds-ai-item"><strong>'+esc(s.name)+'</strong><span class="bai-brand">'+esc(s.brand)+'</span><span class="bai-why">'+esc(s.why)+'</span></div>';
+      var nameHtml=s.url?'<a class="bai-link" href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>':'<strong>'+esc(s.name)+'</strong>';
+      return '<div class="buds-ai-item">'+nameHtml+'<span class="bai-brand">'+esc(s.brand)+'</span><span class="bai-why">'+esc(s.why)+'</span></div>';
     }).join('');
     listEl.innerHTML=html;
     resBox.classList.add('show');

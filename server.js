@@ -840,7 +840,12 @@ Return ONLY a valid JSON object with no explanation or markdown:
       const match = content.match(/\{[\s\S]*\}/);
       if (!match) return res.status(500).json({ error: 'AI did not return JSON' });
       const parsed = JSON.parse(match[0]);
-      res.json({ ok: true, summary: parsed.summary || '', suggestions: parsed.suggestions || [] });
+      const rawSuggestions = parsed.suggestions || [];
+      const suggestions = rawSuggestions.map((s) => {
+        const bud = buds.find((b) => b.n === s.name);
+        return { name: s.name, brand: s.brand || '', why: s.why || '', url: (bud && bud.u) || '' };
+      });
+      res.json({ ok: true, summary: parsed.summary || '', suggestions });
     } catch (e) {
       res.status(500).json({ error: e.message || 'recommend failed' });
     }
