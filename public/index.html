@@ -2213,50 +2213,182 @@ flash of Home. The router clears the tag when it takes over. */
   </div>
   </div>
   <div class="view amb-paused" id="view-tourney" hidden="">
-<!-- ================= TOURNEY ================= -->
+<!-- ================= TOURNEY · 9R2 LEAN KIT BUILD =================
+     The Tourney view runs on its own CRCMZ kit identity (ink / graphite /
+     violet / silver / mono), separate from the trip app's indigo system.
+     Entrant colours and game_color arrive as DATA and only ever paint
+     identity (chips, pips, lens tint) — state is always the fixed kit
+     colours: green #4ADE80 = live/playable, violet = champion/brand,
+     amber = stale. -->
 <style>
-#tourneyContent{display:flex;flex-direction:column;gap:22px}
-.tt{background:rgba(255,255,255,.035);border:1px solid rgba(245,239,224,.1);border-left:3px solid var(--gc);border-radius:18px;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
-.tt header{display:flex;flex-direction:column;gap:6px}.tt-game{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gc)}
-.tt h3{margin:0;font-size:22px}.tt-meta{display:flex;align-items:center;gap:10px;font-size:12.5px;opacity:.85}
-.tt-live{color:#8cff2b;font-weight:700}.tt-live::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#8cff2b;margin-right:6px}.tt-done{color:#F2B33D;font-weight:700}
-.tt-prog{flex:0 0 90px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}.tt-prog span{display:block;height:100%;background:#8cff2b}
-.tt-champ{padding:12px 14px;border-radius:12px;border:1px solid #F2B33D;color:#FFC65C;font-size:15px}
-.tt-sub{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin:4px 0 8px}
-.tt-br{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
-.tt-col{display:flex;flex-direction:column;min-width:168px}.tt-rh{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:8px}
-.tt-cm{display:flex;flex-direction:column;justify-content:space-around;gap:10px;flex:1}
-.tt-m{border:1px solid rgba(245,239,224,.12);border-radius:10px;padding:6px 10px;background:rgba(10,14,39,.6)}.tt-m.up{border-color:#22e6ff}.tt-m.bye{opacity:.5}.tt-m.gold{border-color:#F2B33D;box-shadow:0 0 12px rgba(242,179,61,.25)}
-.tt-side{display:flex;align-items:center;gap:7px;font-size:13.5px;min-height:24px}.tt-side i,.tt-tb i,.tt-lb i{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
-.tt-side span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tt-side b{font-variant-numeric:tabular-nums}.tt-side small{opacity:.6;font-weight:400}
-.tt-side.w{font-weight:700}.tt-side.w b{color:#FFC65C}.tt-side.l{opacity:.55}
-.tt-side b.lv{color:#8cff2b}
-.tt-ser{font-size:11px;font-weight:700;color:#8cff2b;margin-top:2px}
-.tt-fin{display:flex;gap:14px;flex-wrap:wrap}.tt-fin>div{min-width:180px}
-.tt-groups{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.tt-tb table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.tt-tb th,.tt-tb td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(245,239,224,.08)}
-.tt-tb th{font-size:10.5px;opacity:.55;font-weight:700}.tt-tb .n{text-align:left;display:flex;align-items:center;gap:7px}.tt-tb thead .n{display:table-cell}.tt-tb tr.q td:first-child{color:#8cff2b;font-weight:700}
-.tt-lb{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.tt-lb li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center}
-.tt-lb .p{font-weight:800;opacity:.6;text-align:right}.tt-lb li:first-child .p,.tt-lb li:first-child .pt b{color:#FFC65C;opacity:1}
-.tt-lb .nm{display:flex;flex-direction:column;gap:5px;min-width:0}.tt-lb .nm>span:first-child{display:flex;align-items:center;gap:7px;font-weight:700}
-.tt-lb .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}.tt-lb .bar span{display:block;height:100%}
-.tt-lb .pt{text-align:right;font-size:12px}.tt-lb .pt b{font-size:18px}.tt-lb .pt small{display:block;opacity:.6}
-.tt-open{align-self:flex-start;color:#FFC65C;font-weight:700;font-size:14px;text-decoration:none}.tt-empty{opacity:.55;text-align:center;font-size:14px}
+#view-tourney{--tk-ink:#090A0E;--tk-bg:#060608;--tk-graphite:#171922;--tk-violet:#A855F7;--tk-violet-lt:#CFA6FF;--tk-silver:#D9DEE6;--tk-white:#F4F5F7;--tk-muted:#A7A4B2;--tk-green:#4ADE80;--tk-amber:#E8B33D;--tk-red:#FF8A94;--tk-line:rgba(217,222,230,.10);--tk-line2:rgba(217,222,230,.18);background:var(--tk-bg)}
+#view-tourney::before{background:radial-gradient(640px 400px at 16% 10%,rgba(168,85,247,.08),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(168,85,247,.05),transparent 70%)}
+#view-tourney section{padding-top:calc(var(--header-h) + 10px)}
+#tourneyContent{display:flex;flex-direction:column;font-family:"Space Grotesk",system-ui,sans-serif;color:var(--tk-white);line-height:1.3}
+#tourneyContent .tk-mono,#tourneyContent .tk-kick,#tourneyContent .tk-fresh,#tourneyContent .tk-sk,#tourneyContent .tk-lk,#tourneyContent .tk-lt,#tourneyContent .tk-tc-meta,#tourneyContent .tk-live,#tourneyContent .tk-prog,#tourneyContent .tk-ck,#tourneyContent .tk-tag,#tourneyContent .tk-sub,#tourneyContent .tk-pos,#tourneyContent .tk-pts,#tourneyContent .tk-dh,#tourneyContent .tk-glog,#tourneyContent .tk-lhead,#tourneyContent .tk-lrow .tk-c-n,#tourneyContent .tk-fx-id,#tourneyContent .tk-state,#tourneyContent .tk-score,#tourneyContent .tk-rl,#tourneyContent .tk-rs,#tourneyContent .tk-snum,#tourneyContent .tk-grow,#tourneyContent .tk-vnote,#tourneyContent .tk-dchip,#tourneyContent .tk-lstat,#tourneyContent .tk-nk,#tourneyContent .tk-clear,#tourneyContent .tk-foot,#tourneyContent .tk-legend,#tourneyContent .tk-newtag{font-family:"IBM Plex Mono",ui-monospace,monospace}
+/* head */
+#view-tourney .tk-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+#view-tourney .tk-kick{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.3em;color:var(--tk-violet);font-weight:600}
+#view-tourney .tk-title{font-size:23px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;margin:3px 0 0;line-height:1.15;color:var(--tk-white)}
+#view-tourney .tk-fresh{font-size:9.5px;color:var(--tk-muted);text-align:right;line-height:1.7;letter-spacing:.06em;padding-top:4px}
+#view-tourney .tk-fdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tk-green);margin-right:4px;vertical-align:1px}
+#view-tourney .tk-fresh.tk-stale .tk-fdot{background:transparent;border:1.5px solid var(--tk-muted)}
+#view-tourney .tk-fresh.tk-loading .tk-fdot{background:transparent;border:1.5px solid var(--tk-violet)}
+#tourneyContent.tk-isstale .tk-live{color:var(--tk-muted)}
+#tourneyContent.tk-isstale .tk-live i{background:var(--tk-muted);animation:none}
+/* bug strip */
+#tourneyContent .tk-strip{display:flex;gap:9px;align-items:flex-start;background:#101117;border:1px solid var(--tk-line2);border-left:4px solid var(--tk-muted);border-radius:10px;padding:6px 11px;margin-bottom:10px}
+#tourneyContent .tk-sk{font-size:9px;font-weight:700;letter-spacing:.14em;padding:3px 6px;border-radius:5px;flex:none;margin-top:1px;background:rgba(217,222,230,.10);color:var(--tk-silver)}
+#tourneyContent .tk-strip[data-kind="latest"],#tourneyContent .tk-strip[data-kind="live"]{border-left-color:var(--tk-green)}
+#tourneyContent .tk-strip[data-kind="latest"] .tk-sk,#tourneyContent .tk-strip[data-kind="live"] .tk-sk{background:rgba(74,222,128,.16);color:var(--tk-green)}
+#tourneyContent .tk-strip[data-kind="upnext"]{border-left-color:var(--tk-green)}
+#tourneyContent .tk-strip[data-kind="upnext"] .tk-sk{background:var(--tk-green);color:#0B1510}
+#tourneyContent .tk-strip[data-kind="champion"]{border-left-color:var(--tk-violet)}
+#tourneyContent .tk-strip[data-kind="champion"] .tk-sk{background:rgba(168,85,247,.25);color:var(--tk-violet-lt)}
+#tourneyContent .tk-strip[data-kind="stale"]{border-left-color:var(--tk-amber)}
+#tourneyContent .tk-strip[data-kind="stale"] .tk-sk{background:rgba(232,179,61,.15);color:var(--tk-amber)}
+#tourneyContent .tk-st{font-size:12.5px;font-weight:600;line-height:1.4;flex:1}
+#tourneyContent .tk-st span{color:var(--tk-muted);font-weight:400}
+/* lens card */
+#tourneyContent .tk-lens{background:linear-gradient(180deg,rgba(168,85,247,.10),rgba(168,85,247,0) 60%),var(--tk-graphite);border:1px solid rgba(168,85,247,.45);border-radius:16px;padding:12px 13px;margin-bottom:12px}
+#tourneyContent .tk-lh{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+#tourneyContent .tk-lk{font-size:9px;letter-spacing:.18em;color:var(--tk-violet-lt)}
+#tourneyContent .tk-ln{font-size:16px;font-weight:700;text-transform:uppercase;line-height:1.15}
+#tourneyContent .tk-lt{font-size:9px;color:var(--tk-muted);letter-spacing:.12em;margin-top:2px;display:inline-block}
+#tourneyContent .tk-clear{margin-left:auto;font-size:10px;color:var(--tk-muted);letter-spacing:.08em;cursor:pointer;border:1px solid var(--tk-line2);border-radius:7px;padding:5px 8px;flex:none;background:none}
+#tourneyContent .tk-nextbox{background:#101117;border:1px solid var(--tk-line2);border-radius:11px;padding:9px 11px;margin-bottom:8px}
+#tourneyContent .tk-nk{font-size:8.5px;letter-spacing:.18em;color:var(--tk-muted);margin-bottom:4px}
+#tourneyContent .tk-nv{font-size:14.5px;font-weight:700;line-height:1.35}
+#tourneyContent .tk-nv .tk-play{color:var(--tk-green)}
+#tourneyContent .tk-lstats{border-top:1px dashed var(--tk-line2);padding-top:7px}
+#tourneyContent .tk-lstat{font-size:11px;color:var(--tk-silver);letter-spacing:.03em;padding:2px 0}
+/* tournament card */
+#tourneyContent .tk-tc{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:10px 13px 8px;margin-bottom:10px;position:relative;overflow:hidden}
+#tourneyContent .tk-tc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tk-gc,#A855F7)}
+#tourneyContent .tk-tc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+#tourneyContent .tk-tc-name{font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.01em;line-height:1.25}
+#tourneyContent .tk-tc-meta{font-size:9.5px;color:var(--tk-muted);letter-spacing:.1em;margin-top:3px}
+#tourneyContent .tk-gdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tk-gc,#A855F7);margin-right:4px;vertical-align:1px}
+#tourneyContent .tk-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--tk-green);letter-spacing:.14em;flex:none;padding-top:3px}
+#tourneyContent .tk-live i{width:7px;height:7px;border-radius:50%;background:var(--tk-green);display:block;animation:tkpulse 1.6s infinite}
+#tourneyContent .tk-live.tk-fin{color:var(--tk-muted)}
+#tourneyContent .tk-live.tk-fin i{background:var(--tk-muted);animation:none}
+@keyframes tkpulse{0%,100%{opacity:1}50%{opacity:.35}}
+#tourneyContent .tk-prog{font-size:9.5px;color:var(--tk-muted);letter-spacing:.08em;margin-top:3px}
+#tourneyContent .tk-champband{background:linear-gradient(90deg,rgba(168,85,247,.32),rgba(168,85,247,.10));border:1px solid rgba(168,85,247,.55);border-radius:11px;padding:9px 12px;margin:8px 0 4px}
+#tourneyContent .tk-ck{font-size:8.5px;letter-spacing:.2em;color:var(--tk-violet-lt)}
+#tourneyContent .tk-cn{font-size:15.5px;font-weight:700;text-transform:uppercase;margin-top:2px}
+#tourneyContent .tk-cs{font-size:11.5px;color:var(--tk-muted);margin-top:2px}
+/* entrant bits */
+#tourneyContent .tk-chip{width:32px;height:32px;border-radius:10px;overflow:hidden;flex:none;background:#0D0E13;border:1.5px solid var(--tk-line2);cursor:pointer;position:relative;z-index:2;display:inline-block;vertical-align:middle}
+#tourneyContent .tk-chip img{width:100%;height:100%;object-fit:cover;object-position:22% 30%;display:block;pointer-events:none}
+#tourneyContent .tk-chip.tk-lg{width:44px;height:44px;border-radius:12px;cursor:default}
+#tourneyContent .tk-chip.tk-on{border-color:var(--tk-ec,#A855F7);box-shadow:0 0 0 1.5px var(--tk-ec,#A855F7)}
+#tourneyContent .tk-chip.tk-mono{display:inline-flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:700;color:var(--tk-silver);letter-spacing:.03em}
+#tourneyContent .tk-nm{font-size:14px;font-weight:600;color:var(--tk-white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tourneyContent .tk-nm.tk-dimnm{color:var(--tk-muted);font-size:13.5px;font-weight:400}
+#tourneyContent .tk-tag{font-size:8.5px;letter-spacing:.12em;padding:2px 5px;border-radius:4px;vertical-align:2px;margin-left:6px;white-space:nowrap;font-weight:700}
+#tourneyContent .tk-tag.tk-you{background:rgba(168,85,247,.18);color:var(--tk-violet-lt);border:1px solid rgba(168,85,247,.45)}
+#tourneyContent .tk-tag.tk-life{background:rgba(255,77,94,.14);color:var(--tk-red);border:1px solid rgba(255,77,94,.4)}
+/* lensing dim/highlight */
+#tourneyContent [data-who]{transition:opacity .25s}
+#tourneyContent.tk-lensing [data-who]{opacity:.35}
+#tourneyContent.tk-lensing [data-who].tk-lit{opacity:1;background:rgba(168,85,247,.07);background:color-mix(in srgb,var(--tk-ec) 7%,transparent);box-shadow:inset 3px 0 0 var(--tk-ec);border-radius:6px}
+/* standings (ffa) */
+#tourneyContent .tk-srow{display:flex;align-items:center;gap:9px;padding:5px 2px;border-top:1px solid var(--tk-line);cursor:pointer}
+#tourneyContent .tk-srow:first-of-type{border-top:none}
+#tourneyContent .tk-pos{font-size:18px;font-weight:700;width:20px;color:var(--tk-silver);flex:none}
+#tourneyContent .tk-who{flex:1;min-width:0}
+#tourneyContent .tk-sub{font-size:9.5px;color:var(--tk-muted);letter-spacing:.06em;margin-top:2px}
+#tourneyContent .tk-pts{font-size:20px;font-weight:700;color:var(--tk-white);text-align:right}
+#tourneyContent .tk-chev{color:var(--tk-muted);font-size:14px;flex:none;transition:transform .25s}
+#tourneyContent .tk-srow.tk-open .tk-chev{transform:rotate(90deg)}
+#tourneyContent .tk-detail{border-top:1px dashed var(--tk-line2);padding:9px 2px 6px}
+#tourneyContent .tk-dh{font-size:9px;letter-spacing:.16em;color:var(--tk-muted);margin-bottom:6px}
+#tourneyContent .tk-glog{display:flex;justify-content:space-between;font-size:11px;color:var(--tk-muted);padding:3.5px 0}
+#tourneyContent .tk-glog b{color:var(--tk-silver);font-weight:400}
+/* league / groups table */
+#tourneyContent .tk-tsub{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.16em;color:var(--tk-muted);margin:10px 0 2px;text-transform:uppercase}
+#tourneyContent .tk-lhead,#tourneyContent .tk-lrow{display:flex;align-items:center;gap:6px;padding:6px 2px}
+#tourneyContent .tk-lhead{font-size:8.5px;color:var(--tk-muted);letter-spacing:.14em;border-top:1px solid var(--tk-line)}
+#tourneyContent .tk-lrow{border-top:1px solid var(--tk-line)}
+#tourneyContent .tk-lhead .tk-c-pos,#tourneyContent .tk-lrow .tk-c-pos{width:20px;flex:none}
+#tourneyContent .tk-lrow .tk-c-pos{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:700;color:var(--tk-silver)}
+#tourneyContent .tk-lrow.tk-q .tk-c-pos{color:var(--tk-green)}
+#tourneyContent .tk-lhead .tk-c-pl,#tourneyContent .tk-lrow .tk-c-pl{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+#tourneyContent .tk-lrow .tk-c-pl .tk-chip{width:28px;height:28px;border-radius:8px}
+#tourneyContent .tk-lrow .tk-c-pl .tk-nm{font-size:12.5px}
+#tourneyContent .tk-lhead .tk-c-n,#tourneyContent .tk-lrow .tk-c-n{width:16px;flex:none;text-align:right;font-size:12.5px;color:var(--tk-silver)}
+#tourneyContent .tk-lrow .tk-c-n{color:var(--tk-muted)}
+#tourneyContent .tk-lrow .tk-c-n.tk-cpts{font-size:15px;font-weight:700;color:var(--tk-white)}
+#tourneyContent .tk-lhead .tk-c-pts,#tourneyContent .tk-lrow .tk-c-pts{width:26px}
+/* fixtures */
+#tourneyContent .tk-fx{border-top:1px solid var(--tk-line);padding:6px 2px 4px;cursor:pointer}
+#tourneyContent .tk-fx:first-of-type{border-top:none}
+#tourneyContent .tk-fx-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+#tourneyContent .tk-fx-id{font-size:9.5px;letter-spacing:.14em;color:var(--tk-muted)}
+#tourneyContent .tk-state{font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:3px 8px;border-radius:20px;border:1px solid var(--tk-line2);color:var(--tk-muted)}
+#tourneyContent .tk-state.tk-play{color:#0B1510;background:var(--tk-green);border-color:var(--tk-green)}
+#tourneyContent .tk-state.tk-final{color:var(--tk-silver)}
+#tourneyContent .tk-state.tk-series{color:var(--tk-green);border-color:rgba(74,222,128,.5)}
+#tourneyContent .tk-fline{display:flex;align-items:center;gap:9px;padding:1px 0}
+#tourneyContent .tk-fline .tk-chip{width:30px;height:30px;border-radius:9px}
+#tourneyContent .tk-fline .tk-who{display:flex;align-items:center;gap:9px}
+#tourneyContent .tk-who.tk-pad{padding-left:41px}
+#tourneyContent .tk-score{font-size:22px;font-weight:700;width:28px;text-align:right;color:var(--tk-white);flex:none}
+#tourneyContent .tk-score.tk-dim{color:rgba(244,245,247,.28)}
+#tourneyContent .tk-loser .tk-nm{color:var(--tk-muted)}
+#tourneyContent .tk-pips{display:flex;gap:4px;margin-left:6px;flex:none}
+#tourneyContent .tk-pip{width:9px;height:9px;border-radius:3px;border:1.5px solid var(--tk-line2);display:inline-block}
+#tourneyContent .tk-pip.tk-on{background:var(--tk-ec);border-color:var(--tk-ec)}
+/* series room */
+#tourneyContent .tk-room{background:#101117;border:1px solid var(--tk-line2);border-radius:12px;padding:11px 12px;margin-top:8px;cursor:default;animation:tkroomin .28s ease}
+@keyframes tkroomin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+#tourneyContent .tk-rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+#tourneyContent .tk-rl{font-size:9.5px;letter-spacing:.16em;color:var(--tk-muted)}
+#tourneyContent .tk-rs{font-size:9.5px;font-weight:700;letter-spacing:.12em;color:var(--tk-green)}
+#tourneyContent .tk-rs.tk-done{color:var(--tk-silver)}
+#tourneyContent .tk-rx{color:var(--tk-muted);font-size:13px;cursor:pointer;padding:2px 4px;background:none;border:none}
+#tourneyContent .tk-serow{display:flex;align-items:center;gap:9px;padding:4px 0}
+#tourneyContent .tk-serow .tk-who{display:flex;align-items:center;gap:9px}
+#tourneyContent .tk-bigpips{display:flex;gap:5px;flex:none}
+#tourneyContent .tk-bigpips .tk-pip{width:13px;height:13px;border-radius:4px}
+#tourneyContent .tk-snum{font-size:19px;font-weight:700;width:24px;text-align:right;flex:none}
+#tourneyContent .tk-grow{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--tk-muted);padding:5px 0;border-top:1px solid var(--tk-line)}
+#tourneyContent .tk-grow b{color:var(--tk-white);font-weight:700}
+#tourneyContent .tk-grow .tk-gw{color:var(--tk-silver)}
+#tourneyContent .tk-vnote{font-size:10px;letter-spacing:.07em;color:var(--tk-violet-lt);margin-top:9px}
+#tourneyContent .tk-dchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+#tourneyContent .tk-dchip{font-size:10px;letter-spacing:.07em;color:var(--tk-muted);border:1px solid var(--tk-line2);border-radius:20px;padding:4px 9px;white-space:nowrap}
+#tourneyContent .tk-dchip b{color:var(--tk-white);font-weight:700}
+#tourneyContent .tk-lens .tk-dchips{margin:0 0 9px}
+#tourneyContent .tk-lens .tk-dchip{font-size:10.5px;padding:5px 10px}
+#tourneyContent .tk-cta{display:block;text-align:center;background:var(--tk-violet);color:#fff;font-weight:700;font-size:13px;letter-spacing:.05em;border-radius:11px;padding:10px;margin-top:10px;text-transform:uppercase;cursor:pointer;text-decoration:none}
+#tourneyContent .tk-cta.tk-ghost{background:transparent;border:1px solid rgba(168,85,247,.55);color:var(--tk-violet-lt)}
+/* foot + legend */
+#tourneyContent .tk-foot{margin-top:2px;padding-top:9px;font-size:9.5px;color:var(--tk-muted);letter-spacing:.08em;display:flex;justify-content:space-between}
+#tourneyContent .tk-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 7px;border-top:1px solid var(--tk-line);margin-top:9px;padding-top:7px;font-size:9.5px;letter-spacing:.02em;color:var(--tk-muted);line-height:1.35;text-align:center}
+#tourneyContent .tk-leg{white-space:nowrap}
+#tourneyContent .tk-leg b{color:var(--tk-white);font-weight:700}
+/* states */
+#tourneyContent .tk-ghost{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:14px;margin-bottom:12px}
+#tourneyContent .tk-gb{height:12px;border-radius:6px;background:rgba(217,222,230,.09)}
+#tourneyContent .tk-gb.tk-w40{width:40%}#tourneyContent .tk-gb.tk-w60{width:60%}#tourneyContent .tk-gb.tk-w80{width:80%}
+#tourneyContent .tk-grow2{display:flex;gap:10px;align-items:center;margin-top:14px}
+#tourneyContent .tk-gc{width:32px;height:32px;border-radius:10px;background:rgba(217,222,230,.09);flex:none}
+#tourneyContent .tk-empty{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:22px 16px;text-align:center;color:var(--tk-muted);font-size:13.5px;margin-bottom:11px}
+#tourneyContent .tk-flash{animation:tkflash 1.2s ease}
+@keyframes tkflash{0%{background:rgba(74,222,128,.22)}100%{background:transparent}}
+#tourneyContent .tk-newtag{font-size:8px;font-weight:700;letter-spacing:.1em;color:#0B1510;background:var(--tk-green);border-radius:4px;padding:2px 4px;margin-left:6px;vertical-align:2px}
+@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}}
 </style>
 
   <section id="tourney"><div class="wrap">
-    <div class="sec-head reveal">
-      <div class="label peri">Tourney</div>
-      <h2>Live <span class="serif">tournaments.</span></h2>
-      <p>Active CRCMZ tournaments — brackets, scores, standings.</p>
+    <div class="tk-head">
+      <div><div class="tk-kick">CRCMZ</div><h2 class="tk-title">Live</h2></div>
+      <div class="tk-fresh" id="ttFresh"><span class="tk-fdot"></span><span id="ttFreshTx">&mdash;</span></div>
     </div>
-    <div id="tourneyContent" class="reveal" style="margin-top:20px"></div>
-    <div style="margin-top:28px;text-align:center" class="reveal">
-      <a href="https://app.crcmz.me/app/tourney" target="_blank" rel="noopener"
-         style="display:inline-block;padding:13px 28px;border-radius:50px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:.01em">
-        Full Experience →
-      </a>
-    </div>
+    <div id="tourneyContent" class="reveal"></div>
   </div></section>
   </div>
   <div class="view amb-paused" id="view-buds" hidden="">
@@ -3429,49 +3561,610 @@ document.getElementById('fcReset').addEventListener('click',function(){
 });
 fcRenderAll();
 } // end legacy FIFA block
-// ── Tourney live feed (app.crcmz.me) ─────────────────────────────────────────
+// ── Tourney live feed (app.crcmz.me) — 9R2 lean kit build ──────────────
+// Data contract unchanged: GET /api/tourney on view entry + every 20s,
+// #tourneyContent mount, #tourneyPrevLine preview. Everything visual is
+// the 9R2 lean design (tourney9r2-lean.html): fixture list + series rooms,
+// entrant lens, diff-derived bug strip, destination chips instead of
+// prose. Expansion/lens state is STATE-KEYED (not DOM-keyed) so the 20s
+// re-render preserves an open room and an active lens across polls and
+// updates their contents in place — a poll never slams a room shut.
 (function(){
   var el=document.getElementById('tourneyContent');
   var prevLine=document.getElementById('tourneyPrevLine');
+  var freshBox=document.getElementById('ttFresh');
+  var freshTx=document.getElementById('ttFreshTx');
   var APP='https://app.crcmz.me/app/tourney';
-  function h(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-  function roundName(st,r,n){if(st==='GF')return r===1?'Grand final':'Final reset';if(st==='P')return '3rd place';if(st==='L')return r===n?'Losers final':'Losers R'+r;var left=n-r;return left===0?'Final':left===1?'Semis':left===2?'Quarters':'Round of '+Math.pow(2,left+1)}
-  function side(m,s,E){var id=s===1?m.e1:m.e2,e=E[id],w=m.status==='played'&&m.winner_id&&m.winner_id===id,l=m.status==='played'&&m.winner_id&&m.winner_id!==id,sc=s===1?m.score1:m.score2,pn=s===1?m.pens1:m.pens2;
-    return '<div class="tt-side'+(w?' w':'')+(l?' l':'')+'"><i style="background:'+h(e?e.color:'transparent')+'"></i><span>'+h(e?e.name:((s===1?m.wait1:m.wait2)||(m.status==='bye'?'Bye':'TBD')))+'</span>'+(m.status==='played'?'<b>'+h(sc)+(pn!=null?' <small>('+h(pn)+')</small>':'')+'</b>':'')+(m.status==='pending'&&e&&(m.partial||[]).length?'<b class="lv">'+m.partial.filter(function(g){return s===1?g.s1>g.s2:g.s2>g.s1}).length+'</b>':'')+'</div>'}
-  function card(m,E,champ){var p=(m.partial||[]),ser=m.playable&&p.length?'<div class="tt-ser">Series '+p.filter(function(g){return g.s1>g.s2}).length+'–'+p.filter(function(g){return g.s2>g.s1}).length+'</div>':'';return '<div class="tt-m'+(m.playable?' up':'')+(m.status==='bye'?' bye':'')+(champ&&m.winner_id===champ&&!m.next_id?' gold':'')+'">'+side(m,1,E)+side(m,2,E)+ser+'</div>'}
-  function bracket(t,st,E,title){var ms=t.matches.filter(function(m){return m.stage===st&&m.status!=='void'});if(!ms.length)return '';
-    var rs=[];ms.forEach(function(m){if(rs.indexOf(m.round)<0)rs.push(m.round)});rs.sort(function(a,b){return a-b});
-    return (title?'<div class="tt-sub">'+h(title)+'</div>':'')+'<div class="tt-br">'+rs.map(function(r){var col=ms.filter(function(m){return m.round===r}).sort(function(a,b){return a.slot-b.slot});
-      return '<div class="tt-col"><div class="tt-rh">'+h(roundName(st,r,rs[rs.length-1]))+'</div><div class="tt-cm">'+col.map(function(m){return card(m,E,t.champion_id)}).join('')+'</div></div>'}).join('')+'</div>'}
-  function table(t,rows,E,g,q){return '<div class="tt-tb">'+(g!==undefined?'<div class="tt-sub">'+(g?'Group '+h(g):'Table')+'</div>':'')+'<table><thead><tr><th>#</th><th class="n">'+(t.entrants.length&&t.entrants[0].members.length>1?'Team':'Player')+'</th><th>P</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>Pts</th></tr></thead><tbody>'
-    +rows.map(function(r){var e=E[r.entrant_id]||{};return '<tr class="'+(q&&r.pos<=q?'q':'')+'"><td>'+r.pos+'</td><td class="n"><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.f-r.a>0?'+':'')+(r.f-r.a)+'</td><td><b>'+r.pts+'</b></td></tr>'}).join('')+'</tbody></table></div>'}
-  function board(t,E){var top=Math.max.apply(null,[1].concat(t.leaderboard.map(function(r){return r.points})));
-    return '<ol class="tt-lb">'+t.leaderboard.map(function(r){var e=E[r.entrant_id]||{};return '<li><span class="p">'+r.pos+'</span><span class="nm"><span><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</span><span class="bar"><span style="width:'+(r.points/top*100)+'%;background:'+h(e.color)+'"></span></span></span><span class="pt"><b>'+r.points+'</b> pts<small>'+r.kills+' kills · '+r.wins+' W</small></span></li>'}).join('')+'</ol>'}
-  function prog(t){var p=t.progress,bo=t.settings.legs===2?2:(t.settings.best_of||1);if(t.kind==='ffa')return p.played+'/'+p.total+' games';var u=bo>1?'series':(p.total===1?'match':'matches'),g=p.games||0;return p.played+'/'+p.total+' '+u+(bo>1&&g?' · '+g+' game'+(g===1?'':'s')+' (best of '+bo+')':'')}
-  function render(t){var E={};t.entrants.forEach(function(e){E[e.id]=e});var champ=E[t.champion_id];var body='';
-    if(t.format==='ffa')body=board(t,E);
-    else if(t.format==='league')body=table(t,t.tables['']||[],E);
-    else{if(t.format==='groups')body='<div class="tt-groups">'+Object.keys(t.tables).sort().map(function(g){return table(t,t.tables[g],E,g,t.settings.advance)}).join('')+'</div>'+bracket(t,'K',E,'Knockout');
-      else body=bracket(t,'W',E,t.format==='double_elim'?'Winners bracket':'')+(t.format==='double_elim'?bracket(t,'L',E,'Losers bracket'):'');
-      var fin=t.matches.filter(function(m){return (m.stage==='GF'||m.stage==='P')&&m.status!=='void'});
-      if(fin.length)body+='<div class="tt-fin">'+fin.map(function(m){return '<div><div class="tt-rh">'+h(roundName(m.stage,m.round,1))+'</div>'+card(m,E,t.champion_id)+'</div>'}).join('')+'</div>'}
-    var pct=t.progress.total?Math.round(t.progress.played/t.progress.total*100):0;
-    return '<article class="tt" style="--gc:'+h(t.game_color)+'"><header><span class="tt-game">'+h(t.game_label)+' · '+h(t.mode_label)+' · '+h(t.format_label)+'</span><h3>'+h(t.name)+'</h3>'
-      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+prog(t)+'</span></div></header>'
-      +(champ?'<div class="tt-champ">🏆 <b>'+h(champ.name)+'</b> '+(champ.members.length>1?'are':'is')+' champion</div>':'')
-      +body+'<a class="tt-open" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ →</a></article>'}
+  var VIOLET='#A855F7', FALLBACK='#A7A4B2';
+  var REDUCED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ---------- state ---------- */
+  var S={ payload:null, feed:'loading', lastOk:'',
+          room:null,   // match key: tid|match-stamp
+          lens:null,   // entrant id
+          log:null,    // game-log key: tid|entrantId
+          strip:null,  // {kind,label,text}
+          flash:[],    // keys flashed on this render (or NEW-tagged)
+          mePerson:null };
   var timer=null;
+
+  /* ---------- small helpers ---------- */
+  function h(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function hex(c,d){return (typeof c==='string'&&/^#[0-9a-fA-F]{6}$/.test(c))?c:(d||FALLBACK)}
+  function surname(name){var p=String(name||'').trim().split(/\s+/);return (p[p.length-1]||'').toUpperCase()}
+  function clockHM(){var d=new Date();function z(n){return (n<10?'0':'')+n}return z(d.getHours())+':'+z(d.getMinutes())}
+  function boOf(t){var s=t.settings||{};return s.legs===2?2:(s.best_of||1)}
+  function needOf(t){var bo=boOf(t);return bo>1?Math.floor(bo/2)+1:1}
+  function partialScore(m){var a=0,b=0;(m.partial||[]).forEach(function(g){if(g.s1>g.s2)a++;else if(g.s2>g.s1)b++});return [a,b]}
+  function seriesScore(m){if(m.status==='played'&&typeof m.score1==='number'&&typeof m.score2==='number')return [m.score1,m.score2];return partialScore(m)}
+  function entMap(t){var E={};(t.entrants||[]).forEach(function(e){E[e.id]=e});return E}
+  function nameOf(E,id){return E[id]?E[id].name:''}
+  function isBracket(t){return t.format!=='ffa'&&t.format!=='league'&&t.format!=='groups'}
+  function gfMatch(t){var ms=(t.matches||[]).filter(function(m){return m.stage==='GF'&&m.status!=='void'});ms.sort(function(a,b){return a.round-b.round});return ms[0]||null}
+
+  /* ---------- crew logos: entrant -> self-hosted logo by identity ------
+     Feed names/ids vary; match on id + name + members, alias spirit of
+     the server's PERSON_ALIASES. Brendan Campbell IS Deception (owner-
+     confirmed) — checked before Soup because "BrendanSoup" contains it. */
+  var LOGOS={ samad:{img:'samad',tag:'ASAMAD89'}, soup:{img:'soup',tag:'INTERESTINGSOUP'},
+              moose:{img:'moose',tag:'THEMOOSECOMPANY'}, kap:{img:'kap',tag:'KAPTAAN'},
+              decep:{img:'decep',tag:'DECEPTION'}, killer:{img:'killer',tag:'KILLERX096'} };
+  var LOGO_RULES=[ ['decep',['deception','brendan','brendansoup']],
+                   ['samad',['abdulsamad','asamad89','asamad','samad']],
+                   ['soup',['interestingsoup','moiiz41510','moiz','soup']],
+                   ['moose',['themoosecompany','thegoopcompany','mutasif','moose']],
+                   ['kap',['kaptaan','kap']],
+                   ['killer',['killerx096','killer']] ];
+  function logoKey(e){
+    if(!e)return null;
+    var cands=[e.id,e.name].concat(e.members||[]).map(function(x){return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'')});
+    for(var r=0;r<LOGO_RULES.length;r++){
+      for(var c=0;c<cands.length;c++){
+        if(!cands[c])continue;
+        for(var a=0;a<LOGO_RULES[r][1].length;a++){
+          var al=LOGO_RULES[r][1][a];
+          if(cands[c]===al||(al.length>=4&&cands[c].indexOf(al)>=0))return LOGO_RULES[r][0];
+        }
+      }
+    }
+    return null;
+  }
+  function meEntrantId(list){
+    var want={Mutasif:'moose',Moiz:'soup',Samad:'samad',Brendan:'decep'}[S.mePerson];
+    if(!want)return null;
+    var found=null;
+    (list||[]).forEach(function(t){(t.entrants||[]).forEach(function(e){if(logoKey(e)===want)found=e.id})});
+    return found;
+  }
+  function youTag(eid,st){return st.meId&&eid===st.meId?'<span class="tk-tag tk-you">YOU</span>':''}
+  function chip(eid,e,extra){
+    var k=logoKey(e),col=hex(e?e.color:'');
+    if(k)return '<span class="tk-chip '+(extra||'')+'" data-lens="'+h(eid)+'" style="--tk-ec:'+col+'"><img src="assets/'+LOGOS[k].img+'.webp" alt=""></span>';
+    var init=surname(e?e.name:'?').slice(0,2)||'?';
+    return '<span class="tk-chip tk-mono '+(extra||'')+'" data-lens="'+h(eid)+'" style="--tk-ec:'+col+'">'+h(init)+'</span>';
+  }
+  function chipStill(eid,e){
+    var k=logoKey(e),col=hex(e?e.color:'');
+    if(k)return '<span class="tk-chip tk-lg" style="--tk-ec:'+col+'"><img src="assets/'+LOGOS[k].img+'.webp" alt=""></span>';
+    var init=surname(e?e.name:'?').slice(0,2)||'?';
+    return '<span class="tk-chip tk-lg tk-mono" style="--tk-ec:'+col+'">'+h(init)+'</span>';
+  }
+
+  /* ---------- fixture order, labels, destinations ---------- */
+  var STAGE_ORDER={W:0,L:1,P:2,K:3,GF:4};
+  function fixtureList(t){
+    var ms=(t.matches||[]).filter(function(m){return m.status!=='void'});
+    ms.sort(function(a,b){
+      var sa=STAGE_ORDER[a.stage]!=null?STAGE_ORDER[a.stage]:5, sb=STAGE_ORDER[b.stage]!=null?STAGE_ORDER[b.stage]:5;
+      if(sa!==sb)return sa-sb;
+      if(a.round!==b.round)return a.round-b.round;
+      return (a.slot||0)-(b.slot||0);
+    });
+    return ms;
+  }
+  function mkey(t,m){return t.id+'|'+(m.id!=null?('i'+m.id):(m.stage+':'+m.round+':'+m.slot))}
+  function byKeyMap(t,list){var map={};list.forEach(function(m){map[mkey(t,m)]=m});return map}
+  function labelMap(t,list){
+    var maxW=0;list.forEach(function(m){if(m.stage==='W'&&m.round>maxW)maxW=m.round});
+    var wIdx=0,map={};
+    list.forEach(function(m){
+      var L;
+      if(m.stage==='W'){ if(m.round===maxW)L='W FINAL'; else { wIdx++; L='M'+wIdx; } }
+      else if(m.stage==='L')L='LOSERS R'+m.round;
+      else if(m.stage==='GF')L=m.round>1?'GF RESET':'GRAND FINAL';
+      else if(m.stage==='P')L='3RD PLACE';
+      else if(m.stage==='K')L='KNOCKOUT';
+      else L=(m.stage||'MATCH')+' R'+m.round;
+      map[mkey(t,m)]=L;
+    });
+    var counts={};Object.keys(map).forEach(function(k){counts[map[k]]=(counts[map[k]]||0)+1});
+    list.forEach(function(m){var k=mkey(t,m);if(counts[map[k]]>1)map[k]=map[k]+' · '+(m.slot||'')});
+    return map;
+  }
+  function destFor(t,m,labels,byKey){
+    var hasGF=(t.matches||[]).some(function(x){return x.stage==='GF'&&x.status!=='void'});
+    var hasL=(t.matches||[]).some(function(x){return x.stage==='L'&&x.status!=='void'});
+    var maxL=0;(t.matches||[]).forEach(function(x){if(x.stage==='L'&&x.round>maxL)maxL=x.round});
+    var win=null,lose=null;
+    if(m.next_id!=null){var tgt=byKey[t.id+'|i'+m.next_id];if(tgt)win=labels[mkey(t,tgt)]}
+    if(!win){
+      if(m.stage==='GF')win='CHAMPION';
+      else if(m.stage==='P')win='3RD';
+      else if(m.stage==='W'&&labels[mkey(t,m)]!=='W FINAL')win='W FINAL';
+      else win=hasGF?'GRAND FINAL':'CHAMPION';
+    }
+    if(m.stage==='GF')lose='2ND';
+    else if(m.stage==='L'||m.stage==='P'||m.stage==='K')lose='OUT';
+    else if(m.stage==='W')lose=hasL?('LOSERS R'+Math.min(m.round,maxL)):'OUT';
+    else lose='OUT';
+    return {win:win,lose:lose};
+  }
+  function destChips(t,m,labels,byKey){
+    var R=destFor(t,m,labels,byKey);
+    if(m.status==='played'&&m.winner_id){
+      var E=entMap(t),lid=m.winner_id===m.e1?m.e2:m.e1;
+      return '<div class="tk-dchips"><span class="tk-dchip"><b>'+h(surname(nameOf(E,m.winner_id)))+'</b> &rarr; '+h(R.win)+'</span><span class="tk-dchip"><b>'+h(surname(nameOf(E,lid)))+'</b> &rarr; '+h(R.lose)+'</span></div>';
+    }
+    return '<div class="tk-dchips"><span class="tk-dchip"><b>WIN</b> &rarr; '+h(R.win)+'</span><span class="tk-dchip"><b>LOSE</b> &rarr; '+h(R.lose)+'</span></div>';
+  }
+  function slotName(m,side){var id=side===1?m.e1:m.e2;if(id)return null;return side===1?m.wait1:m.wait2}
+  function slotShort(t,m,side,E){var id=side===1?m.e1:m.e2;if(id)return surname(nameOf(E,id));return (side===1?m.wait1:m.wait2)||'TBD'}
+  function lossesIn(t,eid){var n=0;(t.matches||[]).forEach(function(m){if(m.status==='played'&&m.winner_id&&m.winner_id!==eid&&(m.e1===eid||m.e2===eid))n++});return n}
+  function arrivalNote(t,m){
+    var notes=[],E=entMap(t);
+    [m.e1,m.e2].forEach(function(eid){
+      if(!eid)return;
+      (t.matches||[]).forEach(function(f){
+        if(f.status!=='played'||!f.winner_id)return;
+        var ss=seriesScore(f);
+        if(f.next_id!=null&&m.id!=null&&String(f.next_id)===String(m.id)&&f.winner_id===eid)
+          notes.push('TOOK '+labelMap(t,fixtureList(t))[mkey(t,f)]+' '+ss[0]+'–'+ss[1]);
+        else if(m.stage==='L'&&f.stage==='W'&&f.winner_id!==eid&&(f.e1===eid||f.e2===eid)){
+          var mine=eid===f.e1?ss[0]:ss[1],theirs=eid===f.e1?ss[1]:ss[0];
+          notes.push('LOST '+labelMap(t,fixtureList(t))[mkey(t,f)]+' '+mine+'–'+theirs);
+        }
+      });
+    });
+    return notes.length?notes.join(' · '):null;
+  }
+
+  /* ---------- bug strip: derived from the payload diff ---------- */
+  function deriveStrip(prevList,nextList){
+    if(!prevList)return null;
+    var ev=[];
+    function findTour(list,id){for(var i=0;i<(list||[]).length;i++)if(list[i].id===id)return list[i];return null}
+    nextList.forEach(function(t){
+      var pt=findTour(prevList,t.id);if(!pt)return;
+      var E=entMap(t),list=fixtureList(t),labels=labelMap(t,list),byKey=byKeyMap(t,list);
+      if(t.champion_id&&!pt.champion_id){
+        var gf=gfMatch(t),ss=gf?seriesScore(gf):[0,0];
+        ev.push({p:1,kind:'champion',label:'CHAMPION',text:surname(nameOf(E,t.champion_id))+' · GF '+ss[0]+'–'+ss[1],flash:['strip','band-'+t.id]});
+      }
+      list.forEach(function(m){
+        var pm=null;(pt.matches||[]).forEach(function(x){if(mkey(pt,x)===mkey(t,m))pm=x});
+        if(!pm)return;
+        var lbl=labels[mkey(t,m)],fk='fx-'+mkey(t,m);
+        if(pm.status!=='played'&&m.status==='played'&&m.stage!=='GF'){
+          var ss=seriesScore(m),lid=m.winner_id===m.e1?m.e2:m.e1,R=destFor(t,m,labels,byKey);
+          var cons=(m.stage==='L'||m.stage==='P')?' → OUT':' → '+R.lose;
+          ev.push({p:2,kind:'latest',label:'LATEST',text:lbl+' FINAL · '+surname(nameOf(E,m.winner_id))+' '+ss[0]+'–'+ss[1]+' '+surname(nameOf(E,lid))+cons,flash:['strip',fk]});
+        }
+        if(m.status!=='played'&&(m.partial||[]).length>(pm.partial||[]).length){
+          var s2=partialScore(m);
+          if(s2[0]===s2[1])ev.push({p:3,kind:'live',label:'LIVE',text:lbl+' · TIED '+s2[0]+'–'+s2[1]+' · G'+(m.partial.length+1)+' NEXT',flash:['strip',fk,'room-'+mkey(t,m)+'-g'+m.partial.length]});
+          else ev.push({p:3,kind:'live',label:'LIVE',text:lbl+' · '+surname(nameOf(E,s2[0]>s2[1]?m.e1:m.e2))+' '+s2[0]+'–'+s2[1]+' · G'+(m.partial.length+1)+' NEXT',flash:['strip',fk,'room-'+mkey(t,m)+'-g'+m.partial.length]});
+        }
+        if(!pm.playable&&m.playable&&m.status!=='played'&&!(m.partial||[]).length){
+          ev.push({p:4,kind:'upnext',label:'UP NEXT',text:lbl+' · '+slotShort(t,m,1,E)+' V '+slotShort(t,m,2,E),flash:['strip',fk]});
+        }
+      });
+      if(t.format==='ffa'&&pt.format==='ffa'&&t.progress&&pt.progress&&t.progress.played>pt.progress.played){
+        var rows=t.leaderboard||[],prows=pt.leaderboard||[];
+        if(rows.length){
+          var lead=rows[0],plead=prows[0];
+          if(plead&&plead.entrant_id!==lead.entrant_id)
+            ev.push({p:5,kind:'latest',label:'LATEST',text:String(t.name).toUpperCase()+' · LEAD '+surname(nameOf(E,lead.entrant_id))+' '+lead.points+' PTS',flash:['strip','ffa-'+t.id+'-'+lead.entrant_id]});
+          else
+            ev.push({p:2,kind:'latest',label:'LATEST',text:String(t.name).toUpperCase()+' · G'+t.progress.played+' IN · '+surname(nameOf(E,lead.entrant_id))+' '+lead.points+' PTS',flash:['strip','ffa-'+t.id+'-'+lead.entrant_id]});
+        }
+      }
+    });
+    if(!ev.length)return null;
+    ev.sort(function(a,b){return a.p-b.p});
+    return ev[0];
+  }
+  function statusStrip(list){
+    var play=[];
+    (list||[]).forEach(function(t){
+      if(!isBracket(t))return;
+      var fl2=fixtureList(t),labels=labelMap(t,fl2);
+      fl2.forEach(function(m){if(m.playable&&!(m.partial||[]).length)play.push(labels[mkey(t,m)]+' PLAYABLE')});
+    });
+    var suffix='',ffa=(list||[]).filter(function(t){return t.format==='ffa'})[0];
+    if(ffa&&ffa.progress)suffix=' · '+ffa.progress.played+'/'+ffa.progress.total;
+    if(!(list||[]).length)return {kind:'status',label:'STATUS',text:'NO TOURNAMENTS'};
+    return {kind:'status',label:'STATUS',text:(play.length?play.join(' · '):'ALL WAITING')+suffix};
+  }
+
+  /* ---------- lens: next + chips + stat lines, generated ---------- */
+  function ffaStatLine(t,row){
+    var rows=(t.leaderboard||[]).slice().sort(function(a,b){return a.pos-b.pos});
+    var lead=rows[0],p2=rows[1],p=t.progress||{played:0,total:0},n=rows.length;
+    var s='FFA P'+row.pos+'/'+n+' · '+row.points+' PTS';
+    if(p.played===0)return s+' · 0/'+p.total+' PLAYED';
+    if(row.pos===1&&p2)s+=' · +'+(row.points-p2.points)+' LEAD';
+    else if(row.pos>1&&lead)s+=' · −'+(lead.points-row.points);
+    return s+' · '+(p.total-p.played)+' LEFT';
+  }
+  function leagueStatLine(t,row,g){
+    var rows=((t.tables||{})[g]||[]).slice().sort(function(a,b){return a.pos-b.pos});
+    var top=rows[0];
+    var s=(g?('GROUP '+String(g).toUpperCase()+' · '):'LEAGUE ')+'P'+row.pos+' · '+row.pts+' PTS · '+row.w+'W '+row.d+'D '+row.l+'L';
+    if(row.pos===1)s+=' · TOP';else if(top)s+=' · −'+(top.pts-row.pts);
+    var adv=t.settings&&t.settings.advance;
+    if(t.format==='groups'&&adv){
+      if(row.pos<=adv){var below=rows[adv];s+=' · IN CUT'+(below?' +'+(row.pts-below.pts):'');}
+      else{var cut=rows[adv-1];s+=' · OUT CUT'+(cut?' −'+(cut.pts-row.pts):'');}
+    }
+    return s;
+  }
+  function lensInfo(eid,list){
+    var info={name:'',tag:'',color:VIOLET,next:'',chips:[],stats:[],champion:false};
+    list.forEach(function(t){var e=entMap(t)[eid];if(e&&!info.name){info.name=e.name;info.color=hex(e.color,VIOLET);var k=logoKey(e);info.tag=k?LOGOS[k].tag:''}});
+    var bracketNext=null,outLabel=null;
+    list.forEach(function(t){
+      if(!isBracket(t))return;
+      var E=entMap(t);if(!E[eid])return;
+      var fl2=fixtureList(t),labels=labelMap(t,fl2);
+      if(t.champion_id){
+        if(t.champion_id===eid&&!info.champion){
+          info.champion=true;var gf=gfMatch(t),ss=gf?seriesScore(gf):[0,0];
+          info.next='CHAMPION · GF '+ss[0]+'–'+ss[1];info.chips=['★ CHAMPION'];
+        }
+        return;
+      }
+      var losses=lossesIn(t,eid),maxL=t.format==='double_elim'?2:1;
+      if(losses>=maxL){
+        var last=null;fl2.forEach(function(m){if(m.status==='played'&&m.winner_id&&m.winner_id!==eid&&(m.e1===eid||m.e2===eid))last=m});
+        if(last&&!outLabel)outLabel='OUT · '+labels[mkey(t,last)];
+        return;
+      }
+      for(var i=0;i<fl2.length;i++){
+        var m=fl2[i];
+        if(m.status!=='played'&&m.status!=='bye'&&(m.e1===eid||m.e2===eid)){
+          if(!bracketNext)bracketNext={t:t,m:m,labels:labels,byKey:byKeyMap(t,fl2),lives:maxL-losses};
+          break;
+        }
+      }
+    });
+    if(!info.champion&&bracketNext){
+      var t=bracketNext.t,m=bracketNext.m,E=entMap(t);
+      var oppId=m.e1===eid?m.e2:m.e1;
+      var opp=oppId?h(surname(nameOf(E,oppId))):h((m.e1===eid?m.wait2:m.wait1)||'TBD');
+      var nx=h(bracketNext.labels[mkey(t,m)])+' V '+opp;
+      if((m.partial||[]).length){var ss2=partialScore(m);nx+=' · '+ss2[0]+'–'+ss2[1]}
+      else if(m.playable)nx+=' · <span class="tk-play">PLAYABLE</span>';
+      else nx+=' · WAIT';
+      info.next=nx;
+      var R=destFor(t,m,bracketNext.labels,bracketNext.byKey);
+      info.chips=['WIN → '+R.win,'LOSE → '+R.lose];
+      if(t.format==='double_elim')info.stats.push('LIVES '+bracketNext.lives);
+    } else if(!info.champion&&outLabel){
+      info.next=outLabel;
+    }
+    list.forEach(function(t){
+      var E=entMap(t);if(!E[eid])return;
+      if(t.format==='ffa'){
+        var row=(t.leaderboard||[]).filter(function(r){return r.entrant_id===eid})[0];
+        if(row){
+          info.stats.push(ffaStatLine(t,row));
+          if(!info.next&&!info.champion){
+            var p=t.progress||{played:0,total:0};
+            info.next=p.played<p.total?('G'+(p.played+1)+' · '+String(t.name).toUpperCase()):'SERIES COMPLETE';
+          }
+        }
+      } else if(t.format==='league'||t.format==='groups'){
+        var tbls=t.tables||{};
+        Object.keys(tbls).forEach(function(g){
+          var row=(tbls[g]||[]).filter(function(r){return r.entrant_id===eid})[0];
+          if(row)info.stats.push(leagueStatLine(t,row,g));
+        });
+      }
+    });
+    if(!info.next&&!info.champion)info.next='TABLE ONLY · NO FIXTURE IN FEED';
+    return info;
+  }
+
+  /* ---------- shared render helpers ---------- */
+  function fl(key){return (!REDUCED&&S.flash.indexOf(key)>=0)?' tk-flash':''}
+  function ntag(key){return (REDUCED&&S.flash.indexOf(key)>=0)?'<span class="tk-newtag">NEW</span>':''}
+  function lit(eid){return S.lens===eid?' tk-lit':''}
+  function pips(m,side,need,eid,E,big){
+    var ss=seriesScore(m),mine=side===1?ss[0]:ss[1],out='';
+    for(var i=0;i<need;i++)out+='<span class="tk-pip'+(i<mine?' tk-on':'')+'" style="--tk-ec:'+hex(eid&&E[eid]?E[eid].color:'')+'"></span>';
+    return '<span class="'+(big?'tk-bigpips':'tk-pips')+'">'+out+'</span>';
+  }
+  function fxState(m){
+    if(m.status==='played')return '<span class="tk-state tk-final">FINAL</span>';
+    if((m.partial||[]).length){var ss=partialScore(m);return '<span class="tk-state tk-series">SERIES '+ss[0]+'–'+ss[1]+'</span>'}
+    if(m.playable)return '<span class="tk-state tk-play">PLAYABLE</span>';
+    return '';
+  }
+  function roomState(m){
+    if(m.status==='played')return {t:'FINAL',done:true};
+    if((m.partial||[]).length){var ss=partialScore(m);return {t:ss[0]===ss[1]?('SERIES TIED '+ss[0]+'–'+ss[1]):('LIVE · GAME '+(m.partial.length+1)),done:false}}
+    if(m.playable)return {t:'UP NEXT',done:false};
+    return {t:'WAITING',done:true};
+  }
+  function champBand(t,E,st){
+    if(!t.champion_id||!E[t.champion_id])return '';
+    var sub='',gf=gfMatch(t);
+    if(gf&&gf.status==='played'&&gf.winner_id){
+      var ss=seriesScore(gf),lid=gf.winner_id===gf.e1?gf.e2:gf.e1;
+      sub='GF '+ss[0]+'–'+ss[1]+' V '+surname(nameOf(E,lid));
+    }
+    return '<div class="tk-champband'+fl('band-'+t.id)+'" data-band="'+h(t.id)+'"><div class="tk-ck">★ CHAMPION</div><div class="tk-cn">'+h(E[t.champion_id].name)+'</div>'+(sub?'<div class="tk-cs">'+h(sub)+'</div>':'')+'</div>';
+  }
+  function metaFor(t){
+    var g=String(t.game_label||'').toUpperCase(),abbr=g.indexOf('DUTY')>=0?'COD':g;
+    if(t.format==='ffa')return abbr+' · FFA';
+    var mode=String(t.mode_label||'').toUpperCase();
+    return abbr==='COD'?mode:(abbr+' · '+mode);
+  }
+  function progFrac(t){
+    var p=t.progress||{played:0,total:0},s=p.played+'/'+p.total;
+    if(t.format==='ffa'&&p.played>0&&p.played<p.total)s+=' · NEXT G'+(p.played+1);
+    return s;
+  }
+  function cardHead(t){
+    var fin=t.status!=='active';
+    return '<div class="tk-tc-head"><div><div class="tk-tc-name">'+h(t.name)+'</div><div class="tk-tc-meta"><span class="tk-gdot"></span>'+h(metaFor(t))+'</div></div>'
+      +(fin?'<div class="tk-live tk-fin"><i></i>FINISHED</div>':'<div class="tk-live"><i></i>LIVE</div>')+'</div>';
+  }
+
+  /* ---------- cards ---------- */
+  function gameLog(t,r){
+    var p=t.progress||{played:0,total:0},out='';
+    for(var g=1;g<=p.total;g++){
+      var note='—';
+      if(g<=p.played)note=(p.played===1)?(r.kills+' KILLS'+(r.wins?' · W':'')):'✓';
+      out+='<div class="tk-glog"><span>G'+g+'</span><b>'+h(note)+'</b></div>';
+    }
+    return out;
+  }
+  function ffaCard(t,st){
+    var E=entMap(t);
+    var rows=(t.leaderboard||[]).map(function(r){
+      var e=E[r.entrant_id]||{name:'—',color:''},eid=r.entrant_id,lk=t.id+'|'+eid;
+      var detail='';
+      if(st.log===lk)detail='<div class="tk-detail"><div class="tk-dh">GAME LOG</div>'+gameLog(t,r)+'</div>';
+      return '<div class="tk-srow'+(st.log===lk?' tk-open':'')+lit(eid)+fl('ffa-'+t.id+'-'+eid)+'" data-who="'+h(eid)+'" data-row="'+h(eid)+'" data-tid="'+h(t.id)+'" style="--tk-ec:'+hex(e.color)+'">'
+        +'<span class="tk-pos">'+h(r.pos)+'</span>'+chip(eid,e)
+        +'<span class="tk-who"><span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)
+        +'<div class="tk-sub">'+h(r.kills)+'K\u00b7'+h(r.wins)+'W</div></span>'
+        +'<span class="tk-pts">'+h(r.points)+'</span><span class="tk-chev">›</span></div>'+detail;
+    }).join('');
+    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+rows
+      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
+  }
+  function tableHTML(t,rows,E,g,st){
+    var adv=t.settings&&t.settings.advance;
+    var team=t.entrants&&t.entrants.length&&t.entrants[0].members&&t.entrants[0].members.length>1;
+    var head='<div class="tk-lhead"><span class="tk-c-pos">POS</span><span class="tk-c-pl">'+(team?'TEAM':'PLAYER')+'</span><span class="tk-c-n">P</span><span class="tk-c-n">W</span><span class="tk-c-n">D</span><span class="tk-c-n">L</span><span class="tk-c-n tk-c-pts">PTS</span></div>';
+    var body=rows.map(function(r){
+      var e=E[r.entrant_id]||{name:'—',color:''},eid=r.entrant_id;
+      var q=t.format==='groups'&&adv&&r.pos<=adv;
+      return '<div class="tk-lrow'+(q?' tk-q':'')+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-c-pos">'+h(r.pos)+'</span>'
+        +'<span class="tk-c-pl">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)+'</span>'
+        +'<span class="tk-c-n">'+h(r.p)+'</span><span class="tk-c-n">'+h(r.w)+'</span><span class="tk-c-n">'+h(r.d)+'</span><span class="tk-c-n">'+h(r.l)+'</span>'
+        +'<span class="tk-c-n tk-cpts tk-c-pts">'+h(r.pts)+'</span></div>';
+    }).join('');
+    return (g!==''?'<div class="tk-tsub">GROUP '+h(String(g).toUpperCase())+'</div>':'')+head+body;
+  }
+  function roomHTML(t,m,labels,byKey,st){
+    var E=entMap(t),rs=roomState(m),ss=seriesScore(m),bo=boOf(t),need=needOf(t),ssP=partialScore(m);
+    var sides=[1,2].map(function(s){
+      var eid=s===1?m.e1:m.e2;
+      if(!eid){
+        var snm=slotName(m,s)||'TBD';
+        return '<div class="tk-serow"><span class="tk-who tk-pad"><span class="tk-nm tk-dimnm">'+h(snm)+'</span></span><span class="tk-snum" style="color:var(--tk-muted)">–</span></div>';
+      }
+      var e=E[eid]||{name:'—',color:''},mine=s===1?ss[0]:ss[1];
+      return '<div class="tk-serow'+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-who">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span></span>'
+        +pips(m,s,need,eid,E,true)+'<span class="tk-snum">'+h(mine)+'</span></div>';
+    }).join('');
+    var games='';
+    if(m.e1&&m.e2){
+      var decided=m.status==='played'||ssP[0]>=need||ssP[1]>=need;
+      for(var g=0;g<bo;g++){
+        if(g<(m.partial||[]).length){
+          var pg=m.partial[g],wn=pg.s1>pg.s2?surname(nameOf(E,m.e1)):surname(nameOf(E,m.e2));
+          games+='<div class="tk-grow'+fl('room-'+mkey(t,m)+'-g'+(g+1))+'"><span>G'+(g+1)+' · <span class="tk-gw">'+h(wn)+'</span></span><b>'+h(pg.s1)+' – '+h(pg.s2)+'</b></div>';
+        }
+        else if(decided)games+='<div class="tk-grow"><span>G'+(g+1)+'</span><b>✕</b></div>';
+        else if(g===bo-1&&(m.partial||[]).length<bo-1)games+='<div class="tk-grow"><span>G'+(g+1)+' · IF NEEDED</span><b>—</b></div>';
+        else games+='<div class="tk-grow"><span>G'+(g+1)+'</span><b>—</b></div>';
+      }
+      if(m.pens1!=null&&m.pens2!=null)games+='<div class="tk-grow"><span>PENS</span><b>'+h(m.pens1)+' – '+h(m.pens2)+'</b></div>';
+    }
+    var note=arrivalNote(t,m);
+    var solid=m.playable&&m.status!=='played';
+    return '<div class="tk-room" data-room="'+h(mkey(t,m))+'">'
+      +'<div class="tk-rh"><span class="tk-rl">BO'+bo+'</span><span class="tk-rs'+(rs.done?' tk-done':'')+'">'+rs.t+'</span><button type="button" class="tk-rx" data-close="1" aria-label="Close">✕</button></div>'
+      +sides+games
+      +(note?'<div class="tk-vnote">↪ '+h(note)+'</div>':'')
+      +destChips(t,m,labels,byKey)
+      +'<a class="tk-cta'+(solid?'':' tk-ghost')+'" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ</a></div>';
+  }
+  function fxHTML(t,m,labels,byKey,st){
+    var E=entMap(t),k=mkey(t,m),ss=seriesScore(m),need=needOf(t);
+    function line(side){
+      var eid=side===1?m.e1:m.e2,sc=side===1?ss[0]:ss[1];
+      if(!eid){
+        var snm=(m.stage==='GF'&&m.round===1)?'···':(slotName(m,side)||'TBD');
+        return '<div class="tk-fline"><span class="tk-who tk-pad"><span class="tk-nm tk-dimnm">'+h(snm)+'</span></span><span class="tk-score tk-dim">–</span></div>';
+      }
+      var e=E[eid]||{name:'—',color:''};
+      var lost=m.status==='played'&&m.winner_id&&m.winner_id!==eid;
+      var life=(t.format==='double_elim'&&m.stage==='L'&&m.status!=='played'&&lossesIn(t,eid)===1)?'<span class="tk-tag tk-life">1 LIFE LEFT</span>':'';
+      var show=m.status==='played'||(m.partial||[]).length>0;
+      return '<div class="tk-fline'+(lost?' tk-loser':'')+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-who">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)+life+'</span>'
+        +(show?pips(m,side,need,eid,E,false):'')+'<span class="tk-score'+(show?'':' tk-dim')+'">'+(show?h(sc):'–')+'</span></div>';
+    }
+    return '<div class="tk-fx'+(st.room===k?' tk-open':'')+fl('fx-'+k)+'" data-match="'+h(k)+'">'
+      +'<div class="tk-fx-top"><span class="tk-fx-id">'+h(labels[k])+'</span>'+fxState(m)+'</div>'
+      +line(1)+line(2)
+      +(st.room===k?roomHTML(t,m,labels,byKey,st):'')
+      +'</div>';
+  }
+  function bracketCard(t,st){
+    var E=entMap(t),list=fixtureList(t),labels=labelMap(t,list),byKey=byKeyMap(t,list);
+    var body=list.map(function(m){return fxHTML(t,m,labels,byKey,st)}).join('');
+    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+body
+      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
+  }
+  function tableCard(t,st){
+    var E=entMap(t),tbls=t.tables||{},body='';
+    if(t.format==='groups'){
+      Object.keys(tbls).sort().forEach(function(g){body+=tableHTML(t,tbls[g]||[],E,g,st)});
+      var ks=fixtureList(t).filter(function(m){return m.stage==='K'});
+      if(ks.length){
+        var labels=labelMap(t,fixtureList(t)),byKey=byKeyMap(t,fixtureList(t));
+        body+='<div class="tk-tsub">KNOCKOUT</div>'+ks.map(function(m){return fxHTML(t,m,labels,byKey,st)}).join('');
+      }
+    } else {
+      body=tableHTML(t,tbls['']||[],E,'',st);
+    }
+    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+body
+      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
+  }
+  function cardFor(t,st){
+    if(t.format==='ffa')return ffaCard(t,st);
+    if(t.format==='league'||t.format==='groups')return tableCard(t,st);
+    return bracketCard(t,st);
+  }
+
+  /* ---------- strip / lens / foot / legend ---------- */
+  function stripHTML(){
+    var s=S.strip;
+    if(!s)return '';
+    return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span><span class="tk-st">'+h(s.text)+ntag('strip')+'</span></div>';
+  }
+  function lensHTML(list,st){
+    if(!S.lens)return '';
+    var eid=S.lens,info=lensInfo(eid,list),e=null;
+    list.forEach(function(t){var x=entMap(t)[eid];if(x)e=x});
+    if(!e)return '';
+    var chips=info.chips.map(function(c){
+      var p=c.split(' → ');
+      if(p.length===2)return '<span class="tk-dchip"><b>'+h(p[0])+'</b> → '+h(p[1])+'</span>';
+      return '<span class="tk-dchip"><b>'+h(c)+'</b></span>';
+    }).join('');
+    var stats=info.stats.filter(Boolean).map(function(s){return '<div class="tk-lstat">'+h(s)+'</div>'}).join('');
+    return '<div class="tk-lens" id="tkLensCard">'
+      +'<div class="tk-lh">'+chipStill(eid,e)
+      +'<span><span class="tk-lk">LENS</span><br><span class="tk-ln">'+h(info.name)+'</span>'+youTag(eid,st)+(info.tag?'<br><span class="tk-lt">'+h(info.tag)+'</span>':'')+'</span>'
+      +'<button type="button" class="tk-clear" data-clear="1">CLEAR ✕</button></div>'
+      +'<div class="tk-nextbox"><div class="tk-nk">NEXT</div><div class="tk-nv">'+info.next+'</div></div>'
+      +(chips?'<div class="tk-dchips">'+chips+'</div>':'')
+      +(stats?'<div class="tk-lstats">'+stats+'</div>':'')
+      +'</div>';
+  }
+  var LEGEND=[['W FINAL','WINNERS FINAL'],['L','LOSERS'],['GF','GRAND FINAL'],['→','ADVANCES'],['✕','NOT NEEDED'],['—','NOT PLAYED'],['K','KILLS'],['W','WINS'],['PTS','POINTS']];
+  function legendHTML(){
+    return '<div class="tk-legend" aria-label="Legend">'+LEGEND.map(function(p){return '<span class="tk-leg"><b>'+h(p[0])+'</b> '+h(p[1])+'</span>'}).join('')+'</div>';
+  }
+  function footHTML(){
+    var l=S.room?'ROOM OPEN':(S.lens?'LENS ON':'TAP LOGO = LENS');
+    return '<div class="tk-foot"><span>'+l+'</span><span>POLL 20S</span></div>';
+  }
+  function skeletonHTML(){
+    function ghost(rows){
+      var r='';
+      for(var i=0;i<rows;i++)r+='<div class="tk-grow2"><span class="tk-gc"></span><span class="tk-gb tk-w60"></span></div>';
+      return '<div class="tk-ghost"><div class="tk-gb tk-w40"></div><div class="tk-gb tk-w80" style="margin-top:10px"></div>'+r+'</div>';
+    }
+    return '<div class="tk-strip" data-kind="status"><span class="tk-sk">STATUS</span><span class="tk-st">···</span></div>'
+      +ghost(3)+ghost(2)
+      +'<div class="tk-foot"><span>NO DATA YET</span><span>POLL 20S</span></div>';
+  }
+
+  /* ---------- render ---------- */
+  function setFresh(){
+    if(!freshBox||!freshTx)return;
+    freshBox.classList.remove('tk-stale','tk-loading');
+    if(S.feed==='stale'){freshBox.classList.add('tk-stale');freshTx.textContent='STALE '+(S.lastOk||'')}
+    else if(S.feed==='loading'){freshBox.classList.add('tk-loading');freshTx.textContent='—'}
+    else freshTx.textContent='UPDATED '+(S.lastOk||'');
+  }
+  function render(){
+    if(!el)return;
+    setFresh();
+    el.classList.toggle('tk-lensing',!!S.lens);
+    el.classList.toggle('tk-isstale',S.feed==='stale');
+    if(S.feed==='loading'&&!S.payload){el.innerHTML=skeletonHTML();S.flash=[];return}
+    var list=S.payload||[];
+    var st={room:S.room,log:S.log,meId:meEntrantId(list)};
+    if(!list.length){
+      el.innerHTML=stripHTML()+'<div class="tk-empty">No tournaments running right now. Start one in the CRCMZ app.</div>'+footHTML()+legendHTML();
+      S.flash=[];return;
+    }
+    el.innerHTML=stripHTML()+lensHTML(list,st)+list.map(function(t){return cardFor(t,st)}).join('')+footHTML()+legendHTML();
+    S.flash=[];
+  }
+
+  /* ---------- load / poll (contract: same lifecycle as before) ------- */
   function load(){
     fetch('/api/tourney',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-      var list=d.tournaments||[];if(!el)return;
+      var list=d.tournaments||[];
+      if(d.error&&!list.length){ /* soft failure: keep last good payload */
+        if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
+        else if(S.feed==='loading'){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
+        return;
+      }
+      var ev=deriveStrip(S.payload,list);
+      if(ev){S.strip={kind:ev.kind,label:ev.label,text:ev.text};S.flash=ev.flash||['strip']}
+      else {S.strip=statusStrip(list);S.flash=[]}
+      S.payload=list;S.feed='live';S.lastOk=clockHM();
+      if(S.lens&&!lensStillValid(list))S.lens=null;
       var live=list.filter(function(t){return t.status==='active'});
       if(prevLine)prevLine.textContent=live.length?live.length+' live now':(list.length?'Latest results':'No active tournaments');
-      el.innerHTML=list.length?list.map(render).join(''):'<p class="tt-empty">No tournaments running right now. Start one in the CRCMZ app.</p>';
-    }).catch(function(){if(el)el.innerHTML='<p class="tt-empty">Could not load tournaments.</p>'});
+      render();
+    }).catch(function(){
+      if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
+      else if(el){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
+    });
+  }
+  function lensStillValid(list){
+    var ok=false;
+    (list||[]).forEach(function(t){if(entMap(t)[S.lens])ok=true});
+    return ok;
   }
   document.addEventListener('viewchange',function(e){clearInterval(timer);if(e.detail==='tourney'){load();timer=setInterval(load,20000)}});
   if(document.body.getAttribute('data-view')==='tourney'){load();timer=setInterval(load,20000)}
   load();
+  fetch('/api/me',{headers:{'Accept':'application/json'}}).then(function(r){return r.json()}).then(function(j){
+    S.mePerson=j&&j.person?j.person:null;
+    if(S.payload)render();
+  }).catch(function(){});
+
+  /* ---------- interactions (delegated; state-keyed) ---------- */
+  el.addEventListener('click',function(ev){
+    var t=ev.target;
+    var chipEl=t.closest?t.closest('[data-lens]'):null;
+    if(chipEl){var id=chipEl.getAttribute('data-lens');S.lens=(S.lens===id)?null:id;render();return}
+    if(t.closest&&t.closest('[data-clear]')){S.lens=null;render();return}
+    if(t.closest&&t.closest('[data-close]')){S.room=null;render();return}
+    if(t.closest&&t.closest('.tk-room'))return;   /* taps inside a room don't close it */
+    if(t.closest&&t.closest('.tk-cta'))return;    /* let the link work */
+    var fx=t.closest?t.closest('[data-match]'):null;
+    if(fx){var mid=fx.getAttribute('data-match');S.room=(S.room===mid)?null:mid;render();return}
+    var row=t.closest?t.closest('[data-row]'):null;
+    if(row){var lk=row.getAttribute('data-tid')+'|'+row.getAttribute('data-row');S.log=(S.log===lk)?null:lk;render();return}
+  });
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape'&&(S.lens||S.room)){S.lens=null;S.room=null;render()}
+  });
 })();
 </script>
 <script>
