@@ -32,6 +32,13 @@
   --amber:#F2B33D; --amber2:#FFC65C;
   --peri:#A5B4FF; /* periwinkle accent — stamp + micro-highlights only */
   --ease:cubic-bezier(.32,.72,.24,1); /* one motion system: iOS standard ease-out */
+  /* Kinetics spring tokens (Motion Tools review, Oct 17 — Kinetics by
+     Colorion spring families as cubic-bezier approximations of spring
+     physics). They retime EXISTING transitions/animations only: feel
+     changes, endpoints/geometry/durations' targets never do. No JS
+     spring loops anywhere — these are pure compositor easings. */
+  --spring:cubic-bezier(.3,1.45,.44,1);      /* settle w/ a hint of overshoot: expands, digit rolls */
+  --spring-soft:cubic-bezier(.25,1.08,.35,1);/* near-flat settle: presses, chevrons, dims */
   --cream:#F5EFE0; --muted:#A9A5C6; --muted2:#8E89B8;
   /* V3 light palette (warm paper) — measured on #F5EFE0: ink 15.7:1,
      paper-mut 7.3:1, paper-mut2 6.2:1, amber-deep 5.0:1 — all AA */
@@ -581,7 +588,7 @@ body[data-view="food"] .tabbar,body[data-view="split"] .tabbar,body[data-view="a
    at 360px wide — Poll and Pack started off the pill with no scroll
    cue. Collapsed, 8 tabs take ~315px and the admin 9th tab fits too,
    at both phone widths; overflow-x stays as a safety net only. */
-.tabbar .tab{flex:none;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 7px 4px;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--ease),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
+.tabbar .tab{flex:none;background:none;border:0;color:rgba(233,236,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 7px 4px;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .3s var(--spring-soft),opacity .3s var(--ease),color .3s var(--ease);text-decoration:none}
 .tabbar .tab span{display:none}
 .tabbar .tab.on span{display:block}
 @media (max-width:370px){.tabbar .tab{padding-left:5px;padding-right:5px}}
@@ -1522,6 +1529,17 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 .cd-cell b{display:block;font-size:40px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
 .cd-cell span{display:block;margin-top:4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .cd-strip i{font-style:normal;color:var(--amber2);font-size:22px;line-height:44px}
+/* Kinetic digits (Motion Tools review, Oct 17): each countdown value
+   renders as two digit columns; a column is a 0-9 strip (three copies
+   for wrap) rolled by compositor transform only — no layout writes
+   per frame, no JS loop. The plain value rides a visually-hidden node
+   for assistive tech. Reduced motion: transition off, digits snap. */
+.cd-cell{position:relative}
+.cd-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cd-cell b .cdr{display:inline-block;width:1ch;height:1.1em;overflow:hidden;vertical-align:top;text-align:center;font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:normal;text-transform:none;margin:0}
+.cd-cell b .cdr-strip{display:block;transition:transform .55s var(--spring);font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:normal;text-transform:none;margin:0}
+.cd-cell b .cdr-strip span{display:block;height:1.1em;line-height:1.1em;font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:normal;text-transform:none;margin:0}
+@media (prefers-reduced-motion: reduce){.cd-cell b .cdr-strip{transition:none}}
 #tripProgress .tp-card{margin-top:6px}
 /* ---------- Stay: house card ---------- */
 .stay-photo img{height:clamp(230px,40vw,330px)}
@@ -1738,14 +1756,14 @@ img{max-width:100%}
 /* 6 · Dock magnification, adapted to touch: icons swell on press
    (and sit a touch larger on the active tab). Transforms only — the
    tab row's layout and the icon-only system are unchanged. */
-.tabbar .tab svg{transition:transform .28s var(--ease)}
+.tabbar .tab svg{transition:transform .3s var(--spring)}
 .tabbar .tab.on svg{transform:scale(1.07)}
 .tabbar .tab:active svg{transform:scale(1.24)}
 
 /* 8 · Launcher press-glow: on press, each tile lights in its OWN tint
    (ring + outer wash + inner wash ride the tile's --tint vars). The
    existing :active scale(.97) keeps doing the press motion. */
-.nav-tile{transition:transform .3s var(--ease),opacity .3s var(--ease),box-shadow .25s var(--ease)}
+.nav-tile{transition:transform .3s var(--spring-soft),opacity .3s var(--ease),box-shadow .25s var(--ease)}
 .nav-tile:active{box-shadow:0 0 0 1px var(--tintline),0 14px 30px rgba(2,3,10,.4),0 18px 42px -10px var(--wash),inset 0 0 26px var(--wash),inset 0 1px 0 rgba(255,255,255,.08)}
 
 /* 7 · Packing stepper: a stage track under the category chips. The
@@ -2259,7 +2277,7 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-st{font-size:12.5px;font-weight:600;line-height:1.4;flex:1}
 #tourneyContent .tk-st span{color:var(--tk-muted);font-weight:400}
 /* lens card */
-#tourneyContent .tk-lens{background:linear-gradient(180deg,rgba(168,85,247,.10),rgba(168,85,247,0) 60%),var(--tk-graphite);border:1px solid rgba(168,85,247,.45);border-radius:16px;padding:12px 13px;margin-bottom:12px}
+#tourneyContent .tk-lens{background:linear-gradient(180deg,rgba(168,85,247,.10),rgba(168,85,247,0) 60%),var(--tk-graphite);border:1px solid rgba(168,85,247,.45);border-radius:16px;padding:12px 13px;margin-bottom:12px;animation:tkroomin .38s var(--spring)}
 #tourneyContent .tk-lh{display:flex;align-items:center;gap:10px;margin-bottom:9px}
 #tourneyContent .tk-lk{font-size:9px;letter-spacing:.18em;color:var(--tk-violet-lt)}
 #tourneyContent .tk-ln{font-size:16px;font-weight:700;text-transform:uppercase;line-height:1.15}
@@ -2300,7 +2318,7 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-tag.tk-you{background:rgba(168,85,247,.18);color:var(--tk-violet-lt);border:1px solid rgba(168,85,247,.45)}
 #tourneyContent .tk-tag.tk-life{background:rgba(255,77,94,.14);color:var(--tk-red);border:1px solid rgba(255,77,94,.4)}
 /* lensing dim/highlight */
-#tourneyContent [data-who]{transition:opacity .25s}
+#tourneyContent [data-who]{transition:opacity .3s var(--spring-soft)}
 #tourneyContent.tk-lensing [data-who]{opacity:.35}
 #tourneyContent.tk-lensing [data-who].tk-lit{opacity:1;background:rgba(168,85,247,.07);background:color-mix(in srgb,var(--tk-ec) 7%,transparent);box-shadow:inset 3px 0 0 var(--tk-ec);border-radius:6px}
 /* standings (ffa) */
@@ -2310,7 +2328,7 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-who{flex:1;min-width:0}
 #tourneyContent .tk-sub{font-size:9.5px;color:var(--tk-muted);letter-spacing:.06em;margin-top:2px}
 #tourneyContent .tk-pts{font-size:20px;font-weight:700;color:var(--tk-white);text-align:right}
-#tourneyContent .tk-chev{color:var(--tk-muted);font-size:14px;flex:none;transition:transform .25s}
+#tourneyContent .tk-chev{color:var(--tk-muted);font-size:14px;flex:none;transition:transform .3s var(--spring-soft)}
 #tourneyContent .tk-srow.tk-open .tk-chev{transform:rotate(90deg)}
 #tourneyContent .tk-detail{border-top:1px dashed var(--tk-line2);padding:9px 2px 6px}
 #tourneyContent .tk-dh{font-size:9px;letter-spacing:.16em;color:var(--tk-muted);margin-bottom:6px}
@@ -2351,7 +2369,7 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-pip{width:9px;height:9px;border-radius:3px;border:1.5px solid var(--tk-line2);display:inline-block}
 #tourneyContent .tk-pip.tk-on{background:var(--tk-ec);border-color:var(--tk-ec)}
 /* series room */
-#tourneyContent .tk-room{background:#101117;border:1px solid var(--tk-line2);border-radius:12px;padding:11px 12px;margin-top:8px;cursor:default;animation:tkroomin .28s ease}
+#tourneyContent .tk-room{background:#101117;border:1px solid var(--tk-line2);border-radius:12px;padding:11px 12px;margin-top:8px;cursor:default;animation:tkroomin .38s var(--spring)}
 @keyframes tkroomin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 #tourneyContent .tk-rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 #tourneyContent .tk-rl{font-size:9.5px;letter-spacing:.16em;color:var(--tk-muted)}
@@ -2374,6 +2392,12 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-lens .tk-dchip{font-size:10.5px;padding:5px 10px}
 #tourneyContent .tk-cta{display:block;text-align:center;background:var(--tk-violet);color:#fff;font-weight:700;font-size:13px;letter-spacing:.05em;border-radius:11px;padding:10px;margin-top:10px;text-transform:uppercase;cursor:pointer;text-decoration:none}
 #tourneyContent .tk-cta.tk-ghost{background:transparent;border:1px solid rgba(168,85,247,.55);color:var(--tk-violet-lt)}
+/* press feedback (Kinetics spring tokens): transform-only, resting
+   geometry untouched; closed rows only, so an open room never scales */
+#tourneyContent .tk-fx:not(.tk-open),#tourneyContent .tk-srow:not(.tk-open){transition:transform .18s var(--spring-soft)}
+#tourneyContent .tk-fx:not(.tk-open):active,#tourneyContent .tk-srow:not(.tk-open):active{transform:scale(.99)}
+#tourneyContent .tk-chip{transition:transform .18s var(--spring-soft)}
+#tourneyContent .tk-chip:active{transform:scale(.92)}
 /* foot + legend */
 #tourneyContent .tk-foot{margin-top:2px;padding-top:9px;font-size:9.5px;color:var(--tk-muted);letter-spacing:.08em;display:flex;justify-content:space-between}
 #tourneyContent .tk-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 7px;border-top:1px solid var(--tk-line);margin-top:9px;padding-top:7px;font-size:9.5px;letter-spacing:.02em;color:var(--tk-muted);line-height:1.35;text-align:center}
@@ -2389,7 +2413,7 @@ flash of Home. The router clears the tag when it takes over. */
 #tourneyContent .tk-flash{animation:tkflash 1.2s ease}
 @keyframes tkflash{0%{background:rgba(74,222,128,.22)}100%{background:transparent}}
 #tourneyContent .tk-newtag{font-size:8px;font-weight:700;letter-spacing:.1em;color:#0B1510;background:var(--tk-green);border-radius:4px;padding:2px 4px;margin-left:6px;vertical-align:2px}
-@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}}
+@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-lens{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}#tourneyContent .tk-fx,#tourneyContent .tk-srow,#tourneyContent .tk-chip{transition:none}}
 </style>
 
   <section id="tourney"><div class="wrap">
@@ -2779,12 +2803,53 @@ function updateRecapChamp(){
  if(fin&&fc.final&&fc.final[0]!==null&&fc.final[1]!==null&&fc.final[0]!==undefined&&fc.final[1]!==undefined&&fc.final[0]!==fc.final[1])champ=fc.final[0]>fc.final[1]?fin[0]:fin[1];
  recapChampEl.textContent=champ>=0?('FC 27 Champions — '+fcName(champ)+'. The gauntlet is settled.'):'FC 27 — no champion was saved on this device.';
 }
+/* Kinetic digit rollers (Motion Tools review): each countdown <b> is
+   rebuilt once as two digit columns; tick() then only writes strip
+   transforms. A column shows one cell of a 30-cell strip (0-9 x3);
+   its position lives in the middle copy and rebases silently after
+   each roll, so a roll is always a single step. Jumps (first paint,
+   refocus) snap without animating. Under prefers-reduced-motion the
+   stylesheet kills the strip transition and every set is a snap. */
+function cdRoller(host){
+ var strip=document.createElement('span');strip.className='cdr-strip';strip.setAttribute('aria-hidden','true');
+ var html='';for(var r=0;r<3;r++)for(var n=0;n<10;n++)html+='<span>'+n+'</span>';
+ strip.innerHTML=html;
+ var col=document.createElement('span');col.className='cdr';col.appendChild(strip);host.appendChild(col);
+ var H=0,pos=null,cur=null,timer=null;
+ function cellH(){if(!H)H=strip.children[0].getBoundingClientRect().height||44;return H}
+ function place(anim){
+   if(!anim)strip.style.transition='none';
+   strip.style.transform='translateY('+(-pos*cellH())+'px)';
+   if(!anim){strip.getBoundingClientRect();strip.style.transition=''}
+ }
+ function rebase(){if(pos<10)pos+=10;else if(pos>=20)pos-=10;else return;place(false)}
+ return {set:function(d){d=+d;if(cur===d)return;
+   if(cur===null){cur=d;pos=10+d;place(false);return}
+   var fwd=(d-cur+10)%10,back=(cur-d+10)%10;
+   if(fwd>1&&back>1){cur=d;pos=10+d;place(false);return}
+   pos+=(fwd<=back?fwd:-back);cur=d;place(true);
+   if(timer)clearTimeout(timer);timer=setTimeout(rebase,640);
+ }};
+}
+var cdUnits=null;
+function cdSet(id,v){
+ if(!cdUnits){cdUnits={};['cd-d','cd-h','cd-m','cd-s'].forEach(function(i){
+   var el=document.getElementById(i);if(!el)return;
+   var init=(el.textContent||'00').replace(/\D/g,'');init=('0'+init).slice(-2);
+   el.textContent='';
+   var sr=document.createElement('span');sr.className='cd-sr';sr.textContent=init;el.appendChild(sr);
+   var cols=[cdRoller(el),cdRoller(el)];
+   cols[0].set(init.charAt(0));cols[1].set(init.charAt(1));
+   cdUnits[i]={set:function(val){sr.textContent=val;cols[0].set(val.charAt(0));cols[1].set(val.charAt(1))}};
+ })}
+ var u=cdUnits[id];if(u)u.set(v);
+}
 function tick(){
  var now=Date.now(),diff=TARGET-now;
- var dEl=document.getElementById('cd-d'),hEl=document.getElementById('cd-h'),mEl=document.getElementById('cd-m'),sEl=document.getElementById('cd-s'),msg=document.getElementById('cd-msg'),nav=document.getElementById('navCd');
+ var msg=document.getElementById('cd-msg'),nav=document.getElementById('navCd');
  var navTx=document.getElementById('navCdTx')||nav,gEl=document.getElementById('cdGhost');
  if(diff<=0){
-   dEl.textContent=hEl.textContent=mEl.textContent=sEl.textContent="00";
+   cdSet('cd-d',"00");cdSet('cd-h',"00");cdSet('cd-m',"00");cdSet('cd-s',"00");
    if(gEl)gEl.textContent="00";
    if(now<END){
      msg.textContent="The boys are in Calgary.";
@@ -2800,7 +2865,7 @@ function tick(){
    return;
  }
  var d=Math.floor(diff/86400000),h=Math.floor(diff/3600000)%24,m=Math.floor(diff/60000)%60,s=Math.floor(diff/1000)%60;
- dEl.textContent=pad(d);hEl.textContent=pad(h);mEl.textContent=pad(m);sEl.textContent=pad(s);
+ cdSet('cd-d',pad(d));cdSet('cd-h',pad(h));cdSet('cd-m',pad(m));cdSet('cd-s',pad(s));
  if(gEl)gEl.textContent=pad(d);
  navTx.textContent="T-MINUS "+d+"D "+pad(h)+"H "+pad(m)+"M";
  var preMsg=CONTENT.trip.nextUpDefault||'';
