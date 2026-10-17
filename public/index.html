@@ -2803,6 +2803,8 @@ if(REDUCED){
 }
 
 
+/* Shared by the buds, food and admin renderers: keep it outside the disabled block below. */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 /* ================= FC 27 tournament (legacy — section replaced by Tourney) ================= */
 if(false){
 var FC_KEY='crcmz-fc27-v2',FC_OLD_KEY='crcmz-fc27-v1';
@@ -2831,7 +2833,6 @@ try{
 var selTeam=-1;
 function fcSave(){ try{localStorage.setItem(FC_KEY,JSON.stringify(fc));}catch(e){} }
 function fcName(i){var n=(fc.names[i]||'').trim();return n?n:FC_TEAMS[i].def}
-function esc(s){return String(s).replace(/</g,'&lt;')}
 function chips(i,cls){
  return '<span class="'+cls+'">'+FC_TEAMS[i].players.map(function(p){return '<img src="'+p[1]+'" alt="" loading="lazy">'}).join('')+'</span>';
 }
