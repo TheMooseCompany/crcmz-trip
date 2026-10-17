@@ -253,20 +253,45 @@ async function main() {
     }
   });
 
+  // Zitadel login names are not always the email, so resolve what was typed
+  // (email, username or login name) to a user id before the password check.
+  async function findUserId(identifier) {
+    const queries = identifier.includes('@')
+      ? [{ emailQuery: { emailAddress: identifier, method: 'TEXT_QUERY_METHOD_EQUALS_IGNORE_CASE' } },
+         { loginNameQuery: { loginName: identifier, method: 'TEXT_QUERY_METHOD_EQUALS_IGNORE_CASE' } }]
+      : [{ userNameQuery: { userName: identifier, method: 'TEXT_QUERY_METHOD_EQUALS_IGNORE_CASE' } },
+         { loginNameQuery: { loginName: identifier, method: 'TEXT_QUERY_METHOD_EQUALS_IGNORE_CASE' } }];
+    // v2 searches the whole instance; management v1 only sees the token's own org.
+    for (const q of queries) {
+      const sr = await fetch(`${ISSUER}/v2/users`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: { limit: 2 }, queries: [{ typeQuery: { type: 'TYPE_HUMAN' } }, q] }),
+      });
+      if (!sr.ok) continue;
+      const hit = ((await sr.json()).result || [])[0];
+      if (hit) return hit.id || hit.userId || null;
+    }
+    return null;
+  }
+
   app.post('/auth/password/login', async (req, res) => {
     if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
     const { identifier, password } = req.body || {};
     if (!identifier || !password) return res.status(400).json({ error: 'identifier and password required' });
     try {
+      const userId = await findUserId(identifier.trim());
+      if (!userId) return res.status(401).json({ error: 'No CRCMZ account found for that email or username.' });
       const r = await fetch(`${ISSUER}/v2/sessions`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checks: { user: { loginName: identifier.trim() }, password: { password } } }),
+        body: JSON.stringify({ checks: { user: { userId }, password: { password } } }),
       });
       if (!r.ok) {
         const errBody = await r.text();
         console.error('[crcmz-trip] password/login Zitadel error:', r.status, errBody.slice(0, 200));
-        return res.status(401).json({ error: 'Incorrect email or password.' });
+        const locked = /locked/i.test(errBody);
+        return res.status(401).json({ error: locked ? 'Account locked after too many tries. Reset it at app.crcmz.me.' : 'Wrong password.' });
       }
       const data = await r.json();
       const sessionId = data.sessionId;
@@ -399,7 +424,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="panel" id="panel-password">
     <div class="field">
       <label for="pw-em">Email or username</label>
-      <input type="email" id="pw-em" placeholder="your@email.com" autocomplete="username" autocapitalize="off" inputmode="email" onkeydown="if(event.key==='Enter')document.getElementById('pw-pass').focus()"/>
+      <input type="text" id="pw-em" placeholder="Email or username" autocomplete="username" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')document.getElementById('pw-pass').focus()"/>
     </div>
     <div class="field">
       <label for="pw-pass">Password</label>
