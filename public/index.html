@@ -405,9 +405,13 @@ footer a:hover{text-decoration:underline}
    the landed frame — so the cinematic is JS-driven on every browser now.) */
 body.live-drive #world,body.live-drive #planeCA,body.live-drive #planeTX,
 body.live-drive #cityCA,body.live-drive #cityTX,body.live-drive #cityYYC,
-body.live-drive .city-dot{transition:transform .12s linear}
-body.live-drive #detailLayer{transition:opacity .12s linear}
-body.live-drive #scene{transition:filter .12s linear,opacity .12s linear}
+body.live-drive .city-dot,body.live-drive #detailLayer,body.live-drive #scene{transition:none}
+/* Raster map + star layers (smooth dive): the zoom moves bitmaps on the
+   compositor instead of re-rasterising the coastline every frame. */
+#starScene,#mapLayer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#mapLayer{overflow:hidden}
+#starScene{transform-origin:50% 50%;will-change:transform}
+#mapLayer canvas{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;display:none}
 
 /* ================= V3: app shell + two-tone =================
    Readability rule: anything you READ goes light (Food, Split, Stay,
@@ -2581,7 +2585,7 @@ function revealCheck(){
 }
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
 document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
-window.addEventListener('scroll',function(){requestAnimationFrame(revealCheck)},{passive:true});
+var rvAt=0;window.addEventListener('scroll',function(){var n=performance.now();if(n-rvAt<200)return;rvAt=n;requestAnimationFrame(revealCheck)},{passive:true});
 window.addEventListener('resize',revealCheck);
 setInterval(revealCheck,600);
 revealCheck();
@@ -2702,6 +2706,8 @@ function fitScene(){
    sceneEl.setAttribute('viewBox','0 0 1000 620'); view.cx=500; view.cy=310;
  }
  sceneEl.setAttribute('preserveAspectRatio','xMidYMid slice');
+ var ss=document.getElementById('starScene');
+ if(ss){ss.setAttribute('viewBox',sceneEl.getAttribute('viewBox'));ss.setAttribute('preserveAspectRatio','xMidYMid slice');}
 }
 fitScene();
 
@@ -2738,6 +2744,13 @@ var STEPS=[
  {s:5.6,fx:409,fy:237,t:.9,detail:.8},
  {s:7.2,fx:417,fy:231,t:1,detail:1}
 ];
+function camAt(p,desk){
+ var seg=Math.min(3,Math.floor(p*4)),fr=p*4-seg,A=STEPS[seg],B=STEPS[seg+1];
+ var c={s:Math.exp(Math.log(A.s)+(Math.log(B.s)-Math.log(A.s))*fr),fx:A.fx+(B.fx-A.fx)*fr,fy:A.fy+(B.fy-A.fy)*fr,
+   t:A.t+(B.t-A.t)*fr,detail:A.detail+(B.detail-A.detail)*fr};
+ if(p===0&&desk){c.s=1.9;c.fx=430;c.fy=290}
+ return c;
+}
 function cineProgress(){
  var total=cine.offsetHeight-window.innerHeight;
  if(total<=0)return 1;
@@ -2749,41 +2762,33 @@ var cineHome=true;
 /* smoothstep fade window: 0 at/below a, 1 at/above b */
 function fadeWin(p,a,b){var t=(p-a)/(b-a);t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
 function renderProgress(p){
+ lastP=p;
  if(Math.abs(p-curP)<0.0004)return; curP=p;
- var seg=Math.min(3,Math.floor(p*4)),fr=p*4-seg;
- var A=STEPS[seg],B=STEPS[seg+1];
- var st={
-   s:Math.exp(Math.log(A.s)+(Math.log(B.s)-Math.log(A.s))*fr),
-   fx:A.fx+(B.fx-A.fx)*fr, fy:A.fy+(B.fy-A.fy)*fr,
-   t:A.t+(B.t-A.t)*fr, detail:A.detail+(B.detail-A.detail)*fr
- };
  var i=Math.round(p*4),desk=window.innerWidth>=761;
+ var st=camAt(p,desk);
  var s=st.s,fx=st.fx,fy=st.fy;
- if(p===0&&desk){s=1.9;fx=430;fy=290}
- stage.dataset.step=String(i);
+ if(stage.dataset.step!==String(i))stage.dataset.step=String(i);
  world.style.transform='translate('+view.cx+'px,'+view.cy+'px) scale('+s.toFixed(3)+') translate('+(-fx)+'px,'+(-fy)+'px)';
- var inv=1/Math.sqrt(s),invF=1/s;
- document.getElementById('cityCA').style.transform='translate(364px,349px) scale('+inv.toFixed(3)+')';
- document.getElementById('cityYVR').style.transform='translate(358px,247px) scale('+inv.toFixed(3)+')';
- document.getElementById('cityTX').style.transform='translate(531px,394px) scale('+inv.toFixed(3)+')';
- document.getElementById('cityYYC').style.transform='translate(417px,231px) scale('+inv.toFixed(3)+')';
+ positionMap(s,fx,fy);
+ var inv=1/Math.sqrt(s),invF=1/s,invS=inv.toFixed(3);
+ cityEls.CA.style.transform='translate(364px,349px) scale('+invS+')';
+ cityEls.YVR.style.transform='translate(358px,247px) scale('+invS+')';
+ cityEls.TX.style.transform='translate(531px,394px) scale('+invS+')';
+ cityEls.YYC.style.transform='translate(417px,231px) scale('+invS+')';
  cityDots.forEach(function(g){
    var tx=g.style.getPropertyValue('--tx'),ty=g.style.getPropertyValue('--ty');
    g.style.transform='translate('+tx+','+ty+') scale('+invF.toFixed(3)+')';
  });
  detailLayer.style.opacity=st.detail;
- function flyVia(plane,dots,a,c1,v,c2,b,off){
-   var t=Math.max(0,Math.min(1,st.t*1.04-off));
-   var pt,ang,t2;
-   if(t<0.5){t2=t*2;pt=qPt(a,c1,v,t2);ang=qAng(a,c1,v,Math.min(t2,.999));}
-   else{t2=(t-0.5)*2;pt=qPt(v,c2,b,t2);ang=qAng(v,c2,b,Math.min(t2,.999));}
-   plane.style.transform='translate('+pt.x.toFixed(1)+'px,'+pt.y.toFixed(1)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(1.2/Math.sqrt(s)).toFixed(3)+')';
-   plane.setAttribute('opacity',st.t>=1?0:1);
-   var dotO=.95*(1-.45*(i===4?1:0));
-   for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}
- }
- flyVia(planeCA,dotsCA,P.CA,P.CAc1,P.YVR,P.CAc2,P.YYC,0);
- (function fly(plane,dots,a,c,b,off){var t=Math.max(0,Math.min(1,st.t*1.04-off));var pt=qPt(a,c,b,t),ang=qAng(a,c,b,Math.min(t,.999));plane.style.transform='translate('+pt.x.toFixed(1)+'px,'+pt.y.toFixed(1)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(1.2/Math.sqrt(s)).toFixed(3)+')';plane.setAttribute('opacity',st.t>=1?0:1);var dotO=.95*(1-.45*(i===4?1:0));for(var k=0;k<dots.length;k++){dots[k].setAttribute('r',(2.3*inv).toFixed(2));dots[k].setAttribute('opacity',(k/(dots.length-1))<=t?dotO:0)}})(planeTX,dotsTX,P.TX,P.TXc,P.YYC,.03);
+ /* Flights: cruise, then from 70% of the route slow down, descend (shrink,
+    shadow closes in under the plane) and park side by side at YYC. */
+ planeFrame(planeCA,shadowCA,dotsCA,function(u){
+   if(u<0.5){var t2=u*2;return [qPt(P.CA,P.CAc1,P.YVR,t2),qAng(P.CA,P.CAc1,P.YVR,Math.min(t2,.999))]}
+   var t3=(u-0.5)*2;return [qPt(P.YVR,P.CAc2,P.YYC,t3),qAng(P.YVR,P.CAc2,P.YYC,Math.min(t3,.999))];
+ },clamp01(st.t*1.04),s,inv,i,-2.4);
+ planeFrame(planeTX,shadowTX,dotsTX,function(u){
+   return [qPt(P.TX,P.TXc,P.YYC,u),qAng(P.TX,P.TXc,P.YYC,Math.min(u,.999))];
+ },clamp01(st.t*1.04-.03),s,inv,i,2.4);
  var wantPulses=i>=3;
  if(wantPulses!==pulsesOn){pulsesOn=wantPulses;setPulses(wantPulses)}
  var bw=(p>0.42&&p<0.85)?Math.min(1,Math.min((p-0.42)/0.08,(0.85-p)/0.06)):0;
@@ -2820,7 +2825,18 @@ function renderProgress(p){
     dive; scrolling back up reverses the blur with p. */
  var land=Math.max(0,Math.min(1,(p-0.8)/0.2));
  var landE=land*land*(3-2*land);
- sceneEl.style.filter=landE>0.001?('blur('+(landE*9).toFixed(1)+'px) brightness('+(1-0.16*landE).toFixed(2)+')'):'';
+ /* Blur only the map bitmap layer (a GPU filter on a composited layer);
+    the overlay with routes, labels and the parked planes just dims. */
+ var landQ=Math.round(landE*20)/20;
+ if(mapLayer.__landQ!==landQ){
+   mapLayer.__landQ=landQ;
+   mapLayer.style.filter=landQ>0?('blur('+(landQ*9).toFixed(1)+'px) brightness('+(1-0.16*landQ).toFixed(2)+')'):'';
+   mapLayer.style.opacity=(1-0.55*landQ).toFixed(2);
+   starScene.style.opacity=(1-0.55*landQ).toFixed(2);
+   /* The overlay (labels, rings, routes) softens too so the hero sits on a
+      clean field; stepped in 5% increments instead of every frame. */
+   sceneEl.style.filter=landQ>0?('blur('+(landQ*9).toFixed(1)+'px) brightness('+(1-0.16*landQ).toFixed(2)+')'):'';
+ }
  sceneEl.style.opacity=(1-0.55*landE).toFixed(2);
  if(heroScrim)heroScrim.style.opacity=(1-landE).toFixed(2);
  /* Landed composition (owner's gap report, measured in the rig): the
@@ -2848,7 +2864,9 @@ function renderProgress(p){
  var depthT=Math.max(0,Math.min(1,(Math.log(s)-Math.log(1.25))/(Math.log(7.2)-Math.log(1.25))));
  if(arcLayer)arcLayer.style.transform='scale('+(1+0.15*depthT).toFixed(3)+')';
  if(labelLayer)labelLayer.style.transform='scale('+(1+0.10*depthT).toFixed(3)+')';
- if(starsG)starsG.style.transform='translate(500px,310px) scale('+(1+0.045*depthT).toFixed(3)+') translate(-500px,-310px)';
+ /* Stars zoom as a whole composited layer (no per-frame redraw of 110 dots). */
+ var starK=(1+0.045*depthT).toFixed(3);
+ if(starScene.__k!==starK){starScene.__k=starK;starScene.style.transform='scale('+starK+')'}
  if(drawCAEl)drawCAEl.style.strokeDashoffset=(100*(1-st.t)).toFixed(1);
  if(drawTXEl)drawTXEl.style.strokeDashoffset=(100*(1-Math.max(0,st.t-0.03))).toFixed(1);
  if(railFill)railFill.style.transform='scaleY('+p.toFixed(3)+')';
@@ -2856,8 +2874,11 @@ function renderProgress(p){
    /* Desktop: the label rides LEFT of the marker, never centred under
       the hero headline; phones keep it above the marker. Across the
       landing stretch it also slides left and fades out entirely. */
-   if(desk){yycText.setAttribute('text-anchor','end');yycText.setAttribute('x','-38');yycText.setAttribute('y','4');}
-   else{yycText.setAttribute('text-anchor','middle');yycText.setAttribute('x','0');yycText.setAttribute('y','-14');}
+   if(yycText.__desk!==desk){
+     yycText.__desk=desk;
+     if(desk){yycText.setAttribute('text-anchor','end');yycText.setAttribute('x','-38');yycText.setAttribute('y','4');}
+     else{yycText.setAttribute('text-anchor','middle');yycText.setAttribute('x','0');yycText.setAttribute('y','-14');}
+   }
    yycText.style.opacity=(1-landE).toFixed(2);yycText.style.transform='translateX('+(-64*landE).toFixed(1)+'px)';
  }
  cityDots.forEach(function(g,di){
@@ -2871,9 +2892,108 @@ function renderProgress(p){
    var ff=edge<0?0:(edge>1?1:edge);
    g.style.opacity=(co*ff).toFixed(2);
  });
- zoomVal.textContent='×'+s.toFixed(1);
- camVal.textContent=i<1?'NORTH AMERICA':i<2?'UNITED STATES':i<4?'ALBERTA · INBOUND':'YYC · CALGARY';
+ var zt='×'+s.toFixed(1),ct=i<1?'NORTH AMERICA':i<2?'UNITED STATES':i<4?'ALBERTA · INBOUND':'YYC · CALGARY';
+ if(zoomVal.textContent!==zt)zoomVal.textContent=zt;
+ if(camVal.textContent!==ct)camVal.textContent=ct;
 }
+var cityEls={CA:document.getElementById('cityCA'),YVR:document.getElementById('cityYVR'),
+  TX:document.getElementById('cityTX'),YYC:document.getElementById('cityYYC')};
+var shadowCA=planeCA.querySelector('ellipse'),shadowTX=planeTX.querySelector('ellipse');
+function clamp01(x){return x<0?0:x>1?1:x}
+/* Position along the route: linear until 70%, then a C1 Hermite ease so the
+   approach slows smoothly into a landing roll (no speed jump at 70%). */
+function flightU(t){if(t<=0.7)return t;var x=(t-0.7)/0.3;return 0.7+0.3*(x+0.8*x*x-0.8*x*x*x)}
+function planeFrame(plane,shadow,dots,at,t,s,inv,step,parkX){
+ var r=at(flightU(t)),pt=r[0],ang=r[1];
+ var d=clamp01((t-0.7)/0.3);d=d*d*(3-2*d);var alt=1-d;
+ /* On-screen size: the original cruise size, growing a touch as the camera
+    closes in, then shrinking to under half through the descent. */
+ var onScreen=1.3416*Math.pow(s/1.25,0.18)*(1-0.66*d);
+ plane.style.transform='translate('+(pt.x+parkX*d).toFixed(2)+'px,'+(pt.y+0.6*d).toFixed(2)+'px) rotate('+ang.toFixed(1)+'deg) scale('+(onScreen/s).toFixed(4)+')';
+ if(shadow){
+   /* Light from the upper left: the shadow sits down-right of the plane by its
+      altitude, in screen terms, so rotate the offset into the plane's frame. */
+   var a=-ang*Math.PI/180,ox=7*alt,oy=11*alt;
+   shadow.setAttribute('cx',(0.9+ox*Math.cos(a)-oy*Math.sin(a)).toFixed(2));
+   shadow.setAttribute('cy',(2.4+ox*Math.sin(a)+oy*Math.cos(a)).toFixed(2));
+   shadow.setAttribute('opacity',(0.45+0.55*d).toFixed(2));
+ }
+ var n=dots.length,show=Math.floor(t*(n-1)+1e-6),dotO=.95*(1-.45*(step===4?1:0));
+ var rr=(Math.round(2.3*inv*20)/20).toFixed(2),key=show+'|'+rr+'|'+dotO;
+ if(dots.__key!==key){dots.__key=key;for(var k=0;k<n;k++){dots[k].setAttribute('r',rr);dots[k].setAttribute('opacity',k<=show?dotO:0)}}
+}
+planeCA.setAttribute('opacity',1);planeTX.setAttribute('opacity',1);
+
+/* ===== Raster map (smooth dive on phones) =====
+   The coastline and lakes are drawn once into canvases and the dive zooms
+   those bitmaps on the compositor, so no frame re-rasterises 90+ vector paths
+   and their glow at a new scale. Three tiers keep it sharp: each covers the
+   area visible across its zoom band at that band's top resolution. The vector
+   map stays visible until the first tier is ready, and is the fallback. */
+var lastP=0,mapM=null,mapTiers=[],mapShown=null,mapBuildId=0;
+var mapLayer=document.createElement('div');mapLayer.id='mapLayer';mapLayer.setAttribute('aria-hidden','true');
+var starScene=document.createElementNS('http://www.w3.org/2000/svg','svg');starScene.id='starScene';starScene.setAttribute('aria-hidden','true');
+stage.insertBefore(mapLayer,sceneEl);stage.insertBefore(starScene,mapLayer);
+if(starsG){starScene.appendChild(starsG);starsG.style.transform='';}
+fitScene();
+var mapVec=[document.getElementById('landmass'),document.getElementById('greatLakes')];
+function sceneM(){var vb=sceneEl.viewBox.baseVal,W=stage.clientWidth||window.innerWidth,H=stage.clientHeight||window.innerHeight,k=Math.max(W/vb.width,H/vb.height);
+ return {x:vb.x,y:vb.y,w:vb.width,h:vb.height,W:W,H:H,k:k,ox:(W-vb.width*k)/2,oy:(H-vb.height*k)/2}}
+function positionMap(s,fx,fy){
+ if(!mapM||!mapTiers.length)return;
+ var pick=null;
+ for(var q=0;q<mapTiers.length;q++){var tr=mapTiers[q];if(tr.ready&&(s>=tr.lo-1e-6||!pick))pick=tr}
+ if(!pick)return;
+ if(mapShown!==pick){if(mapShown)mapShown.c.style.display='none';pick.c.style.display='block';mapShown=pick}
+ var k=mapM.k,tx=k*(view.cx+s*(pick.x-fx)-mapM.x)+mapM.ox,ty=k*(view.cy+s*(pick.y-fy)-mapM.y)+mapM.oy;
+ pick.c.style.transform='translate3d('+tx.toFixed(1)+'px,'+ty.toFixed(1)+'px,0) scale('+(k*s/pick.res).toFixed(5)+')';
+}
+function buildMap(){
+ var id=++mapBuildId;
+ if(!mapVec[0]||!window.HTMLCanvasElement)return;
+ mapM=sceneM();
+ var desk=window.innerWidth>=761,dpr=Math.min(2,window.devicePixelRatio||1),CAP=5e6,MAXS=4096;
+ var src=mapVec.map(function(n){return n?n.outerHTML.replace(/ style="[^"]*"/,''):''}).join('');
+ src=src.replace('<g id="landmass"','<g id="landmass" filter="url(#mapGlow)"');
+ var bands=[[0,2.2],[2.2,4.0],[4.0,99]],next=[];
+ bands.forEach(function(b){
+   var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,smax=0,any=false;
+   for(var q=0;q<=200;q++){var c=camAt(q/200,desk);if(c.s<b[0]||c.s>b[1])continue;any=true;
+     var hw=(mapM.W/2)/(mapM.k*c.s)*1.2,hh=(mapM.H/2)/(mapM.k*c.s)*1.2;
+     x0=Math.min(x0,c.fx-hw);x1=Math.max(x1,c.fx+hw);y0=Math.min(y0,c.fy-hh);y1=Math.max(y1,c.fy+hh);smax=Math.max(smax,c.s)}
+   if(!any)return;
+   x0=Math.max(-200,x0);y0=Math.max(-200,y0);x1=Math.min(1200,x1);y1=Math.min(820,y1);
+   var w=x1-x0,h=y1-y0,res=mapM.k*smax*dpr;
+   if(w*res*h*res>CAP)res*=Math.sqrt(CAP/(w*res*h*res));
+   res=Math.min(res,MAXS/w,MAXS/h);
+   next.push({lo:b[0],x:x0,y:y0,w:w,h:h,res:res,ready:false,c:null});
+ });
+ var old=mapTiers;mapTiers=next;mapShown=null;
+ function draw(n){
+   if(id!==mapBuildId||n>=next.length){if(id===mapBuildId)old.forEach(function(t){if(t.c)t.c.remove()});return}
+   var tr=next[n],cw=Math.max(1,Math.round(tr.w*tr.res)),ch=Math.max(1,Math.round(tr.h*tr.res));
+   var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+cw+'" height="'+ch+'" viewBox="'+tr.x+' '+tr.y+' '+tr.w+' '+tr.h+'">'
+     +'<defs><filter id="mapGlow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#8C96FF" flood-opacity=".35"/></filter></defs>'+src+'</svg>';
+   var img=new Image();
+   img.onload=function(){
+     if(id!==mapBuildId)return;
+     try{
+       var c=document.createElement('canvas');c.width=cw;c.height=ch;c.getContext('2d').drawImage(img,0,0,cw,ch);
+       c.style.width=cw+'px';c.style.height=ch+'px';mapLayer.appendChild(c);tr.c=c;tr.ready=true;
+       if(n===0){old.forEach(function(t){if(t.c)t.c.style.display='none'});mapVec.forEach(function(v){if(v)v.style.display='none'})}
+       curP=-1;renderProgress(lastP);
+     }catch(e){}
+     setTimeout(function(){draw(n+1)},120);
+   };
+   img.onerror=function(){setTimeout(function(){draw(n+1)},120)};
+   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ }
+ draw(0);
+}
+buildMap();
+var mapResizeT=0;
+window.addEventListener('resize',function(){clearTimeout(mapResizeT);mapResizeT=setTimeout(function(){fitScene();buildMap()},250)});
+
 if(REDUCED){
  cine.classList.add('landed-fit');
  document.querySelectorAll('.step-sentinel').forEach(function(s){s.style.display='none'});
@@ -2895,18 +3015,23 @@ if(REDUCED){
  function driveCine(){
    if(!cineHome)return;
    var target=cineProgress(),now=performance.now();
-   if(gateSnap){gateSnap=false;sprP.x=target;sprP.v=0;sprT=now;renderProgress(target);return;}
+   if(gateSnap){gateSnap=false;sprP.x=target;sprP.v=0;sprT=now;renderProgress(target);return true;}
    var dt=Math.min(100,now-sprT); sprT=now;
    while(dt>0){var step=Math.min(8,dt),h=step/1000;
      sprP.v+=(-240*(sprP.x-target)-31*sprP.v)*h; sprP.x+=sprP.v*h; dt-=step;}
-   if(Math.abs(target-sprP.x)<0.0004&&Math.abs(sprP.v)<0.004){sprP.x=target;sprP.v=0}
+   var settled=false;
+   if(Math.abs(target-sprP.x)<0.0004&&Math.abs(sprP.v)<0.004){sprP.x=target;sprP.v=0;settled=true}
    renderProgress(sprP.x);
+   return settled;
  }
- var driveQueued=false;
- function queueDrive(){ if(driveQueued)return; driveQueued=true; requestAnimationFrame(function(){driveQueued=false;driveCine()}); }
+ /* One frame loop that keeps integrating the spring until it settles, so a
+    glide after the finger lifts is painted every frame, not in 150 ms jumps. */
+ var loopOn=false;
+ function loopCine(){ var done=!cineHome||driveCine(); if(done){loopOn=false;return} requestAnimationFrame(loopCine); }
+ function queueDrive(){ if(loopOn)return; loopOn=true; sprT=performance.now(); requestAnimationFrame(loopCine); }
  window.addEventListener('scroll',queueDrive,{passive:true});
  window.addEventListener('resize',function(){fitScene();curP=-1;sprP.x=cineProgress();sprP.v=0;sprT=performance.now();renderProgress(sprP.x)});
- var driveInt=setInterval(driveCine,150);
+ var driveInt=setInterval(queueDrive,150);
  renderProgress(sprP.x);
  /* Pure scroll scrub (owner's order, 2026-10-16): no compaction,
     no latch, no glide. The 200vh track never resizes and scroll is
