@@ -2087,6 +2087,34 @@ flash of Home. The router clears the tag when it takes over. */
   </div>
   <div class="view amb-paused" id="view-tourney" hidden="">
 <!-- ================= TOURNEY ================= -->
+<style>
+#tourneyContent{display:flex;flex-direction:column;gap:22px}
+.tt{background:rgba(255,255,255,.035);border:1px solid rgba(245,239,224,.1);border-left:3px solid var(--gc);border-radius:18px;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+.tt header{display:flex;flex-direction:column;gap:6px}.tt-game{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gc)}
+.tt h3{margin:0;font-size:22px}.tt-meta{display:flex;align-items:center;gap:10px;font-size:12.5px;opacity:.85}
+.tt-live{color:#8cff2b;font-weight:700}.tt-live::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#8cff2b;margin-right:6px}.tt-done{color:#F2B33D;font-weight:700}
+.tt-prog{flex:0 0 90px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}.tt-prog span{display:block;height:100%;background:#8cff2b}
+.tt-champ{padding:12px 14px;border-radius:12px;border:1px solid #F2B33D;color:#FFC65C;font-size:15px}
+.tt-sub{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin:4px 0 8px}
+.tt-br{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.tt-col{display:flex;flex-direction:column;min-width:168px}.tt-rh{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:8px}
+.tt-cm{display:flex;flex-direction:column;justify-content:space-around;gap:10px;flex:1}
+.tt-m{border:1px solid rgba(245,239,224,.12);border-radius:10px;padding:6px 10px;background:rgba(10,14,39,.6)}.tt-m.up{border-color:#22e6ff}.tt-m.bye{opacity:.5}.tt-m.gold{border-color:#F2B33D;box-shadow:0 0 12px rgba(242,179,61,.25)}
+.tt-side{display:flex;align-items:center;gap:7px;font-size:13.5px;min-height:24px}.tt-side i,.tt-tb i,.tt-lb i{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.tt-side span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tt-side b{font-variant-numeric:tabular-nums}.tt-side small{opacity:.6;font-weight:400}
+.tt-side.w{font-weight:700}.tt-side.w b{color:#FFC65C}.tt-side.l{opacity:.55}
+.tt-fin{display:flex;gap:14px;flex-wrap:wrap}.tt-fin>div{min-width:180px}
+.tt-groups{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.tt-tb table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.tt-tb th,.tt-tb td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(245,239,224,.08)}
+.tt-tb th{font-size:10.5px;opacity:.55;font-weight:700}.tt-tb .n{text-align:left;display:flex;align-items:center;gap:7px}.tt-tb thead .n{display:table-cell}.tt-tb tr.q td:first-child{color:#8cff2b;font-weight:700}
+.tt-lb{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.tt-lb li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center}
+.tt-lb .p{font-weight:800;opacity:.6;text-align:right}.tt-lb li:first-child .p,.tt-lb li:first-child .pt b{color:#FFC65C;opacity:1}
+.tt-lb .nm{display:flex;flex-direction:column;gap:5px;min-width:0}.tt-lb .nm>span:first-child{display:flex;align-items:center;gap:7px;font-weight:700}
+.tt-lb .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}.tt-lb .bar span{display:block;height:100%}
+.tt-lb .pt{text-align:right;font-size:12px}.tt-lb .pt b{font-size:18px}.tt-lb .pt small{display:block;opacity:.6}
+.tt-open{align-self:flex-start;color:#FFC65C;font-weight:700;font-size:14px;text-decoration:none}.tt-empty{opacity:.55;text-align:center;font-size:14px}
+</style>
+
   <section id="tourney"><div class="wrap">
     <div class="sec-head reveal">
       <div class="label peri">Tourney</div>
@@ -3026,72 +3054,48 @@ document.getElementById('fcReset').addEventListener('click',function(){
 });
 fcRenderAll();
 } // end legacy FIFA block
-// ── Tourney live feed ────────────────────────────────────────────────────────
+// ── Tourney live feed (app.crcmz.me) ─────────────────────────────────────────
 (function(){
   var el=document.getElementById('tourneyContent');
   var prevLine=document.getElementById('tourneyPrevLine');
-  function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
-  function renderTeamDot(color){return '<span style="width:8px;height:8px;border-radius:50%;background:'+esc(color)+';display:inline-block;flex-shrink:0"></span>'}
-  function renderMatch(m){
-    var t1name=m.team1?esc(m.team1.name):'TBD',t2name=m.team2?esc(m.team2.name):'TBD';
-    var t1color=m.team1?m.team1.color:'#555',t2color=m.team2?m.team2.color:'#555';
-    var s1=m.score1!=null?'<b>'+m.score1+'</b>':'',s2=m.score2!=null?'<b>'+m.score2+'</b>':'';
-    var w1=m.winner_id&&m.team1&&m.winner_id===m.team1.id,w2=m.winner_id&&m.team2&&m.winner_id===m.team2.id;
-    return '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px">'
-      +'<div style="display:flex;align-items:center;gap:6px;font-weight:'+(w1?700:400)+'">'
-      +renderTeamDot(t1color)+'<span style="flex:1;font-size:13px">'+t1name+'</span>'+s1+'</div>'
-      +'<div style="font-size:11px;text-align:center;opacity:.4">vs</div>'
-      +'<div style="display:flex;align-items:center;gap:6px;font-weight:'+(w2?700:400)+'">'
-      +renderTeamDot(t2color)+'<span style="flex:1;font-size:13px">'+t2name+'</span>'+s2+'</div>'
-      +'</div>';
-  }
-  function renderTournament(t){
-    var html='<div style="margin-bottom:24px">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-      +'<span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,.25);color:#a5b4fc">'+esc(t.game)+'</span>'
-      +'<span style="font-size:13px;font-weight:600">'+esc(t.name)+'</span>'
-      +'</div>';
-    if(t.rounds&&t.rounds.length){
-      html+='<div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px">';
-      t.rounds.forEach(function(r){
-        var label=r.round===t.rounds.length?'Final':r.round===t.rounds.length-1?'Semi-Final':'Round '+r.round;
-        html+='<div style="min-width:180px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;opacity:.5;margin-bottom:8px">'+esc(label)+'</div>'
-          +'<div style="display:flex;flex-direction:column;gap:8px">';
-        r.matches.forEach(function(m){html+=renderMatch(m);});
-        html+='</div></div>';
-      });
-      html+='</div>';
-    }else{
-      html+='<p style="opacity:.5;font-size:14px">No bracket yet.</p>';
-    }
-    html+='</div>';
-    return html;
-  }
+  var APP='https://app.crcmz.me/app/tourney';
+  function h(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function roundName(st,r,n){if(st==='GF')return r===1?'Grand final':'Final reset';if(st==='P')return '3rd place';if(st==='L')return r===n?'Losers final':'Losers R'+r;var left=n-r;return left===0?'Final':left===1?'Semis':left===2?'Quarters':'Round of '+Math.pow(2,left+1)}
+  function side(m,s,E){var id=s===1?m.e1:m.e2,e=E[id],w=m.status==='played'&&m.winner_id&&m.winner_id===id,l=m.status==='played'&&m.winner_id&&m.winner_id!==id,sc=s===1?m.score1:m.score2,pn=s===1?m.pens1:m.pens2;
+    return '<div class="tt-side'+(w?' w':'')+(l?' l':'')+'"><i style="background:'+h(e?e.color:'transparent')+'"></i><span>'+h(e?e.name:((s===1?m.wait1:m.wait2)||(m.status==='bye'?'Bye':'TBD')))+'</span>'+(m.status==='played'?'<b>'+h(sc)+(pn!=null?' <small>('+h(pn)+')</small>':'')+'</b>':'')+'</div>'}
+  function card(m,E,champ){return '<div class="tt-m'+(m.playable?' up':'')+(m.status==='bye'?' bye':'')+(champ&&m.winner_id===champ&&!m.next_id?' gold':'')+'">'+side(m,1,E)+side(m,2,E)+'</div>'}
+  function bracket(t,st,E,title){var ms=t.matches.filter(function(m){return m.stage===st&&m.status!=='void'});if(!ms.length)return '';
+    var rs=[];ms.forEach(function(m){if(rs.indexOf(m.round)<0)rs.push(m.round)});rs.sort(function(a,b){return a-b});
+    return (title?'<div class="tt-sub">'+h(title)+'</div>':'')+'<div class="tt-br">'+rs.map(function(r){var col=ms.filter(function(m){return m.round===r}).sort(function(a,b){return a.slot-b.slot});
+      return '<div class="tt-col"><div class="tt-rh">'+h(roundName(st,r,rs[rs.length-1]))+'</div><div class="tt-cm">'+col.map(function(m){return card(m,E,t.champion_id)}).join('')+'</div></div>'}).join('')+'</div>'}
+  function table(t,rows,E,g,q){return '<div class="tt-tb">'+(g!==undefined?'<div class="tt-sub">'+(g?'Group '+h(g):'Table')+'</div>':'')+'<table><thead><tr><th>#</th><th class="n">'+(t.entrants.length&&t.entrants[0].members.length>1?'Team':'Player')+'</th><th>P</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>Pts</th></tr></thead><tbody>'
+    +rows.map(function(r){var e=E[r.entrant_id]||{};return '<tr class="'+(q&&r.pos<=q?'q':'')+'"><td>'+r.pos+'</td><td class="n"><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.f-r.a>0?'+':'')+(r.f-r.a)+'</td><td><b>'+r.pts+'</b></td></tr>'}).join('')+'</tbody></table></div>'}
+  function board(t,E){var top=Math.max.apply(null,[1].concat(t.leaderboard.map(function(r){return r.points})));
+    return '<ol class="tt-lb">'+t.leaderboard.map(function(r){var e=E[r.entrant_id]||{};return '<li><span class="p">'+r.pos+'</span><span class="nm"><span><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</span><span class="bar"><span style="width:'+(r.points/top*100)+'%;background:'+h(e.color)+'"></span></span></span><span class="pt"><b>'+r.points+'</b> pts<small>'+r.kills+' kills · '+r.wins+' W</small></span></li>'}).join('')+'</ol>'}
+  function render(t){var E={};t.entrants.forEach(function(e){E[e.id]=e});var champ=E[t.champion_id];var body='';
+    if(t.format==='ffa')body=board(t,E);
+    else if(t.format==='league')body=table(t,t.tables['']||[],E);
+    else{if(t.format==='groups')body='<div class="tt-groups">'+Object.keys(t.tables).sort().map(function(g){return table(t,t.tables[g],E,g,t.settings.advance)}).join('')+'</div>'+bracket(t,'K',E,'Knockout');
+      else body=bracket(t,'W',E,t.format==='double_elim'?'Winners bracket':'')+(t.format==='double_elim'?bracket(t,'L',E,'Losers bracket'):'');
+      var fin=t.matches.filter(function(m){return (m.stage==='GF'||m.stage==='P')&&m.status!=='void'});
+      if(fin.length)body+='<div class="tt-fin">'+fin.map(function(m){return '<div><div class="tt-rh">'+h(roundName(m.stage,m.round,1))+'</div>'+card(m,E,t.champion_id)+'</div>'}).join('')+'</div>'}
+    var pct=t.progress.total?Math.round(t.progress.played/t.progress.total*100):0;
+    return '<article class="tt" style="--gc:'+h(t.game_color)+'"><header><span class="tt-game">'+h(t.game_label)+' · '+h(t.mode_label)+' · '+h(t.format_label)+'</span><h3>'+h(t.name)+'</h3>'
+      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+t.progress.played+'/'+t.progress.total+' '+(t.kind==='ffa'?'games':'matches')+'</span></div></header>'
+      +(champ?'<div class="tt-champ">🏆 <b>'+h(champ.name)+'</b> '+(champ.members.length>1?'are':'is')+' champion</div>':'')
+      +body+'<a class="tt-open" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ →</a></article>'}
+  var timer=null;
   function load(){
-    fetch('/api/tourney',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){
-      var list=d.tournaments||[];
-      if(!el)return;
-      if(!list.length){
-        el.innerHTML='<p style="opacity:.5;font-size:14px;text-align:center">No active tournaments right now.</p>';
-        if(prevLine)prevLine.textContent='No active tournaments';
-        return;
-      }
-      if(prevLine)prevLine.textContent=list.length+' active';
-      // Load full detail for each
-      Promise.all(list.map(function(t){
-        return fetch('/api/tourney/'+t.id,{credentials:'same-origin'}).then(function(r){return r.json();});
-      })).then(function(details){
-        el.innerHTML=details.map(renderTournament).join('');
-      }).catch(function(){
-        el.innerHTML=details?details.map(renderTournament).join(''):'<p style="opacity:.5">Could not load brackets.</p>';
-      });
-    }).catch(function(){
-      if(el)el.innerHTML='<p style="opacity:.5;font-size:14px;text-align:center">Could not load tournaments.</p>';
-    });
+    fetch('/api/tourney',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var list=d.tournaments||[];if(!el)return;
+      var live=list.filter(function(t){return t.status==='active'});
+      if(prevLine)prevLine.textContent=live.length?live.length+' live now':(list.length?'Latest results':'No active tournaments');
+      el.innerHTML=list.length?list.map(render).join(''):'<p class="tt-empty">No tournaments running right now. Start one in the CRCMZ app.</p>';
+    }).catch(function(){if(el)el.innerHTML='<p class="tt-empty">Could not load tournaments.</p>'});
   }
-  // Load when tab becomes visible
-  document.addEventListener('viewchange',function(e){if(e.detail==='tourney')load();});
-  if(document.body.getAttribute('data-view')==='tourney')load();
+  document.addEventListener('viewchange',function(e){clearInterval(timer);if(e.detail==='tourney'){load();timer=setInterval(load,20000)}});
+  if(document.body.getAttribute('data-view')==='tourney'){load();timer=setInterval(load,20000)}
+  load();
 })();
 </script>
 <script>

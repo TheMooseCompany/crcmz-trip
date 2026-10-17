@@ -1060,33 +1060,20 @@ Return ONLY a valid JSON object with no explanation or markdown:
     }
   });
 
-  // Tourney proxy — pulls active tournaments from app.crcmz.me using machine token
-  const CRCMZ_MAIN_TOKEN = process.env.CRCMZ_MACHINE_TOKEN || '';
+  // Tourney: live tournaments from app.crcmz.me's read-only feed (TOURNEY_FEED_TOKEN).
+  const TOURNEY_FEED_TOKEN = process.env.TOURNEY_FEED_TOKEN || '';
   app.get('/api/tourney', requireAuth, async (req, res) => {
-    if (!CRCMZ_MAIN_TOKEN) return res.json({ tournaments: [] });
+    if (!TOURNEY_FEED_TOKEN) return res.json({ tournaments: [], error: 'not configured' });
     try {
-      const r = await fetch('https://app.crcmz.me/api/tourney/tournaments?status=active', {
-        headers: { 'Authorization': `Bearer ${CRCMZ_MAIN_TOKEN}` },
+      const r = await fetch('https://app.crcmz.me/api/tourney/feed', {
+        headers: { Authorization: `Bearer ${TOURNEY_FEED_TOKEN}` },
         signal: AbortSignal.timeout(8000),
       });
-      if (!r.ok) return res.json({ tournaments: [] });
-      const data = await r.json();
-      res.json({ tournaments: Array.isArray(data) ? data : [] });
+      if (!r.ok) return res.json({ tournaments: [], error: `upstream ${r.status}` });
+      const d = await r.json();
+      res.set('Cache-Control', 'no-store').json({ tournaments: Array.isArray(d.tournaments) ? d.tournaments : [] });
     } catch {
-      res.json({ tournaments: [] });
-    }
-  });
-  app.get('/api/tourney/:tid', requireAuth, async (req, res) => {
-    if (!CRCMZ_MAIN_TOKEN) return res.status(503).json({ error: 'not configured' });
-    try {
-      const r = await fetch(`https://app.crcmz.me/api/tourney/tournaments/${req.params.tid}`, {
-        headers: { 'Authorization': `Bearer ${CRCMZ_MAIN_TOKEN}` },
-        signal: AbortSignal.timeout(8000),
-      });
-      if (!r.ok) return res.status(r.status).json({ error: 'upstream error' });
-      res.json(await r.json());
-    } catch (e) {
-      res.status(500).json({ error: 'fetch failed' });
+      res.json({ tournaments: [], error: 'unreachable' });
     }
   });
 
