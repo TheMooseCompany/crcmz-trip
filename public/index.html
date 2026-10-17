@@ -3163,6 +3163,7 @@ fcRenderAll();
     +rows.map(function(r){var e=E[r.entrant_id]||{};return '<tr class="'+(q&&r.pos<=q?'q':'')+'"><td>'+r.pos+'</td><td class="n"><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.f-r.a>0?'+':'')+(r.f-r.a)+'</td><td><b>'+r.pts+'</b></td></tr>'}).join('')+'</tbody></table></div>'}
   function board(t,E){var top=Math.max.apply(null,[1].concat(t.leaderboard.map(function(r){return r.points})));
     return '<ol class="tt-lb">'+t.leaderboard.map(function(r){var e=E[r.entrant_id]||{};return '<li><span class="p">'+r.pos+'</span><span class="nm"><span><i style="background:'+h(e.color)+'"></i>'+h(e.name)+'</span><span class="bar"><span style="width:'+(r.points/top*100)+'%;background:'+h(e.color)+'"></span></span></span><span class="pt"><b>'+r.points+'</b> pts<small>'+r.kills+' kills · '+r.wins+' W</small></span></li>'}).join('')+'</ol>'}
+  function prog(t){var p=t.progress,bo=t.settings.legs===2?2:(t.settings.best_of||1);if(t.kind==='ffa')return p.played+'/'+p.total+' games';var u=bo>1?'series':(p.total===1?'match':'matches'),g=p.games||0;return p.played+'/'+p.total+' '+u+(bo>1&&g?' · '+g+' game'+(g===1?'':'s')+' (best of '+bo+')':'')}
   function render(t){var E={};t.entrants.forEach(function(e){E[e.id]=e});var champ=E[t.champion_id];var body='';
     if(t.format==='ffa')body=board(t,E);
     else if(t.format==='league')body=table(t,t.tables['']||[],E);
@@ -3172,7 +3173,7 @@ fcRenderAll();
       if(fin.length)body+='<div class="tt-fin">'+fin.map(function(m){return '<div><div class="tt-rh">'+h(roundName(m.stage,m.round,1))+'</div>'+card(m,E,t.champion_id)+'</div>'}).join('')+'</div>'}
     var pct=t.progress.total?Math.round(t.progress.played/t.progress.total*100):0;
     return '<article class="tt" style="--gc:'+h(t.game_color)+'"><header><span class="tt-game">'+h(t.game_label)+' · '+h(t.mode_label)+' · '+h(t.format_label)+'</span><h3>'+h(t.name)+'</h3>'
-      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+t.progress.played+'/'+t.progress.total+' '+(t.kind==='ffa'?'games':'matches')+(t.kind!=='ffa'&&(t.progress.games||0)>t.progress.played?' · '+t.progress.games+' games in':'')+'</span></div></header>'
+      +'<div class="tt-meta">'+(t.status==='active'?'<span class="tt-live">Live</span>':'<span class="tt-done">Finished</span>')+'<span class="tt-prog"><span style="width:'+pct+'%"></span></span><span>'+prog(t)+'</span></div></header>'
       +(champ?'<div class="tt-champ">🏆 <b>'+h(champ.name)+'</b> '+(champ.members.length>1?'are':'is')+' champion</div>':'')
       +body+'<a class="tt-open" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ →</a></article>'}
   var timer=null;
