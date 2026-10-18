@@ -1123,20 +1123,40 @@ Return ONLY a valid JSON object with no explanation or markdown:
   });
 
   // Tourney: live tournaments from app.crcmz.me's read-only feed (TOURNEY_FEED_TOKEN).
+  // Perf (Oct 17 device probe): the client polls this every 20 s and the
+  // uncached upstream hop cost ~190 ms on device. A 10 s in-memory cache
+  // halves upstream traffic; on an upstream error the last good payload
+  // is served stale instead of an empty board. Payload shape unchanged.
   const TOURNEY_FEED_TOKEN = process.env.TOURNEY_FEED_TOKEN || '';
+  const TOURNEY_FEED_URL = process.env.TOURNEY_FEED_URL || 'https://app.crcmz.me/api/tourney/feed';
+  const TOURNEY_CACHE_TTL = Number(process.env.TOURNEY_CACHE_TTL_MS) > 0
+    ? Number(process.env.TOURNEY_CACHE_TTL_MS) : 10000;
+  let tourneyCache = null; // { tournaments, at }
   app.get('/api/tourney', requireAuth, async (req, res) => {
     if (!TOURNEY_FEED_TOKEN) return res.json({ tournaments: [], error: 'not configured' });
+    if (tourneyCache && Date.now() - tourneyCache.at < TOURNEY_CACHE_TTL) {
+      return res.set('Cache-Control', 'no-store').json({ tournaments: tourneyCache.tournaments });
+    }
+    let failure = null;
     try {
-      const r = await fetch('https://app.crcmz.me/api/tourney/feed', {
+      const r = await fetch(TOURNEY_FEED_URL, {
         headers: { Authorization: `Bearer ${TOURNEY_FEED_TOKEN}` },
         signal: AbortSignal.timeout(8000),
       });
-      if (!r.ok) return res.json({ tournaments: [], error: `upstream ${r.status}` });
-      const d = await r.json();
-      res.set('Cache-Control', 'no-store').json({ tournaments: Array.isArray(d.tournaments) ? d.tournaments : [] });
+      if (!r.ok) failure = `upstream ${r.status}`;
+      else {
+        const d = await r.json();
+        const tournaments = Array.isArray(d.tournaments) ? d.tournaments : [];
+        tourneyCache = { tournaments, at: Date.now() };
+        return res.set('Cache-Control', 'no-store').json({ tournaments });
+      }
     } catch {
-      res.json({ tournaments: [], error: 'unreachable' });
+      failure = 'unreachable';
     }
+    if (tourneyCache) {
+      return res.set('Cache-Control', 'no-store').json({ tournaments: tourneyCache.tournaments });
+    }
+    return res.json({ tournaments: [], error: failure || 'unreachable' });
   });
 
   // Link previews: chat/social crawlers (WhatsApp, iMessage, Telegram,
@@ -1723,27 +1743,64 @@ document.addEventListener('keydown', function(e) {
     if (!PLACES_KEY) { res.status(503).json({ error: 'places-key-missing' }); return null; }
     return venue;
   }
+  function placesMetaPayload(d) {
+    return {
+      placeId: d.placeId,
+      googleMapsUri: d.googleMapsUri,
+      attributions: d.attributions,
+      // Gallery extensions (additive; older consumers ignore them):
+      // how many photos the gallery may serve (cap 5), which index is
+      // the venue's default photo, and per-index author attributions
+      // aligned with the ?n= indexes of /api/places/photo.
+      photoCount: d.photoCount,
+      photoIndex: d.photoIndex,
+      photoAttributions: d.photos.map((p) => p.attributions),
+    };
+  }
   app.get('/api/places/meta', requireAuth, async (req, res) => {
     const venue = placesVenueOrError(req, res);
     if (!venue) return;
     try {
       const d = await placeDetails(venue);
-      res.json({
-        placeId: d.placeId,
-        googleMapsUri: d.googleMapsUri,
-        attributions: d.attributions,
-        // Gallery extensions (additive; older consumers ignore them):
-        // how many photos the gallery may serve (cap 5), which index is
-        // the venue's default photo, and per-index author attributions
-        // aligned with the ?n= indexes of /api/places/photo.
-        photoCount: d.photoCount,
-        photoIndex: d.photoIndex,
-        photoAttributions: d.photos.map((p) => p.attributions),
-      });
+      res.json(placesMetaPayload(d));
     } catch (e) {
       console.error('[crcmz-trip] places meta failed:', venue.slug, e.code || e.status || e.message);
       res.status(502).json({ error: e.code === 'verify' ? 'places-verify-failed' : 'places-upstream' });
     }
+  });
+  // Batched meta (perf fix, Oct 17 device probe): the Food view used to
+  // fire one /api/places/meta request per venue — 98 in a single burst
+  // on first open. On a cold Details cache each became up to two Google
+  // calls (searchText + Details, 8 s abort each) with NO concurrency
+  // control, so upstream throttling/timeouts picked off ~9% of venues
+  // and each surfaced here as a hard 502 (see the handler above: any
+  // placeDetails throw -> 502). This endpoint resolves every venue
+  // through placeDetails behind a <=5-wide pool, reusing the same
+  // memory/disk caches, and a venue whose resolution fails comes back
+  // null — the endpoint itself always answers 200.
+  async function placesPool(items, limit, fn) {
+    let i = 0;
+    async function worker() {
+      while (i < items.length) { const it = items[i++]; await fn(it); }
+    }
+    const n = Math.max(1, Math.min(limit, items.length));
+    await Promise.all(Array.from({ length: n }, worker));
+  }
+  app.get('/api/places/meta-all', requireAuth, async (req, res) => {
+    const venues = {};
+    if (!PLACES_KEY) {
+      PLACES_VENUES.forEach((v) => { venues[v.slug] = null; });
+      return res.json({ venues });
+    }
+    await placesPool(PLACES_VENUES, 5, async (venue) => {
+      try {
+        venues[venue.slug] = placesMetaPayload(await placeDetails(venue));
+      } catch (e) {
+        console.error('[crcmz-trip] places meta-all venue failed:', venue.slug, e.code || e.status || e.message);
+        venues[venue.slug] = null;
+      }
+    });
+    res.json({ venues });
   });
   // Streams one photo's bytes. photoName comes only from the in-memory
   // Details cache — never from the client, never from disk.

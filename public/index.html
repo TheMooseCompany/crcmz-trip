@@ -5036,15 +5036,30 @@ function spLedgerError(){
  var fxEl=document.getElementById('spFxNote');
  if(fxEl&&spLoaded)fxEl.textContent='Couldn\'t refresh the ledger just now \u2014 showing the last loaded numbers.';
 }
+/* Perf fix (Oct 17 device probe): one Split open used to fetch the
+   ledger TWICE — a dock tap fires both the hashchange handler and the
+   60 ms click handler at the bottom of this module. Callers now share
+   a single in-flight (or <300 ms-old) request per ledger generation;
+   every successful mutation bumps the generation, so the refresh
+   after a save/settle/delete always fetches fresh. */
+var spLedgerGen=0, spLedgerFlight=null;
 function spFetchLedger(){
- return fetch('/api/expenses',{headers:{'Accept':'application/json'}})
+ if(spLedgerFlight&&spLedgerFlight.gen===spLedgerGen
+   &&(spLedgerFlight.pending||Date.now()-spLedgerFlight.at<300)){
+   return spLedgerFlight.promise;
+ }
+ var flight={gen:spLedgerGen,pending:true,at:Date.now(),promise:null};
+ flight.promise=fetch('/api/expenses',{headers:{'Accept':'application/json'}})
    .then(function(r){
      if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
      if(!r.ok)throw new Error('load');
      return r.json();
    })
    .then(function(data){ spApplyLedger(data); spLoaded=true; renderSplit(); })
-   .catch(function(err){ if(err&&err.message==='auth')return; spLedgerError(); });
+   .catch(function(err){ if(err&&err.message==='auth')return; spLedgerError(); })
+   .then(function(){ flight.pending=false; flight.at=Date.now(); });
+ spLedgerFlight=flight;
+ return flight.promise;
 }
 function spFetchFx(){
  return fetch('/api/fx',{headers:{'Accept':'application/json'}})
@@ -5107,6 +5122,7 @@ function spAddExpense(input){
      .then(function(r){
        if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
        if(!r.ok)throw new Error('save');
+       spLedgerGen++;
      });
  }
  if(input.receiptBlob){
@@ -5128,6 +5144,7 @@ function spAddSettlement(from,to,cents){
    .then(function(r){
      if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
      if(!r.ok)throw new Error('settle');
+     spLedgerGen++;
    });
 }
 function spDeleteExpense(id){
@@ -5135,6 +5152,7 @@ function spDeleteExpense(id){
    .then(function(r){
      if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
      if(!r.ok)throw new Error('delete');
+     spLedgerGen++;
    });
 }
 /* ---------- formatting (view currency is display-only) ---------- */
@@ -5163,6 +5181,50 @@ function spAvatar(name,cls){
 }
 /* ---------- rendering ---------- */
 var spSettleEl=document.getElementById('spSettle'),spExpEl=document.getElementById('spExpTable'),spDetailId=null;
+/* Keyed in-place board state (perf fix, Oct 17 device probe): rows
+   persist across renders, keyed by transfer pair / record id, and a
+   render only touches what actually changed — see renderSplit. The
+   two click handlers live here ONCE (event delegation) instead of
+   being rebound onto fresh nodes after every innerHTML rebuild. */
+var spCurTransfers=[], spSettling={}, spBoardMode='', spSettleKeys=new Map(), spExpKeys=new Map();
+function spSettleKey(t){return t.from+'\u2192'+t.to}
+function spSetBoardStatic(html,mode){
+ if(spBoardMode===mode&&spSettleEl.innerHTML===html)return;
+ spBoardMode=mode; spSettleKeys.clear();
+ spSettleEl.innerHTML=html;
+}
+function spPlaceAfter(parent,row,anchor){
+ if(row.parentNode!==parent||row.previousElementSibling!==anchor)parent.appendChild(row);
+ return row;
+}
+if(spSettleEl)spSettleEl.addEventListener('click',function(ev){
+ var btn=ev.target&&ev.target.closest?ev.target.closest('[data-settle]'):null;
+ if(!btn||btn.disabled)return;
+ var t=spCurTransfers[+btn.getAttribute('data-settle')];
+ if(!t)return;
+ var key=spSettleKey(t);
+ spSettling[key]=true; btn.disabled=true;
+ var done=function(){ delete spSettling[key]; if(btn.isConnected)btn.disabled=false; };
+ spAddSettlement(t.from,t.to,t.amountCentsCAD).then(function(){return spFetchLedger();}).then(done,done);
+});
+if(spExpEl)spExpEl.addEventListener('click',function(ev){
+ var undo=ev.target&&ev.target.closest?ev.target.closest('[data-stl]'):null;
+ if(undo){
+   if(!confirm('Remove this settlement?')) return;
+   undo.disabled=true;
+   fetch('/api/settlements/'+encodeURIComponent(undo.getAttribute('data-stl')),{method:'DELETE'})
+     .then(function(r){
+       if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
+       if(!r.ok)throw new Error('del');
+       spLedgerGen++;
+       return spFetchLedger();
+     })
+     .catch(function(err){ if(err&&err.message==='auth')return; undo.disabled=false; });
+   return;
+ }
+ var rowEl=ev.target&&ev.target.closest?ev.target.closest('[data-exp]'):null;
+ if(rowEl)openSpDetail(rowEl.getAttribute('data-exp'));
+});
 function spModeLabel(m){return m==='equal'?'Equally':(m==='exact'?'Exact amounts':'Percentages')}
 function spFmtWords(n){
  var w=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine'];
@@ -5175,91 +5237,130 @@ function renderSplit(){
  var total=spState.expenses.reduce(function(s,e){return s+e.amountCentsCAD},0);
  /* --- ink strip: trip total + your position as one pill --- */
  var stripTotal=document.getElementById('spStripTotal');
- if(stripTotal){stripTotal.textContent=spFmt(total);stripTotal.setAttribute('data-cuamt',total);}
+ if(stripTotal&&stripTotal.getAttribute('data-cuamt')!==String(total)){stripTotal.textContent=spFmt(total);stripTotal.setAttribute('data-cuamt',total);}
  var stripMeta=document.getElementById('spStripMeta');
- if(stripMeta)stripMeta.textContent='Trip total · '+spState.expenses.length+' expense'+(spState.expenses.length===1?'':'s');
+ var stripMetaTxt='Trip total · '+spState.expenses.length+' expense'+(spState.expenses.length===1?'':'s');
+ if(stripMeta&&stripMeta.textContent!==stripMetaTxt)stripMeta.textContent=stripMetaTxt;
  var pill=document.getElementById('spPill');
  if(pill){
    var myBal=(spMePerson&&SP_PEOPLE.indexOf(spMePerson)>-1)?(bal[spMePerson]||0):null;
-   if(myBal===null){pill.hidden=true;pill.innerHTML='';}
+   if(myBal===null){pill.hidden=true;if(pill.__h){pill.innerHTML='';pill.__h='';}}
    else{
      pill.hidden=false;
-     pill.innerHTML=myBal>0?('<small>You</small>+<span data-cuamt="'+myBal+'">'+spFmt(myBal)+'</span>'):(myBal<0?('<small>You</small>\u2212<span data-cuamt="'+(-myBal)+'">'+spFmt(-myBal)+'</span>'):'You\u2019re square');
+     var pillHtml=myBal>0?('<small>You</small>+<span data-cuamt="'+myBal+'">'+spFmt(myBal)+'</span>'):(myBal<0?('<small>You</small>\u2212<span data-cuamt="'+(-myBal)+'">'+spFmt(-myBal)+'</span>'):'You\u2019re square');
+     if(pill.__h!==pillHtml){pill.innerHTML=pillHtml;pill.__h=pillHtml;}
    }
  }
- /* --- settle board: the table is the page --- */
+ /* --- settle board: the table is the page ---
+    Keyed reconcile: a row per from->to pair persists across renders;
+    ranks, amounts and the you-class update in place, only new/gone
+    transfers create or remove nodes, and the produced markup is the
+    same the old full innerHTML rebuild produced. */
+ spCurTransfers=transfers;
  if(!spState.expenses.length){
-   spSettleEl.innerHTML='<div class="nb-empty">Nothing to settle yet.</div>';
+   spSetBoardStatic('<div class="nb-empty">Nothing to settle yet.</div>','empty');
  }else if(!transfers.length){
-   spSettleEl.innerHTML='<div class="nb-empty">All square.</div>';
+   spSetBoardStatic('<div class="nb-empty">All square.</div>','square');
  }else{
    var onePayee=transfers.every(function(t){return t.to===transfers[0].to});
    var head=onePayee?('Payer \u2192 '+esc(transfers[0].to)):'Payer \u2192 Payee';
-   spSettleEl.innerHTML='<div class="nb-thead" aria-hidden="true"><span>#</span><span></span><span>'+head+'</span><span class="r">Owes</span><span></span></div>'
-   +transfers.map(function(t,i){
-     var you=!!spMePerson&&t.from===spMePerson;
-     return '<div class="nb-row'+(you?' you':'')+'">'
-       +'<span class="nb-rk">'+('0'+(i+1)).slice(-2)+'</span>'
-       +spAvatar(t.from,'nb-av')
-       +'<span class="nb-nm">'+esc(t.from)+'<span class="nb-to">\u2192'+spAvatar(t.to,'nb-av nb-toav')+'</span></span>'
-       +'<span class="nb-amt" data-cuamt="'+t.amountCentsCAD+'">'+spFmt(t.amountCentsCAD)+'</span>'
-       +'<button type="button" class="nb-chip" data-settle="'+i+'">Mark paid</button></div>';
-   }).join('');
-   spSettleEl.querySelectorAll('[data-settle]').forEach(function(btn){
-     btn.addEventListener('click',function(){
-       var t=transfers[+btn.getAttribute('data-settle')];
-       if(t){btn.disabled=true;spAddSettlement(t.from,t.to,t.amountCentsCAD).then(function(){return spFetchLedger();}).catch(function(){btn.disabled=false;});}
-     });
+   var thead=spSettleEl.querySelector('.nb-thead');
+   if(spBoardMode!=='rows'||!thead){
+     spSettleEl.innerHTML=''; spSettleKeys.clear();
+     thead=document.createElement('div');
+     thead.className='nb-thead'; thead.setAttribute('aria-hidden','true');
+     thead.innerHTML='<span>#</span><span></span><span>'+head+'</span><span class="r">Owes</span><span></span>';
+     spSettleEl.appendChild(thead);
+     spBoardMode='rows';
+   }else if(thead.children[2].textContent!==head){
+     thead.children[2].textContent=head;
+   }
+   var seenPairs={};
+   var anchor=thead;
+   transfers.forEach(function(t,i){
+     var key=spSettleKey(t); seenPairs[key]=true;
+     var row=spSettleKeys.get(key);
+     if(!row){
+       row=document.createElement('div');
+       row.innerHTML='<span class="nb-rk"></span>'
+         +spAvatar(t.from,'nb-av')
+         +'<span class="nb-nm"></span>'
+         +'<span class="nb-amt"></span>'
+         +'<button type="button" class="nb-chip">Mark paid</button>';
+       spSettleKeys.set(key,row);
+     }
+     var cls='nb-row'+((spMePerson&&t.from===spMePerson)?' you':'');
+     if(row.className!==cls)row.className=cls;
+     var rk=row.children[0],rkTxt=('0'+(i+1)).slice(-2);
+     if(rk.textContent!==rkTxt)rk.textContent=rkTxt;
+     var nm=row.children[2];
+     var nmHtml=esc(t.from)+'<span class="nb-to">\u2192'+spAvatar(t.to,'nb-av nb-toav')+'</span>';
+     if(nm.__h!==nmHtml){nm.innerHTML=nmHtml;nm.__h=nmHtml;}
+     var amtEl=row.children[3];
+     if(amtEl.getAttribute('data-cuamt')!==String(t.amountCentsCAD)){
+       amtEl.setAttribute('data-cuamt',t.amountCentsCAD);
+       amtEl.textContent=spFmt(t.amountCentsCAD);
+     }
+     var chip=row.children[4];
+     if(chip.getAttribute('data-settle')!==String(i))chip.setAttribute('data-settle',i);
+     var dis=!!spSettling[key];
+     if(chip.disabled!==dis)chip.disabled=dis;
+     anchor=spPlaceAfter(spSettleEl,row,anchor);
    });
+   spSettleKeys.forEach(function(row,key){ if(!seenPairs[key]){ row.remove(); spSettleKeys.delete(key); } });
  }
  /* --- footnote: payment count + FX (the view toggle sits beside it) --- */
  var fxEl=document.getElementById('spFxNote');
  if(fxEl){
    var cnt=transfers.length?(spFmtWords(transfers.length)+' payment'+(transfers.length===1?' squares':'s square')+' the pot.'):'All square.';
-   fxEl.textContent=cnt+' Balances kept in CAD · 1 USD = '+SP_FX.toFixed(3)+' CAD · ECB rate'+(SP_FX_STALE?' · last known':'')+'.';
+   var fxTxt=cnt+' Balances kept in CAD · 1 USD = '+SP_FX.toFixed(3)+' CAD · ECB rate'+(SP_FX_STALE?' · last known':'')+'.';
+   if(fxEl.textContent!==fxTxt)fxEl.textContent=fxTxt;
  }
- /* --- expenses table: expenses + recorded settlements (Undo) --- */
+ /* --- expenses table: expenses + recorded settlements (Undo) ---
+    Keyed reconcile, same idea as the settle board: a row per record
+    id persists; its inner markup is rewritten only when the record's
+    rendered string actually changed (so receipt <img> nodes are no
+    longer recreated — and re-fetched — on every render). */
  var rows=[];
  spState.expenses.forEach(function(e){rows.push({t:e.addedAt,kind:'exp',e:e})});
  spState.settlements.forEach(function(s){rows.push({t:s.at,kind:'stl',s:s})});
  rows.sort(function(a,b){return b.t-a.t});
  document.getElementById('spEmpty').hidden=rows.length>0;
  if(spExpEl){
-   spExpEl.innerHTML=rows.map(function(r){
+   var seenRecs={}, anchorExp=null;
+   rows.forEach(function(r){
+     var key,inner;
      if(r.kind==='stl'){
-       var s=r.s;
-       return '<div class="nb-exp-row"><span class="sp-glyph settle"><svg viewBox="0 0 24 24"><path d="M7 10l-3 3 3 3M4 13h13M17 6l3 3-3 3M20 9H7"/></svg></span>'
+       var s=r.s; key='stl:'+s.id;
+       inner='<span class="sp-glyph settle"><svg viewBox="0 0 24 24"><path d="M7 10l-3 3 3 3M4 13h13M17 6l3 3-3 3M20 9H7"/></svg></span>'
          +'<span class="nb-exp-main"><span class="nb-exp-desc">'+esc(s.from)+' paid '+esc(s.to)+'</span>'
          +'<span class="nb-exp-sub">Settlement · '+spDate(s.at)+(s.addedBy?' · by '+esc(s.addedBy):'')+'</span></span>'
          +'<span class="nb-exp-amt">'+spFmt(s.amountCentsCAD)+'</span>'
-         +'<button type="button" class="sp-undo-btn" data-stl="'+s.id+'">Undo</button></div>';
+         +'<button type="button" class="sp-undo-btn" data-stl="'+s.id+'">Undo</button>';
+     }else{
+       var e=r.e,n=Object.keys(e.shares).length; key='exp:'+e.id;
+       var sub=esc(e.payer)+' paid · split '+n+' way'+(n===1?'':'s')+' · '+spModeLabel(e.splitMode)+' · '+spDate(e.addedAt);
+       if(e.currency==='USD')sub+=' · '+spFmtOrig(e)+' · @ '+Number(e.fxRate).toFixed(3);
+       var thumb=e.receipt?('<img class="sp-thumb" src="'+spReceiptUrl(e)+'" alt="">')
+         :('<span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span>');
+       inner=thumb
+         +'<span class="nb-exp-main"><span class="nb-exp-desc">'+esc(e.desc)+'</span>'
+         +'<span class="nb-exp-sub">'+sub+'</span></span>'
+         +'<span class="nb-exp-amt">'+spFmt(e.amountCentsCAD)+'</span>';
      }
-     var e=r.e,n=Object.keys(e.shares).length;
-     var sub=esc(e.payer)+' paid · split '+n+' way'+(n===1?'':'s')+' · '+spModeLabel(e.splitMode)+' · '+spDate(e.addedAt);
-     if(e.currency==='USD')sub+=' · '+spFmtOrig(e)+' · @ '+Number(e.fxRate).toFixed(3);
-     var thumb=e.receipt?('<img class="sp-thumb" src="'+spReceiptUrl(e)+'" alt="">')
-       :('<span class="sp-glyph"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span>');
-     return '<button type="button" class="nb-exp-row" data-exp="'+e.id+'">'+thumb
-       +'<span class="nb-exp-main"><span class="nb-exp-desc">'+esc(e.desc)+'</span>'
-       +'<span class="nb-exp-sub">'+sub+'</span></span>'
-       +'<span class="nb-exp-amt">'+spFmt(e.amountCentsCAD)+'</span></button>';
-   }).join('');
-   spExpEl.querySelectorAll('[data-exp]').forEach(function(b){
-     b.addEventListener('click',function(){openSpDetail(b.getAttribute('data-exp'))});
+     seenRecs[key]=true;
+     var row=spExpKeys.get(key);
+     if(!row){
+       row=document.createElement(r.kind==='stl'?'div':'button');
+       if(r.kind==='exp'){ row.setAttribute('type','button'); row.className='nb-exp-row'; row.setAttribute('data-exp',r.e.id); }
+       else row.className='nb-exp-row';
+       row.__h=null;
+       spExpKeys.set(key,row);
+     }
+     if(row.__h!==inner){ row.innerHTML=inner; row.__h=inner; }
+     anchorExp=spPlaceAfter(spExpEl,row,anchorExp);
    });
-   spExpEl.querySelectorAll('[data-stl]').forEach(function(b){
-     b.addEventListener('click',function(){
-       if(!confirm('Remove this settlement?')) return;
-       b.disabled=true;
-       fetch('/api/settlements/'+encodeURIComponent(b.getAttribute('data-stl')),{method:'DELETE'})
-         .then(function(r){
-           if(r.status===401){window.location.href='/auth/login';throw new Error('auth');}
-           if(!r.ok)throw new Error('del');
-           return spFetchLedger();
-         })
-         .catch(function(err){ if(err&&err.message==='auth')return; b.disabled=false; });
-     });
-   });
+   spExpKeys.forEach(function(row,key){ if(!seenRecs[key]){ row.remove(); spExpKeys.delete(key); } });
  }
  var prev=document.getElementById('splitPrevLine');
  var prevBadge=document.getElementById('splitTileBadge');
@@ -5280,18 +5381,29 @@ function renderSplit(){
    final frame always lands on spFmt's exact string. While the Split
    view is hidden the sweep only records targets — the template has
    already written the correct figures. Reduced motion: no sweep. */
+/* Perf fix (Oct 17 device probe): the roll used to assign textContent
+   every frame, tearing down and recreating the text node ~43x per
+   element per roll (a childList mutation each time — the bulk of the
+   ~380 mutations counted on a Split open). The frames now write into
+   the element's existing text node; the animation, its duration and
+   every displayed string are unchanged. */
+function spSetAmtText(el,txt){
+ var kids=el.childNodes;
+ if(kids.length===1&&kids[0].nodeType===3){ if(kids[0].nodeValue!==txt)kids[0].nodeValue=txt; }
+ else if(el.textContent!==txt)el.textContent=txt;
+}
 function spCountUp(el,target,fromZero){
  if(REDUCED){el._cuVal=target;return;}
  var from=fromZero?0:(typeof el._cuVal==='number'?el._cuVal:0);
  el._cuVal=target;
- if(from===target){el.textContent=spFmt(target);return;}
+ if(from===target){spSetAmtText(el,spFmt(target));return;}
  if(el._cuRaf)cancelAnimationFrame(el._cuRaf);
  var t0=performance.now(),dur=720;
  var step=function(t){
    var p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);
-   el.textContent=spFmt(Math.round(from+(target-from)*e));
+   spSetAmtText(el,spFmt(Math.round(from+(target-from)*e)));
    if(p<1)el._cuRaf=requestAnimationFrame(step);
-   else el.textContent=spFmt(target);
+   else spSetAmtText(el,spFmt(target));
  };
  el._cuRaf=requestAnimationFrame(step);
 }
@@ -5530,7 +5642,13 @@ renderSplit();
 spFetchFx();
 spFetchLedger();
 document.addEventListener('click',function(e){
-  var vt=e.target&&e.target.closest?e.target.closest('[data-view="split"],a[href="#split"]'):null;
+  /* Perf fix (Oct 17 device probe): this selector used to be plain
+     [data-view="split"], which ALSO matches <body data-view="split">
+     — so while Split was the active view, EVERY click anywhere (open
+     the sheet, tap a chip, save) scheduled a ledger fetch 60 ms later,
+     and in the old build each one rebuilt the whole board. The intent
+     is navigation clicks only: the dock tab or a #split link. */
+  var vt=e.target&&e.target.closest?e.target.closest('.tab[data-view="split"],a[href="#split"]'):null;
   if(vt)setTimeout(function(){spFetchLedger();},60);
 });
 window.addEventListener('hashchange',function(){
@@ -6595,32 +6713,58 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    photo has actually loaded, so a dead pipeline changes nothing. */
 (function(){
  var done=new WeakSet();
+ /* Perf fix (Oct 17 device probe): meta used to be fetched per card —
+    98 requests in one burst on first Food open, each committing DOM as
+    it landed (settle 2,477 ms on device, 9 venues 502'd). Now ONE
+    /api/places/meta-all request resolves the whole list server-side;
+    when it lands, every waiting card is applied in a single pass.
+    Photo loading below (probe <img>, galleries) is unchanged. A venue
+    whose meta comes back null keeps the category-photo placeholder,
+    exactly as a failed per-card fetch behaved before. */
+ var metaState='idle', metaBySlug=null, metaWaiters=[];
  function photoUrl(slug,n){return '/api/places/photo?venue='+encodeURIComponent(slug)+(n==null?'':'&n='+n)}
+ function applyMeta(card,photoEl,img,slug,meta){
+  var count=meta.photoCount>0?Math.min(meta.photoCount,5):1;
+  var probe=new Image();
+  probe.onload=function(){
+   var dir=card.querySelector('a.nm-dir');
+   if(dir&&meta.googleMapsUri)dir.href=meta.googleMapsUri;
+   if(count<=1){ // original single-photo swap, unchanged
+    img.src=probe.src;
+    addCredit(photoEl,meta,(meta.attributions||[])[0]||null);
+    return;
+   }
+   buildGallery(card,photoEl,img,meta,slug,count,probe);
+  };
+  probe.onerror=function(){};
+  probe.src=photoUrl(slug,null); // the venue's default photo, as before
+ }
+ function flushMeta(){
+  var waiters=metaWaiters; metaWaiters=[];
+  waiters.forEach(function(w){
+   var m=metaBySlug?metaBySlug[w.slug]:null;
+   if(m)applyMeta(w.card,w.photoEl,w.img,w.slug,m);
+  });
+ }
+ function ensureMeta(){
+  if(metaState!=='idle')return; metaState='loading';
+  fetch('/api/places/meta-all')
+   .then(function(r){return r.ok?r.json():null})
+   .then(function(j){
+    if(!j||!j.venues){ metaState='failed'; metaWaiters=[]; return; }
+    metaBySlug=j.venues; metaState='ready'; flushMeta();
+   })
+   .catch(function(){ metaState='failed'; metaWaiters=[]; });
+ }
  function wire(card){
   if(done.has(card))return; done.add(card);
   var slug=card.getAttribute('data-place-slug'); if(!slug)return;
   var photoEl=card.querySelector('.nm-photo'); if(!photoEl)return;
   var img=photoEl.querySelector('img'); if(!img)return;
-  fetch('/api/places/meta?venue='+encodeURIComponent(slug))
-   .then(function(r){return r.ok?r.json():null})
-   .then(function(meta){
-    if(!meta)return;
-    var count=meta.photoCount>0?Math.min(meta.photoCount,5):1;
-    var probe=new Image();
-    probe.onload=function(){
-     var dir=card.querySelector('a.nm-dir');
-     if(dir&&meta.googleMapsUri)dir.href=meta.googleMapsUri;
-     if(count<=1){ // original single-photo swap, unchanged
-      img.src=probe.src;
-      addCredit(photoEl,meta,(meta.attributions||[])[0]||null);
-      return;
-     }
-     buildGallery(card,photoEl,img,meta,slug,count,probe);
-    };
-    probe.onerror=function(){};
-    probe.src=photoUrl(slug,null); // the venue's default photo, as before
-   })
-   .catch(function(){});
+  if(metaState==='ready'){ var m=metaBySlug[slug]; if(m)applyMeta(card,photoEl,img,slug,m); return; }
+  if(metaState==='failed')return;
+  metaWaiters.push({card:card,photoEl:photoEl,img:img,slug:slug});
+  ensureMeta();
  }
  function creditFor(meta,n){
   var list=meta.photoAttributions;
