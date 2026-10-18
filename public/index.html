@@ -2276,195 +2276,275 @@ flash of Home. The router clears the tag when it takes over. */
      colours: green #4ADE80 = live/playable, violet = champion/brand,
      amber = stale. -->
 <style>
-#view-tourney{--tk-ink:#090A0E;--tk-bg:#060608;--tk-graphite:#171922;--tk-violet:#A855F7;--tk-violet-lt:#CFA6FF;--tk-silver:#D9DEE6;--tk-white:#F4F5F7;--tk-muted:#A7A4B2;--tk-green:#4ADE80;--tk-amber:#E8B33D;--tk-red:#FF8A94;--tk-line:rgba(217,222,230,.10);--tk-line2:rgba(217,222,230,.18);background:var(--tk-bg)}
-#view-tourney::before{background:radial-gradient(640px 400px at 16% 10%,rgba(168,85,247,.08),transparent 65%),radial-gradient(560px 360px at 88% 70%,rgba(168,85,247,.05),transparent 70%)}
+/* ================= TOURNEY · CRCMZ NEON BUILD =================
+   The Tourney view runs on its own CRCMZ identity (deep purple-black /
+   plum, Orbitron display + Manrope, hot magenta + cyan, gold only for
+   champion / winner / #1, acid green #4ADE80 only for live/playable),
+   separate from the trip app's indigo system. Entrant colours and
+   game_color arrive as DATA and paint identity only. */
+@font-face{font-family:"Orbitron";src:url("assets/fonts/orbitron-var.woff2") format("woff2");font-style:normal;font-weight:400 900;font-display:swap}
+@font-face{font-family:"Manrope";src:url("assets/fonts/manrope-var.woff2") format("woff2");font-style:normal;font-weight:200 800;font-display:swap}
+#view-tourney{--tn-ink:#0A0613;--tn-ink2:#0E0819;--tn-plum:#1C1130;--tn-plum2:#150D24;--tn-line:rgba(217,222,230,.10);--tn-line-soft:rgba(217,222,230,.06);--tn-silver:#D9DEE6;--tn-white:#F4F5F7;--tn-muted:#A7A4B2;--tn-dim:#7D7A8D;--tn-violet:#A855F7;--tn-magenta:#FF2E88;--tn-neon:#FF2FD6;--tn-cyan:#2DD4EE;--tn-gold:#F5B93F;--tn-gold-hi:#FFD970;--tn-gold-lo:#C07F16;--tn-green:#4ADE80;--tn-amber:#E8B33D;--tn-ease-glide:cubic-bezier(.65,0,.35,1);--tn-ease-pop:cubic-bezier(.34,1.45,.64,1);--tn-ease-out:cubic-bezier(.22,1,.36,1);--tn-shadow-card:inset 0 1px 0 rgba(244,245,247,.06),inset 0 -16px 26px -20px rgba(0,0,0,.65),0 1px 2px rgba(0,0,0,.55),0 10px 22px -12px rgba(0,0,0,.75),0 26px 44px -24px rgba(0,0,0,.88);--tn-shadow-raised:inset 0 1px 0 rgba(244,245,247,.09),inset 0 -20px 32px -24px rgba(0,0,0,.7),0 2px 4px rgba(0,0,0,.55),0 14px 28px -14px rgba(0,0,0,.8),0 36px 64px -28px rgba(0,0,0,.92);background:radial-gradient(120% 340px at 50% -60px,rgba(168,85,247,.13),rgba(168,85,247,0) 70%),radial-gradient(90% 300px at 85% 120px,rgba(255,46,136,.05),rgba(255,46,136,0) 70%),linear-gradient(180deg,#150B28,#0D0718 300px,var(--tn-ink) 560px);background-color:var(--tn-ink)}
+#view-tourney::before{background:radial-gradient(115% 90% at 50% 38%,rgba(0,0,0,0) 58%,rgba(2,1,6,.42) 100%)}
 #view-tourney section{padding-top:calc(var(--header-h) + 10px)}
-#tourneyContent{display:flex;flex-direction:column;font-family:"Space Grotesk",system-ui,sans-serif;color:var(--tk-white);line-height:1.3}
-#tourneyContent .tk-mono,#tourneyContent .tk-kick,#tourneyContent .tk-fresh,#tourneyContent .tk-sk,#tourneyContent .tk-lk,#tourneyContent .tk-lt,#tourneyContent .tk-tc-meta,#tourneyContent .tk-live,#tourneyContent .tk-prog,#tourneyContent .tk-ck,#tourneyContent .tk-tag,#tourneyContent .tk-sub,#tourneyContent .tk-pos,#tourneyContent .tk-pts,#tourneyContent .tk-dh,#tourneyContent .tk-glog,#tourneyContent .tk-lhead,#tourneyContent .tk-lrow .tk-c-n,#tourneyContent .tk-fx-id,#tourneyContent .tk-state,#tourneyContent .tk-score,#tourneyContent .tk-rl,#tourneyContent .tk-rs,#tourneyContent .tk-snum,#tourneyContent .tk-grow,#tourneyContent .tk-vnote,#tourneyContent .tk-dchip,#tourneyContent .tk-lstat,#tourneyContent .tk-nk,#tourneyContent .tk-clear,#tourneyContent .tk-foot,#tourneyContent .tk-legend,#tourneyContent .tk-newtag{font-family:"IBM Plex Mono",ui-monospace,monospace}
-/* head */
-#view-tourney .tk-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
-#view-tourney .tk-kick{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.3em;color:var(--tk-violet);font-weight:600}
-#view-tourney .tk-title{font-size:23px;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;margin:3px 0 0;line-height:1.15;color:var(--tk-white)}
-#view-tourney .tk-fresh{font-size:9.5px;color:var(--tk-muted);text-align:right;line-height:1.7;letter-spacing:.06em;padding-top:4px}
-#view-tourney .tk-fdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tk-green);margin-right:4px;vertical-align:1px}
-#view-tourney .tk-fresh.tk-stale .tk-fdot{background:transparent;border:1.5px solid var(--tk-muted)}
-#view-tourney .tk-fresh.tk-loading .tk-fdot{background:transparent;border:1.5px solid var(--tk-violet)}
-#tourneyContent.tk-isstale .tk-live{color:var(--tk-muted)}
-#tourneyContent.tk-isstale .tk-live i{background:var(--tk-muted);animation:none}
-/* bug strip */
-#tourneyContent .tk-strip{display:flex;gap:9px;align-items:flex-start;background:#101117;border:1px solid var(--tk-line2);border-left:4px solid var(--tk-muted);border-radius:10px;padding:6px 11px;margin-bottom:10px}
-#tourneyContent .tk-sk{font-size:9px;font-weight:700;letter-spacing:.14em;padding:3px 6px;border-radius:5px;flex:none;margin-top:1px;background:rgba(217,222,230,.10);color:var(--tk-silver)}
-#tourneyContent .tk-strip[data-kind="latest"],#tourneyContent .tk-strip[data-kind="live"]{border-left-color:var(--tk-green)}
-#tourneyContent .tk-strip[data-kind="latest"] .tk-sk,#tourneyContent .tk-strip[data-kind="live"] .tk-sk{background:rgba(74,222,128,.16);color:var(--tk-green)}
-#tourneyContent .tk-strip[data-kind="upnext"]{border-left-color:var(--tk-green)}
-#tourneyContent .tk-strip[data-kind="upnext"] .tk-sk{background:var(--tk-green);color:#0B1510}
-#tourneyContent .tk-strip[data-kind="champion"]{border-left-color:var(--tk-violet)}
-#tourneyContent .tk-strip[data-kind="champion"] .tk-sk{background:rgba(168,85,247,.25);color:var(--tk-violet-lt)}
-#tourneyContent .tk-strip[data-kind="stale"]{border-left-color:var(--tk-amber)}
-#tourneyContent .tk-strip[data-kind="stale"] .tk-sk{background:rgba(232,179,61,.15);color:var(--tk-amber)}
-#tourneyContent .tk-st{font-size:12.5px;font-weight:600;line-height:1.4;flex:1}
-#tourneyContent .tk-st span{color:var(--tk-muted);font-weight:400}
-/* lens card */
-#tourneyContent .tk-lens{background:linear-gradient(180deg,rgba(168,85,247,.10),rgba(168,85,247,0) 60%),var(--tk-graphite);border:1px solid rgba(168,85,247,.45);border-radius:16px;padding:12px 13px;margin-bottom:12px;animation:tkroomin .38s var(--spring)}
-#tourneyContent .tk-lh{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-#tourneyContent .tk-lk{font-size:9px;letter-spacing:.18em;color:var(--tk-violet-lt)}
-#tourneyContent .tk-ln{font-size:16px;font-weight:700;text-transform:uppercase;line-height:1.15}
-#tourneyContent .tk-lt{font-size:9px;color:var(--tk-muted);letter-spacing:.12em;margin-top:2px;display:inline-block}
-#tourneyContent .tk-clear{margin-left:auto;font-size:10px;color:var(--tk-muted);letter-spacing:.08em;cursor:pointer;border:1px solid var(--tk-line2);border-radius:7px;padding:5px 8px;flex:none;background:none}
-#tourneyContent .tk-nextbox{background:#101117;border:1px solid var(--tk-line2);border-radius:11px;padding:9px 11px;margin-bottom:8px}
-#tourneyContent .tk-nk{font-size:8.5px;letter-spacing:.18em;color:var(--tk-muted);margin-bottom:4px}
-#tourneyContent .tk-nv{font-size:14.5px;font-weight:700;line-height:1.35}
-#tourneyContent .tk-nv .tk-play{color:var(--tk-green)}
-#tourneyContent .tk-lstats{border-top:1px dashed var(--tk-line2);padding-top:7px}
-#tourneyContent .tk-lstat{font-size:11px;color:var(--tk-silver);letter-spacing:.03em;padding:2px 0}
-/* tournament card */
-#tourneyContent .tk-tc{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:10px 13px 8px;margin-bottom:10px;position:relative;overflow:hidden}
-#tourneyContent .tk-tc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tk-gc,#A855F7)}
-#tourneyContent .tk-tc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
-#tourneyContent .tk-tc-name{font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.01em;line-height:1.25}
-#tourneyContent .tk-tc-meta{font-size:9.5px;color:var(--tk-muted);letter-spacing:.1em;margin-top:3px}
-#tourneyContent .tk-gdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tk-gc,#A855F7);margin-right:4px;vertical-align:1px}
-#tourneyContent .tk-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--tk-green);letter-spacing:.14em;flex:none;padding-top:3px}
-#tourneyContent .tk-live i{width:7px;height:7px;border-radius:50%;background:var(--tk-green);display:block;animation:tkpulse 1.6s infinite}
-#tourneyContent .tk-live.tk-fin{color:var(--tk-muted)}
-#tourneyContent .tk-live.tk-fin i{background:var(--tk-muted);animation:none}
-@keyframes tkpulse{0%,100%{opacity:1}50%{opacity:.35}}
-#tourneyContent .tk-prog{font-size:9.5px;color:var(--tk-muted);letter-spacing:.08em;margin-top:3px}
-#tourneyContent .tk-champband{background:linear-gradient(90deg,rgba(168,85,247,.32),rgba(168,85,247,.10));border:1px solid rgba(168,85,247,.55);border-radius:11px;padding:9px 12px;margin:8px 0 4px}
-#tourneyContent .tk-ck{font-size:8.5px;letter-spacing:.2em;color:var(--tk-violet-lt)}
-#tourneyContent .tk-cn{font-size:15.5px;font-weight:700;text-transform:uppercase;margin-top:2px}
-#tourneyContent .tk-cs{font-size:11.5px;color:var(--tk-muted);margin-top:2px}
-/* entrant bits */
-#tourneyContent .tk-chip{width:32px;height:32px;border-radius:10px;overflow:hidden;flex:none;background:#0D0E13;border:1.5px solid var(--tk-line2);cursor:pointer;position:relative;z-index:2;display:inline-block;vertical-align:middle}
-#tourneyContent .tk-chip img{width:100%;height:100%;object-fit:cover;object-position:22% 30%;display:block;pointer-events:none}
-#tourneyContent .tk-chip.tk-lg{width:44px;height:44px;border-radius:12px;cursor:default}
-#tourneyContent .tk-chip.tk-on{border-color:var(--tk-ec,#A855F7);box-shadow:0 0 0 1.5px var(--tk-ec,#A855F7)}
-#tourneyContent .tk-chip.tk-mono{display:inline-flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:700;color:var(--tk-silver);letter-spacing:.03em}
-#tourneyContent .tk-nm{font-size:14px;font-weight:600;color:var(--tk-white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#tourneyContent .tk-nm.tk-dimnm{color:var(--tk-muted);font-size:13.5px;font-weight:400}
-#tourneyContent .tk-tag{font-size:8.5px;letter-spacing:.12em;padding:2px 5px;border-radius:4px;vertical-align:2px;margin-left:6px;white-space:nowrap;font-weight:700}
-#tourneyContent .tk-tag.tk-you{background:rgba(168,85,247,.18);color:var(--tk-violet-lt);border:1px solid rgba(168,85,247,.45)}
-#tourneyContent .tk-tag.tk-life{background:rgba(255,77,94,.14);color:var(--tk-red);border:1px solid rgba(255,77,94,.4)}
-/* lensing dim/highlight */
-#tourneyContent [data-who]{transition:opacity .3s var(--spring-soft)}
-#tourneyContent.tk-lensing [data-who]{opacity:.35}
-#tourneyContent.tk-lensing [data-who].tk-lit{opacity:1;background:rgba(168,85,247,.07);background:color-mix(in srgb,var(--tk-ec) 7%,transparent);box-shadow:inset 3px 0 0 var(--tk-ec);border-radius:6px}
-/* standings (ffa) */
-#tourneyContent .tk-srow{display:flex;align-items:center;gap:9px;padding:5px 2px;border-top:1px solid var(--tk-line);cursor:pointer}
-#tourneyContent .tk-srow:first-of-type{border-top:none}
-#tourneyContent .tk-pos{font-size:18px;font-weight:700;width:20px;color:var(--tk-silver);flex:none}
-#tourneyContent .tk-who{flex:1;min-width:0}
-#tourneyContent .tk-sub{font-size:9.5px;color:var(--tk-muted);letter-spacing:.06em;margin-top:2px}
-#tourneyContent .tk-pts{font-size:20px;font-weight:700;color:var(--tk-white);text-align:right}
-#tourneyContent .tk-chev{color:var(--tk-muted);font-size:14px;flex:none;transition:transform .3s var(--spring-soft)}
-#tourneyContent .tk-srow.tk-open .tk-chev{transform:rotate(90deg)}
-#tourneyContent .tk-detail{border-top:1px dashed var(--tk-line2);padding:9px 2px 6px}
-#tourneyContent .tk-dh{font-size:9px;letter-spacing:.16em;color:var(--tk-muted);margin-bottom:6px}
-#tourneyContent .tk-glog{display:flex;justify-content:space-between;font-size:11px;color:var(--tk-muted);padding:3.5px 0}
-#tourneyContent .tk-glog b{color:var(--tk-silver);font-weight:400}
-/* league / groups table */
-#tourneyContent .tk-tsub{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.16em;color:var(--tk-muted);margin:10px 0 2px;text-transform:uppercase}
-#tourneyContent .tk-lhead,#tourneyContent .tk-lrow{display:flex;align-items:center;gap:6px;padding:6px 2px}
-#tourneyContent .tk-lhead{font-size:8.5px;color:var(--tk-muted);letter-spacing:.14em;border-top:1px solid var(--tk-line)}
-#tourneyContent .tk-lrow{border-top:1px solid var(--tk-line)}
-#tourneyContent .tk-lhead .tk-c-pos,#tourneyContent .tk-lrow .tk-c-pos{width:20px;flex:none}
-#tourneyContent .tk-lrow .tk-c-pos{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:700;color:var(--tk-silver)}
-#tourneyContent .tk-lrow.tk-q .tk-c-pos{color:var(--tk-green)}
-#tourneyContent .tk-lhead .tk-c-pl,#tourneyContent .tk-lrow .tk-c-pl{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
-#tourneyContent .tk-lrow .tk-c-pl .tk-chip{width:28px;height:28px;border-radius:8px}
-#tourneyContent .tk-lrow .tk-c-pl .tk-nm{font-size:12.5px}
-#tourneyContent .tk-lhead .tk-c-n,#tourneyContent .tk-lrow .tk-c-n{width:16px;flex:none;text-align:right;font-size:12.5px;color:var(--tk-silver)}
-#tourneyContent .tk-lrow .tk-c-n{color:var(--tk-muted)}
-#tourneyContent .tk-lrow .tk-c-n.tk-cpts{font-size:15px;font-weight:700;color:var(--tk-white)}
-#tourneyContent .tk-lhead .tk-c-pts,#tourneyContent .tk-lrow .tk-c-pts{width:26px}
-/* fixtures */
-#tourneyContent .tk-fx{border-top:1px solid var(--tk-line);padding:6px 2px 4px;cursor:pointer}
-#tourneyContent .tk-fx:first-of-type{border-top:none}
-#tourneyContent .tk-fx-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-#tourneyContent .tk-fx-id{font-size:9.5px;letter-spacing:.14em;color:var(--tk-muted)}
-#tourneyContent .tk-state{font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:3px 8px;border-radius:20px;border:1px solid var(--tk-line2);color:var(--tk-muted)}
-#tourneyContent .tk-state.tk-play{color:#0B1510;background:var(--tk-green);border-color:var(--tk-green)}
-#tourneyContent .tk-state.tk-final{color:var(--tk-silver)}
-#tourneyContent .tk-state.tk-series{color:var(--tk-green);border-color:rgba(74,222,128,.5)}
-#tourneyContent .tk-fline{display:flex;align-items:center;gap:9px;padding:1px 0}
-#tourneyContent .tk-fline .tk-chip{width:30px;height:30px;border-radius:9px}
-#tourneyContent .tk-fline .tk-who{display:flex;align-items:center;gap:9px}
-#tourneyContent .tk-who.tk-pad{padding-left:41px}
-#tourneyContent .tk-score{font-size:22px;font-weight:700;width:28px;text-align:right;color:var(--tk-white);flex:none}
-#tourneyContent .tk-score.tk-dim{color:rgba(244,245,247,.28)}
-#tourneyContent .tk-loser .tk-nm{color:var(--tk-muted)}
-#tourneyContent .tk-pips{display:flex;gap:4px;margin-left:6px;flex:none}
-#tourneyContent .tk-pip{width:9px;height:9px;border-radius:3px;border:1.5px solid var(--tk-line2);display:inline-block}
-#tourneyContent .tk-pip.tk-on{background:var(--tk-ec);border-color:var(--tk-ec)}
-/* series room */
-#tourneyContent .tk-room{background:#101117;border:1px solid var(--tk-line2);border-radius:12px;padding:11px 12px;margin-top:8px;cursor:default;animation:tkroomin .38s var(--spring)}
-@keyframes tkroomin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-#tourneyContent .tk-rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-#tourneyContent .tk-rl{font-size:9.5px;letter-spacing:.16em;color:var(--tk-muted)}
-#tourneyContent .tk-rs{font-size:9.5px;font-weight:700;letter-spacing:.12em;color:var(--tk-green)}
-#tourneyContent .tk-rs.tk-done{color:var(--tk-silver)}
-#tourneyContent .tk-rx{color:var(--tk-muted);font-size:13px;cursor:pointer;padding:2px 4px;background:none;border:none}
-#tourneyContent .tk-serow{display:flex;align-items:center;gap:9px;padding:4px 0}
-#tourneyContent .tk-serow .tk-who{display:flex;align-items:center;gap:9px}
-#tourneyContent .tk-bigpips{display:flex;gap:5px;flex:none}
-#tourneyContent .tk-bigpips .tk-pip{width:13px;height:13px;border-radius:4px}
-#tourneyContent .tk-snum{font-size:19px;font-weight:700;width:24px;text-align:right;flex:none}
-#tourneyContent .tk-grow{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--tk-muted);padding:5px 0;border-top:1px solid var(--tk-line)}
-#tourneyContent .tk-grow b{color:var(--tk-white);font-weight:700}
-#tourneyContent .tk-grow .tk-gw{color:var(--tk-silver)}
-#tourneyContent .tk-vnote{font-size:10px;letter-spacing:.07em;color:var(--tk-violet-lt);margin-top:9px}
-#tourneyContent .tk-dchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
-#tourneyContent .tk-dchip{font-size:10px;letter-spacing:.07em;color:var(--tk-muted);border:1px solid var(--tk-line2);border-radius:20px;padding:4px 9px;white-space:nowrap}
-#tourneyContent .tk-dchip b{color:var(--tk-white);font-weight:700}
-#tourneyContent .tk-lens .tk-dchips{margin:0 0 9px}
-#tourneyContent .tk-lens .tk-dchip{font-size:10.5px;padding:5px 10px}
-#tourneyContent .tk-cta{display:block;text-align:center;background:var(--tk-violet);color:#fff;font-weight:700;font-size:13px;letter-spacing:.05em;border-radius:11px;padding:10px;margin-top:10px;text-transform:uppercase;cursor:pointer;text-decoration:none}
-#tourneyContent .tk-cta.tk-ghost{background:transparent;border:1px solid rgba(168,85,247,.55);color:var(--tk-violet-lt)}
-/* press feedback (Kinetics spring tokens): transform-only, resting
-   geometry untouched; closed rows only, so an open room never scales */
-#tourneyContent .tk-fx:not(.tk-open),#tourneyContent .tk-srow:not(.tk-open){transition:transform .18s var(--spring-soft)}
-#tourneyContent .tk-fx:not(.tk-open):active,#tourneyContent .tk-srow:not(.tk-open):active{transform:scale(.99)}
-#tourneyContent .tk-chip{transition:transform .18s var(--spring-soft)}
-#tourneyContent .tk-chip:active{transform:scale(.92)}
-/* foot + legend */
-#tourneyContent .tk-foot{margin-top:2px;padding-top:9px;font-size:9.5px;color:var(--tk-muted);letter-spacing:.08em;display:flex;justify-content:space-between}
-#tourneyContent .tk-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 7px;border-top:1px solid var(--tk-line);margin-top:9px;padding-top:7px;font-size:9.5px;letter-spacing:.02em;color:var(--tk-muted);line-height:1.35;text-align:center}
-#tourneyContent .tk-leg{white-space:nowrap}
-#tourneyContent .tk-leg b{color:var(--tk-white);font-weight:700}
-/* states */
-#tourneyContent .tk-ghost{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:14px;margin-bottom:12px}
-#tourneyContent .tk-gb{height:12px;border-radius:6px;background:rgba(217,222,230,.09)}
-#tourneyContent .tk-gb.tk-w40{width:40%}#tourneyContent .tk-gb.tk-w60{width:60%}#tourneyContent .tk-gb.tk-w80{width:80%}
-#tourneyContent .tk-grow2{display:flex;gap:10px;align-items:center;margin-top:14px}
-#tourneyContent .tk-gc{width:32px;height:32px;border-radius:10px;background:rgba(217,222,230,.09);flex:none}
-#tourneyContent .tk-empty{background:var(--tk-graphite);border:1px solid var(--tk-line);border-radius:18px;padding:22px 16px;text-align:center;color:var(--tk-muted);font-size:13.5px;margin-bottom:11px}
-#tourneyContent .tk-flash{animation:tkflash 1.2s ease}
-@keyframes tkflash{0%{background:rgba(74,222,128,.22)}100%{background:transparent}}
-#tourneyContent .tk-newtag{font-size:8px;font-weight:700;letter-spacing:.1em;color:#0B1510;background:var(--tk-green);border-radius:4px;padding:2px 4px;margin-left:6px;vertical-align:2px}
-/* BUMP (MicroKit-style pop): points inside a flashed standings row jump once — transform only */
-#tourneyContent .tk-srow.tk-flash .tk-pts{animation:tkbump .55s cubic-bezier(.2,.9,.25,1)}
-@keyframes tkbump{0%{transform:none}35%{transform:scale(1.22) translateY(-4px)}100%{transform:none}}
-/* bug-strip marquee: only when the diff queue holds 2+ facts. CSS
-   translateX loop over duplicated content; the strip lives inside
-   #view-tourney (display:none elsewhere) and pauses on tap / hidden tab */
-#tourneyContent .tk-mq{overflow:hidden;flex:1;min-width:0}
-#tourneyContent .tk-mq-in{display:inline-block;white-space:nowrap;font-size:12.5px;font-weight:600;line-height:1.4;animation:tkmq 14s linear infinite}
-#tourneyContent .tk-mq-in b{letter-spacing:.06em}
-#tourneyContent .tk-mq.tk-paused .tk-mq-in,#tourneyContent.tk-doc-hidden .tk-mq-in{animation-play-state:paused}
-@keyframes tkmq{to{transform:translateX(-50%)}}
-#tourneyContent .tk-mq-row{font-size:12.5px;font-weight:600;line-height:1.45}
-#tourneyContent .tk-mq-row b{letter-spacing:.06em}
-/* skeleton pulse: opacity only, no gradient sweep */
-#tourneyContent .tk-gb,#tourneyContent .tk-gc{animation:tkskel 1.1s ease-in-out infinite}
-@keyframes tkskel{0%,100%{opacity:.45}50%{opacity:1}}
-@media (prefers-reduced-motion: reduce){#tourneyContent .tk-live i{animation:none}#tourneyContent .tk-room{animation:none}#tourneyContent .tk-lens{animation:none}#tourneyContent .tk-flash{animation:none}#tourneyContent [data-who]{transition:none}#tourneyContent .tk-fx,#tourneyContent .tk-srow,#tourneyContent .tk-chip{transition:none}#tourneyContent .tk-mq-in,#tourneyContent .tk-gb,#tourneyContent .tk-gc,#tourneyContent .tk-srow.tk-flash .tk-pts{animation:none}}
+#tourneyContent{display:flex;flex-direction:column;font-family:"Manrope",system-ui,sans-serif;color:var(--tn-silver);line-height:1.35;min-width:0}
+#tourneyContent .tn-disp{font-family:"Orbitron","Manrope",sans-serif}
+#tourneyContent ::selection{background:rgba(255,46,136,.55);color:var(--tn-white)}
+
+/* ---------- hero: the neon sign on its wall ---------- */
+#tourneyContent .tn-hero{position:relative;padding:26px 20px 22px;border-radius:20px;overflow:hidden;border:1px solid rgba(217,222,230,.09);background:radial-gradient(74% 140px at 50% 32%,rgba(255,47,214,.055),rgba(255,47,214,0) 70%),radial-gradient(92% 100px at 50% 48%,rgba(168,85,247,.045),rgba(168,85,247,0) 70%),radial-gradient(60% 120px at 12% 0%,rgba(244,245,247,.02),rgba(244,245,247,0) 70%),radial-gradient(55% 110px at 88% 22%,rgba(0,0,0,.16),rgba(0,0,0,0) 70%),repeating-linear-gradient(0deg,rgba(244,245,247,.013) 0 1px,rgba(244,245,247,0) 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.045) 0 1px,rgba(0,0,0,0) 1px 3px),linear-gradient(180deg,#191129,#120B20 58%,#0E0819);box-shadow:inset 0 2px 16px rgba(0,0,0,.55),inset 0 -20px 32px -24px rgba(0,0,0,.72),inset 0 -1px 0 rgba(244,245,247,.05),0 1px 2px rgba(0,0,0,.5),0 18px 34px -20px rgba(0,0,0,.85)}
+#tourneyContent .tn-hero::before{content:"";position:absolute;left:0;right:0;bottom:0;height:44px;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.3));border-top:1px solid rgba(244,245,247,.045)}
+#tourneyContent .tn-hero>*{position:relative;z-index:1}
+#tourneyContent .tn-hero h1{margin:2px 0 4px;color:var(--tn-white);font-family:"Orbitron",sans-serif;font-weight:800;font-size:clamp(29px,9.4vw,64px);line-height:1.04;letter-spacing:.02em;text-transform:uppercase;text-shadow:0 0 14px rgba(168,85,247,.16),0 3px 10px rgba(3,1,9,.7)}
+#tourneyContent .tn-hero h1::after{content:"";display:block;height:2px;margin-top:16px;border-radius:2px;background:linear-gradient(90deg,rgba(217,222,230,0),rgba(217,222,230,.15) 18%,rgba(217,222,230,.22) 50%,rgba(217,222,230,.15) 82%,rgba(217,222,230,0));box-shadow:0 9px 15px rgba(0,0,0,.55),0 -7px 16px -4px rgba(255,47,214,.06)}
+#tourneyContent .tn-neon{position:relative;z-index:0;display:inline-block;color:#E3AECB;-webkit-text-stroke:.045em rgba(255,92,222,.5);text-shadow:0 0 3px rgba(255,214,240,.22),0 0 9px rgba(255,47,214,.2),0 0 22px rgba(255,47,214,.09),0 4px 12px rgba(3,1,9,.85);animation:tnNeonFlicker 7s linear infinite}
+#tourneyContent .tn-neon::after{content:attr(data-text);position:absolute;inset:0;z-index:-1;pointer-events:none;color:transparent;-webkit-text-stroke:.11em rgba(255,47,214,.26);text-shadow:0 0 18px rgba(255,47,214,.14),0 0 42px rgba(255,47,214,.05);animation:tnNeonBreath 3.4s ease-in-out infinite alternate}
+#tourneyContent .tn-neon::before{content:attr(data-text);position:absolute;inset:0;z-index:-2;pointer-events:none;color:transparent;transform:translateY(.028em);-webkit-text-stroke:.17em rgba(24,5,30,.95);text-shadow:0 .32em .55em rgba(255,47,214,.07),0 8px 18px rgba(0,0,0,.55)}
+@keyframes tnNeonBreath{from{opacity:.45}to{opacity:.75}}
+@keyframes tnNeonFlicker{0%,6.2%,7.4%,42%,43.2%,71%,72.2%,100%{opacity:1}6.8%{opacity:.88}7.1%{opacity:.95}42.6%{opacity:.91}71.6%{opacity:.9}}
+#tourneyContent .tn-tagline{font-family:"Orbitron",sans-serif;font-size:clamp(9.5px,2.9vw,12.5px);font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--tn-silver);line-height:1.7;margin-top:12px}
+#tourneyContent .tn-tagline .tn-sep{color:var(--tn-magenta)}
+#tourneyContent .tn-tagline .tn-tail{color:var(--tn-cyan)}
+#tourneyContent .tn-metaline{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+#tourneyContent .tn-chip{font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--tn-silver);border:1px solid var(--tn-line);border-radius:999px;padding:5px 10px;text-transform:uppercase;background:linear-gradient(180deg,rgba(52,33,84,.75),rgba(21,13,36,.75));box-shadow:inset 0 1px 0 rgba(244,245,247,.07);white-space:nowrap}
+#tourneyContent .tn-chip b{color:var(--tn-white);font-weight:800}
+#tourneyContent .tn-chip.tn-status-full{border-color:rgba(245,185,63,.4);color:var(--tn-gold-hi)}
+#tourneyContent .tn-chip.tn-status-live{border-color:rgba(74,222,128,.45);color:var(--tn-green)}
+#tourneyContent .tn-fresh{display:inline-flex;align-items:center;gap:6px}
+#tourneyContent .tn-fdot{width:6px;height:6px;border-radius:50%;background:var(--tn-green);flex:none}
+#tourneyContent .tn-fresh.tn-stale{color:var(--tn-amber);border-color:rgba(232,179,61,.4)}
+#tourneyContent .tn-fresh.tn-stale .tn-fdot{background:transparent;border:1.5px solid var(--tn-amber)}
+#tourneyContent .tn-fresh.tn-loading .tn-fdot{background:transparent;border:1.5px solid var(--tn-violet)}
+#tourneyContent.tn-isstale .tn-live-dot,#tourneyContent.tn-isstale .tn-live-chip .tn-dot{background:var(--tn-muted);animation:none}
+
+/* ---------- tournament switcher ---------- */
+#tourneyContent .tn-switch{display:flex;gap:7px;margin-top:14px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#tourneyContent .tn-switch::-webkit-scrollbar{display:none}
+#tourneyContent .tn-sw-chip{flex:none;display:inline-flex;align-items:center;gap:7px;appearance:none;cursor:pointer;border:1px solid var(--tn-line);border-radius:999px;padding:7px 12px;background:rgba(21,13,36,.85);color:var(--tn-muted);font-family:"Manrope",sans-serif;font-weight:700;font-size:12px;letter-spacing:.02em;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(244,245,247,.05);transition:color .25s var(--tn-ease-glide),border-color .25s var(--tn-ease-glide),transform .2s var(--tn-ease-pop)}
+#tourneyContent .tn-sw-chip:active{transform:scale(.96)}
+#tourneyContent .tn-sw-chip .tn-sw-dot{width:6px;height:6px;border-radius:50%;background:var(--tn-dim);flex:none}
+#tourneyContent .tn-sw-chip .tn-sw-dot.live{background:var(--tn-green);box-shadow:0 0 5px rgba(74,222,128,.5);animation:tnPulse 1.6s ease-in-out infinite}
+#tourneyContent .tn-sw-chip .tn-sw-st{font-family:"Orbitron",sans-serif;font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--tn-dim)}
+#tourneyContent .tn-sw-chip .tn-sw-st.live{color:var(--tn-green)}
+#tourneyContent .tn-sw-chip.on{background:linear-gradient(135deg,#41246C,#2B1C47 60%,#331547);color:var(--tn-white);border-color:rgba(168,85,247,.5);box-shadow:inset 0 1px 0 rgba(244,245,247,.12),inset 0 -8px 14px -10px rgba(0,0,0,.6),0 4px 12px -6px rgba(0,0,0,.8)}
+#tourneyContent .tn-sw-chip:focus-visible{outline:2px solid var(--tn-violet);outline-offset:2px}
+
+/* ---------- tab bar ---------- */
+#tourneyContent .tn-tabs{position:sticky;top:10px;z-index:20;display:flex;gap:4px;margin-top:12px;padding:4px;background:linear-gradient(180deg,rgba(32,19,54,.97),rgba(11,6,21,.98));border:1px solid rgba(217,222,230,.13);border-radius:14px;box-shadow:inset 0 1px 0 rgba(244,245,247,.08),inset 0 -12px 20px -14px rgba(0,0,0,.7),0 1px 2px rgba(0,0,0,.55),0 10px 22px -12px rgba(0,0,0,.8),0 24px 42px -20px rgba(0,0,0,.9)}
+#tourneyContent .tn-tabs button{flex:1 1 0;appearance:none;border:0;cursor:pointer;background:transparent;color:var(--tn-muted);font-family:"Orbitron",sans-serif;font-weight:700;font-size:clamp(9.5px,2.9vw,11.5px);letter-spacing:.1em;text-transform:uppercase;padding:11px 2px;border-radius:10px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden;transition:color .25s var(--tn-ease-glide),background .25s var(--tn-ease-glide),transform .2s var(--tn-ease-pop)}
+#tourneyContent .tn-tabs button:active{transform:scale(.97)}
+#tourneyContent .tn-tabs button .tn-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--tn-green);box-shadow:0 0 5px rgba(74,222,128,.45);animation:tnPulse 1.6s ease-in-out infinite;position:relative}
+#tourneyContent .tn-tabs button[aria-selected="true"]{background:linear-gradient(135deg,rgba(255,46,136,.16),rgba(168,85,247,.1) 60%,rgba(255,46,136,.07));color:var(--tn-white);box-shadow:inset 0 0 0 1px rgba(255,46,136,.28),inset 0 1px 0 rgba(244,245,247,.12),inset 0 -8px 14px -10px rgba(0,0,0,.55),0 4px 12px -8px rgba(0,0,0,.8)}
+#tourneyContent .tn-tabs button[aria-selected="true"]::after{content:"";position:absolute;left:22%;right:22%;bottom:3px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,46,136,.75),rgba(45,212,238,.6),transparent);animation:tnTabGlowIn .5s var(--tn-ease-out)}
+@keyframes tnTabGlowIn{from{transform:scaleX(.2);opacity:0}to{transform:scaleX(1);opacity:1}}
+#tourneyContent .tn-tabs button:focus-visible{outline:2px solid var(--tn-violet);outline-offset:2px}
+#tourneyContent .tn-panel:not([hidden]){animation:tnPanelIn .45s var(--tn-ease-glide)}
+@keyframes tnPanelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- subheads ---------- */
+#tourneyContent .tn-subhead{display:flex;align-items:baseline;gap:10px;margin:26px 2px 13px}
+#tourneyContent .tn-subhead:first-child{margin-top:20px}
+#tourneyContent .tn-subhead h2{margin:0;font-family:"Orbitron",sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--tn-white);background:linear-gradient(90deg,rgba(255,46,136,.65),rgba(168,85,247,.35) 55%,transparent) left bottom/100% 2px no-repeat;text-shadow:0 2px 8px rgba(3,1,9,.8);padding-bottom:5px}
+#tourneyContent .tn-subhead .tn-sub-note{margin-left:auto;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tn-dim);text-align:right}
+#tourneyContent .tn-live-head h2{display:inline-flex;align-items:center;gap:9px}
+#tourneyContent .tn-live-tag{font-family:"Orbitron",sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--tn-green);border:1px solid rgba(74,222,128,.4);border-radius:999px;padding:3px 8px}
+#tourneyContent .tn-live-dot{position:relative;flex:none;width:8px;height:8px;border-radius:50%;background:var(--tn-green);color:var(--tn-green);box-shadow:0 0 5px rgba(74,222,128,.45);animation:tnPulse 1.6s ease-in-out infinite}
+#tourneyContent .tn-live-dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;pointer-events:none;animation:tnRingPulse 1.8s var(--tn-ease-out) infinite}
+#tourneyContent .tn-live-sec.idle .tn-live-dot{background:var(--tn-dim);color:var(--tn-dim);box-shadow:none;animation:none}
+#tourneyContent .tn-live-sec.idle .tn-live-dot::after{display:none}
+@keyframes tnPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.6}}
+@keyframes tnRingPulse{0%{transform:scale(.55);opacity:.5}70%,100%{transform:scale(1.6);opacity:0}}
+
+/* ---------- idle / honest wells ---------- */
+#tourneyContent .tn-well{border-radius:16px;padding:20px 18px;text-align:center;background:linear-gradient(180deg,rgba(24,15,42,.9),rgba(13,8,24,.95));border:1px solid rgba(217,222,230,.09);box-shadow:inset 0 2px 10px rgba(0,0,0,.55),inset 0 -1px 0 rgba(244,245,247,.03),0 1px 2px rgba(0,0,0,.4)}
+#tourneyContent .tn-well .tn-well-title{font-family:"Orbitron",sans-serif;font-size:14px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--tn-muted)}
+#tourneyContent .tn-well .tn-well-sub{margin:9px auto 0;max-width:44ch;font-size:13.5px;line-height:1.6;color:var(--tn-dim)}
+#tourneyContent .tn-well .tn-well-sub b{color:var(--tn-silver);font-weight:700}
+
+/* ---------- champions ---------- */
+#tourneyContent .tn-champs{position:relative;border-radius:20px;overflow:hidden;margin-top:18px;background:radial-gradient(130% 190px at 50% -40px,rgba(255,217,112,.15),rgba(255,217,112,0) 65%),linear-gradient(180deg,#2B2110,#1D1808 55%,#141106);border:1px solid rgba(245,185,63,.32);box-shadow:inset 0 1px 0 rgba(255,217,112,.22),inset 0 -22px 34px -26px rgba(0,0,0,.75),0 2px 4px rgba(0,0,0,.55),0 16px 30px -16px rgba(0,0,0,.85),0 38px 64px -28px rgba(0,0,0,.92),0 0 30px -14px rgba(245,185,63,.16);padding:22px 18px 18px;text-align:center}
+#tourneyContent .tn-champs>*{position:relative;z-index:1}
+#tourneyContent .tn-champs::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(62% 120px at 50% 0%,rgba(255,217,112,.16),rgba(255,217,112,0) 70%);animation:tnCrownBreathe 4.6s ease-in-out infinite}
+@keyframes tnCrownBreathe{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.55;transform:scale(1.06)}}
+#tourneyContent .tn-champs::after{content:"";position:absolute;top:0;bottom:0;left:0;width:42%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,233,168,.13),transparent);transform:translateX(-150%) skewX(-14deg);animation:tnGoldSweep 5.2s ease-in-out infinite}
+@keyframes tnGoldSweep{0%,55%{transform:translateX(-150%) skewX(-14deg)}88%,100%{transform:translateX(360%) skewX(-14deg)}}
+#tourneyContent .tn-trophy{width:44px;height:44px;margin:0 auto 4px;filter:drop-shadow(0 4px 10px rgba(245,185,63,.28)) drop-shadow(0 6px 12px rgba(0,0,0,.55));animation:tnTrophyFloat 3.8s ease-in-out infinite}
+@keyframes tnTrophyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+#tourneyContent .tn-champs .tn-c-label{font-family:"Orbitron",sans-serif;font-size:10px;font-weight:700;letter-spacing:.3em;color:var(--tn-gold-hi);text-transform:uppercase}
+#tourneyContent .tn-champs .tn-c-name{margin:8px 0 2px;font-family:"Orbitron",sans-serif;font-size:clamp(27px,8.6vw,50px);font-weight:800;line-height:1.08;letter-spacing:.02em;text-transform:uppercase;background:linear-gradient(180deg,#FFF3C4,#FFE9A8 30%,var(--tn-gold) 58%,var(--tn-gold-lo));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 5px 14px rgba(245,185,63,.14)) drop-shadow(0 3px 8px rgba(0,0,0,.6))}
+#tourneyContent .tn-champs .tn-c-members{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 18px;margin-top:12px}
+#tourneyContent .tn-member{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--tn-silver)}
+#tourneyContent .tn-champs .tn-c-story{margin:14px auto 2px;max-width:430px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;line-height:1.9;color:#E8DFC8}
+#tourneyContent .tn-champs .tn-c-story b{color:var(--tn-gold-hi);font-weight:800}
+
+/* ---------- monogram chips ---------- */
+#tourneyContent .tn-mono{flex:none;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em;color:var(--tn-white);border:1px solid var(--tn-pc,var(--tn-line));background:radial-gradient(circle at 32% 26%,rgba(244,245,247,.2),rgba(244,245,247,0) 55%),color-mix(in srgb,var(--tn-pc,#555) 26%,#10081D);box-shadow:inset 0 1px 0 rgba(244,245,247,.18),inset 0 -3px 6px -3px rgba(0,0,0,.6),0 1px 3px rgba(0,0,0,.55),0 0 6px -3px var(--tn-pc,transparent);overflow:hidden;vertical-align:middle}
+#tourneyContent .tn-mono img{width:100%;height:100%;object-fit:cover;display:block}
+#tourneyContent .tn-mono.tn-lg{width:36px;height:36px;font-size:12px}
+
+/* ---------- match cards / rooms ---------- */
+#tourneyContent .tn-match{position:relative;border-radius:16px;border:1px solid rgba(217,222,230,.13);background:radial-gradient(110% 120px at 50% -30px,rgba(168,85,247,.07),rgba(168,85,247,0) 70%),linear-gradient(180deg,rgba(42,26,68,.94),rgba(15,9,27,.97));box-shadow:var(--tn-shadow-card);overflow:hidden;transition:transform .35s var(--tn-ease-out)}
+#tourneyContent .tn-match::before{content:"";position:absolute;top:0;left:8%;right:8%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(244,245,247,.2),transparent)}
+#tourneyContent .tn-match+.tn-match{margin-top:12px}
+#tourneyContent .tn-match.tn-live-card{border-color:rgba(255,46,136,.3);background:radial-gradient(120% 150px at 50% -30px,rgba(255,46,136,.14),rgba(255,46,136,0) 70%),radial-gradient(80% 120px at 92% 108%,rgba(45,212,238,.05),rgba(45,212,238,0) 70%),linear-gradient(180deg,rgba(48,22,70,.96),rgba(14,7,25,.98));box-shadow:inset 0 1px 0 rgba(244,245,247,.11),inset 0 -20px 32px -24px rgba(0,0,0,.7),0 2px 4px rgba(0,0,0,.55),0 16px 30px -16px rgba(0,0,0,.85),0 38px 64px -28px rgba(0,0,0,.92),0 0 30px -12px rgba(255,46,136,.18)}
+#tourneyContent .tn-match-head{padding:14px 16px 12px}
+#tourneyContent .tn-match-top{display:flex;align-items:center;gap:8px;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:600;letter-spacing:.15em;color:var(--tn-dim);text-transform:uppercase}
+#tourneyContent .tn-match-top .tn-stage{color:var(--tn-muted)}
+#tourneyContent .tn-match-top .tn-right{margin-left:auto}
+#tourneyContent .tn-live-chip{display:inline-flex;align-items:center;gap:6px;color:var(--tn-green);border:1px solid rgba(74,222,128,.45);border-radius:999px;padding:3px 9px 3px 7px;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;position:relative}
+#tourneyContent .tn-live-chip .tn-dot{position:relative;width:6px;height:6px;border-radius:50%;background:var(--tn-green);color:var(--tn-green);box-shadow:0 0 5px rgba(74,222,128,.45);animation:tnPulse 1.6s ease-in-out infinite}
+#tourneyContent .tn-live-chip .tn-dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;pointer-events:none;animation:tnRingPulse 1.8s var(--tn-ease-out) infinite}
+#tourneyContent .tn-state-chip{display:inline-flex;align-items:center;border:1px solid var(--tn-line);border-radius:999px;padding:3px 9px;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--tn-muted)}
+#tourneyContent .tn-state-chip.tn-final{color:var(--tn-silver)}
+#tourneyContent .tn-team-rows{margin-top:12px;display:grid;gap:7px}
+#tourneyContent .tn-team-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1px solid transparent;background:linear-gradient(90deg,rgba(10,6,19,.32),rgba(10,6,19,.52));box-shadow:inset 0 1px 4px rgba(0,0,0,.4),inset 0 -1px 0 rgba(244,245,247,.03);position:relative}
+#tourneyContent .tn-team-row.winner{border-color:rgba(217,222,230,.1);background:linear-gradient(90deg,color-mix(in srgb,var(--tn-tc,#555) 10%,rgba(10,6,19,.6)),rgba(10,6,19,.55) 62%);box-shadow:inset 0 1px 0 rgba(244,245,247,.06),inset 0 -8px 14px -10px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.5)}
+#tourneyContent .tn-team-row.winner::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--tn-tc,var(--tn-silver));box-shadow:0 0 5px color-mix(in srgb,var(--tn-tc,transparent) 45%,transparent)}
+#tourneyContent .tn-team-row .tn-tdot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--tn-tc);box-shadow:0 0 5px color-mix(in srgb,var(--tn-tc) 50%,transparent),0 1px 2px rgba(0,0,0,.5)}
+#tourneyContent .tn-team-row .tn-tname{font-size:16px;font-weight:700;color:var(--tn-white);letter-spacing:.01em;min-width:0}
+#tourneyContent .tn-team-row.loser .tn-tname{color:var(--tn-muted);font-weight:600}
+#tourneyContent .tn-team-row .tn-pips{display:inline-flex;gap:4px;margin-left:2px}
+#tourneyContent .tn-team-row .tn-pip{width:6px;height:6px;border-radius:50%;background:rgba(217,222,230,.18)}
+#tourneyContent .tn-team-row .tn-pip.on{background:var(--tn-tc);box-shadow:0 0 4px color-mix(in srgb,var(--tn-tc) 45%,transparent)}
+#tourneyContent .tn-team-row .tn-tscore{margin-left:auto;font-size:21px;font-weight:800;color:var(--tn-white);font-variant-numeric:tabular-nums;white-space:nowrap}
+#tourneyContent .tn-team-row.loser .tn-tscore{color:var(--tn-dim)}
+#tourneyContent .tn-team-row.winner .tn-tscore{text-shadow:0 0 10px color-mix(in srgb,var(--tn-tc,#fff) 20%,transparent),0 2px 6px rgba(0,0,0,.6)}
+#tourneyContent .tn-team-row .tn-crown{font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--tn-gold-hi)}
+#tourneyContent .tn-match-meta{margin-top:10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--tn-dim);text-transform:uppercase}
+#tourneyContent .tn-room-btn{width:100%;appearance:none;border:0;border-top:1px solid var(--tn-line-soft);background:rgba(10,6,19,.35);color:var(--tn-muted);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 16px;font-family:"Orbitron",sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;transition:color .25s var(--tn-ease-glide),background .25s var(--tn-ease-glide)}
+#tourneyContent .tn-room-btn:hover{color:var(--tn-white);background:linear-gradient(90deg,rgba(168,85,247,.1),rgba(255,46,136,.08),rgba(168,85,247,.1))}
+#tourneyContent .tn-room-btn:active{transform:scale(.995)}
+#tourneyContent .tn-room-btn:focus-visible{outline:2px solid var(--tn-violet);outline-offset:-2px}
+#tourneyContent .tn-room-btn .tn-chev{transition:transform .45s var(--tn-ease-glide);font-size:13px}
+#tourneyContent .tn-room-btn[aria-expanded="true"] .tn-chev{transform:rotate(180deg)}
+#tourneyContent .tn-room{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--tn-ease-glide)}
+#tourneyContent .tn-room.open{grid-template-rows:1fr}
+#tourneyContent .tn-room.open .tn-room-body{animation:tnRoomReveal .55s var(--tn-ease-out)}
+@keyframes tnRoomReveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#tourneyContent .tn-room.open .tn-game{animation:tnRoomReveal .6s var(--tn-ease-out) both}
+#tourneyContent .tn-room.open .tn-game:nth-child(2){animation-delay:.06s}
+#tourneyContent .tn-room.open .tn-game:nth-child(3){animation-delay:.12s}
+#tourneyContent .tn-room-inner{overflow:hidden;min-height:0}
+#tourneyContent .tn-room-body{padding:4px 16px 16px}
+#tourneyContent .tn-game{padding:12px 0 10px;border-top:1px dashed var(--tn-line-soft)}
+#tourneyContent .tn-game:first-child{border-top:0}
+#tourneyContent .tn-game-head{display:flex;align-items:baseline;gap:8px}
+#tourneyContent .tn-game-head .tn-g-label{font-family:"Orbitron",sans-serif;font-size:9px;font-weight:600;letter-spacing:.15em;color:var(--tn-dim);text-transform:uppercase}
+#tourneyContent .tn-game-head .tn-g-win{font-size:13.5px;font-weight:700;color:var(--tn-white)}
+#tourneyContent .tn-game-head .tn-g-win .tn-wdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--tn-tc);box-shadow:0 0 4px color-mix(in srgb,var(--tn-tc) 45%,transparent)}
+#tourneyContent .tn-game-head .tn-g-score{margin-left:auto;font-size:13px;font-weight:700;color:var(--tn-silver);font-variant-numeric:tabular-nums;white-space:nowrap}
+#tourneyContent .tn-plines{margin-top:9px;display:grid;gap:5px}
+#tourneyContent .tn-pline{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--tn-muted)}
+#tourneyContent .tn-pline .tn-pname{color:var(--tn-silver);font-weight:600;min-width:0}
+#tourneyContent .tn-pline .tn-map-win{font-size:12px;font-weight:700;white-space:nowrap}
+#tourneyContent .tn-pline .tn-pline-stats{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--tn-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+#tourneyContent .tn-pline .tn-pline-stats b{color:var(--tn-white);font-weight:800}
+#tourneyContent .tn-room-foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;border-top:1px dashed var(--tn-line-soft);padding-top:11px}
+#tourneyContent .tn-dchip{font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.1em;color:var(--tn-muted);border:1px solid var(--tn-line);border-radius:7px;padding:4px 8px;text-transform:uppercase}
+#tourneyContent .tn-dchip b{color:var(--tn-silver);font-weight:700}
+#tourneyContent .tn-cta{margin-left:auto;font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--tn-violet);text-decoration:none;padding:4px 2px;text-transform:uppercase}
+#tourneyContent .tn-now-panel{margin-top:12px;border-radius:12px;padding:13px 14px;background:radial-gradient(90% 90px at 50% -20px,rgba(255,46,136,.08),rgba(255,46,136,0) 70%),linear-gradient(180deg,rgba(14,8,25,.68),rgba(8,5,16,.62));border:1px solid rgba(255,46,136,.24);box-shadow:inset 0 2px 10px rgba(0,0,0,.5),inset 0 -1px 0 rgba(244,245,247,.04),0 0 18px -10px rgba(255,46,136,.22)}
+#tourneyContent .tn-now-panel .tn-np-head{display:flex;align-items:baseline;gap:8px}
+#tourneyContent .tn-now-panel .tn-np-label{font-family:"Orbitron",sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--tn-magenta);text-transform:uppercase}
+#tourneyContent .tn-now-panel .tn-np-round{margin-left:auto;font-size:11px;font-weight:600;color:var(--tn-muted);white-space:nowrap}
+#tourneyContent .tn-now-score{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+#tourneyContent .tn-now-score .tn-ns{font-size:40px;font-weight:800;color:var(--tn-white);font-variant-numeric:tabular-nums;line-height:1;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.65)}
+#tourneyContent .tn-now-score .tn-ns small{display:block;text-align:center;font-family:"Orbitron",sans-serif;font-size:8px;font-weight:600;letter-spacing:.16em;color:var(--tn-dim);margin-top:5px;text-transform:uppercase}
+#tourneyContent .tn-now-score .tn-dash{font-size:22px;font-weight:700;color:var(--tn-dim)}
+
+/* ---------- result rows (Matches) ---------- */
+#tourneyContent .tn-result{border-radius:14px;border:1px solid rgba(217,222,230,.11);background:radial-gradient(100% 80px at 50% -20px,rgba(168,85,247,.04),rgba(168,85,247,0) 70%),linear-gradient(180deg,rgba(34,21,55,.88),rgba(16,10,28,.94));box-shadow:var(--tn-shadow-card);overflow:hidden}
+#tourneyContent .tn-result+.tn-result{margin-top:10px}
+#tourneyContent .tn-result .tn-match-head{padding:12px 14px 11px}
+#tourneyContent .tn-result .tn-room-btn{border-radius:0}
+
+/* ---------- stats: spotlight + boards ---------- */
+#tourneyContent .tn-spot{border-radius:18px;padding:18px;position:relative;overflow:hidden;background:radial-gradient(120% 170px at 18% -30px,rgba(255,46,136,.14),rgba(255,46,136,0) 65%),radial-gradient(110% 170px at 95% -20px,rgba(168,85,247,.15),rgba(168,85,247,0) 60%),linear-gradient(180deg,#2A1544,#12081F);border:1px solid rgba(255,46,136,.28);box-shadow:var(--tn-shadow-raised),0 0 30px -14px rgba(168,85,247,.25)}
+#tourneyContent .tn-spot>*{position:relative}
+#tourneyContent .tn-spot .tn-sp-label{font-family:"Orbitron",sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.26em;color:var(--tn-magenta);text-transform:uppercase}
+#tourneyContent .tn-spot .tn-sp-who{display:flex;align-items:center;gap:11px;margin-top:12px}
+#tourneyContent .tn-spot .tn-sp-name{font-size:23px;font-weight:800;color:var(--tn-white);line-height:1.1}
+#tourneyContent .tn-spot .tn-sp-sub{font-size:10.5px;font-weight:700;color:var(--tn-muted);letter-spacing:.07em;margin-top:3px;text-transform:uppercase}
+#tourneyContent .tn-spot .tn-sp-big{margin-top:8px;display:flex;align-items:baseline;gap:10px}
+#tourneyContent .tn-spot .tn-sp-num{font-size:clamp(50px,14vw,68px);font-weight:800;color:var(--tn-gold-hi);line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(245,185,63,.16),0 3px 10px rgba(0,0,0,.6)}
+#tourneyContent .tn-spot .tn-sp-unit{font-family:"Orbitron",sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.16em;color:var(--tn-muted);text-transform:uppercase;line-height:1.7}
+#tourneyContent .tn-spot .tn-sp-story{margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;line-height:1.9;color:var(--tn-silver);max-width:48ch}
+#tourneyContent .tn-spot .tn-sp-story b{color:var(--tn-white);font-weight:800}
+#tourneyContent .tn-spot .tn-sp-log{margin-top:12px;border-top:1px dashed var(--tn-line-soft);padding-top:9px}
+#tourneyContent .tn-boards{display:grid;gap:12px;margin-top:12px}
+@media (min-width:700px){#tourneyContent .tn-boards{grid-template-columns:1fr 1fr}}
+#tourneyContent .tn-board{position:relative;overflow:hidden;border-radius:14px;padding:14px 15px 12px;background:radial-gradient(100% 70px at 50% -18px,rgba(168,85,247,.055),rgba(168,85,247,0) 70%),linear-gradient(180deg,rgba(38,23,62,.92),rgba(16,10,28,.96));border:1px solid rgba(217,222,230,.11);box-shadow:var(--tn-shadow-card);container-type:inline-size}
+#tourneyContent .tn-board::before{content:"";position:absolute;top:0;left:10%;right:10%;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(244,245,247,.18),transparent)}
+#tourneyContent .tn-board h3{margin:0;font-family:"Orbitron",sans-serif;font-weight:900;letter-spacing:.08em;font-size:13.5px;font-size:clamp(12.5px,4.7cqw,19px);text-transform:uppercase;color:var(--tn-white);display:flex;align-items:center;gap:10px}
+#tourneyContent .tn-board h3 .tn-b-ico{flex:none;width:1.85em;height:1.85em;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:1.02em;line-height:1;color:#FF8AC2;background:radial-gradient(circle at 32% 24%,rgba(244,245,247,.16),rgba(244,245,247,0) 55%),linear-gradient(180deg,rgba(255,46,136,.24),rgba(255,46,136,.1));border:1px solid rgba(255,46,136,.42);box-shadow:inset 0 1px 0 rgba(244,245,247,.22),inset 0 -4px 8px -4px rgba(0,0,0,.65),0 3px 9px rgba(0,0,0,.55),0 0 12px -4px rgba(255,46,136,.4);text-shadow:0 1px 2px rgba(10,2,8,.8),0 0 8px rgba(255,46,136,.35)}
+#tourneyContent .tn-board h3 .tn-b-title{white-space:nowrap;background:linear-gradient(180deg,#FFFFFF 0%,#ECE7F7 32%,#B7A6DE 66%,#7761B4 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 1px 0 rgba(38,19,61,.95)) drop-shadow(0 1px 0 rgba(27,13,46,.92)) drop-shadow(0 1px 0 rgba(18,8,31,.95)) drop-shadow(0 5px 9px rgba(3,1,9,.6)) drop-shadow(0 10px 18px rgba(168,85,247,.16))}
+#tourneyContent .tn-b-rows{margin-top:10px;display:grid}
+#tourneyContent .tn-b-row{position:relative;overflow:hidden;display:flex;align-items:center;gap:9px;padding:6.5px 6px;margin:0 -6px;border-top:1px solid var(--tn-line-soft);font-size:14px;border-radius:7px}
+#tourneyContent .tn-b-row .tn-b-bar{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,var(--tn-pc,#666) 0%,transparent 130%);opacity:.16;transform:scaleX(0);transform-origin:left center;transition:transform .9s var(--tn-ease-out);transition-delay:var(--tn-bd,0ms)}
+#tourneyContent .tn-b-row.first .tn-b-bar{background:linear-gradient(90deg,var(--tn-gold) 0%,transparent 130%);opacity:.24}
+#tourneyContent .tn-b-row>*{position:relative}
+#tourneyContent .tn-b-row .tn-b-bar{position:absolute}
+#tourneyContent .tn-boards.tn-bars-in .tn-b-bar{transform:scaleX(var(--tn-w,0))}
+#tourneyContent .tn-b-row:first-child{border-top:0}
+#tourneyContent .tn-b-row.first{background:linear-gradient(90deg,rgba(245,185,63,.07),rgba(245,185,63,.015) 65%,transparent);box-shadow:inset 2px 0 0 rgba(245,185,63,.75),inset 0 1px 0 rgba(255,217,112,.05)}
+#tourneyContent .tn-b-row .tn-rank{font-size:11px;font-weight:700;color:var(--tn-dim);width:14px;flex:none;font-variant-numeric:tabular-nums}
+#tourneyContent .tn-b-row .tn-b-name{color:var(--tn-silver);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tourneyContent .tn-b-row.first .tn-b-name{color:var(--tn-white);font-weight:800}
+#tourneyContent .tn-b-row .tn-b-val{margin-left:auto;font-size:15.5px;font-weight:800;color:var(--tn-silver);font-variant-numeric:tabular-nums;white-space:nowrap}
+#tourneyContent .tn-b-row.first .tn-b-val{color:var(--tn-gold-hi);text-shadow:0 0 9px rgba(245,185,63,.15),0 2px 6px rgba(0,0,0,.55)}
+#tourneyContent .tn-b-row .tn-mono{width:22px;height:22px;font-size:8.5px}
+#tourneyContent .tn-board .tn-b-unit{margin-top:9px;font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.13em;color:var(--tn-dim);text-transform:uppercase}
+
+/* ---------- tables (league / groups road) ---------- */
+#tourneyContent .tn-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+#tourneyContent .tn-table th{font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.12em;color:var(--tn-dim);text-transform:uppercase;text-align:right;padding:5px 4px;border-bottom:1px solid var(--tn-line)}
+#tourneyContent .tn-table th:nth-child(2){text-align:left}
+#tourneyContent .tn-table td{padding:6px 4px;border-top:1px solid var(--tn-line-soft);color:var(--tn-silver);text-align:right;font-variant-numeric:tabular-nums}
+#tourneyContent .tn-table td:nth-child(2){text-align:left;font-weight:600;color:var(--tn-white)}
+#tourneyContent .tn-table td.tn-td-pts{font-weight:800;color:var(--tn-white)}
+
+/* ---------- line-ups ---------- */
+#tourneyContent .tn-lineups{display:grid;gap:12px}
+@media (min-width:700px){#tourneyContent .tn-lineups{grid-template-columns:1fr 1fr}}
+#tourneyContent .tn-lineup{position:relative;overflow:hidden;border-radius:14px;padding:15px 16px 13px;background:radial-gradient(90% 90px at 12% -24px,color-mix(in srgb,var(--tn-tc,#555) 9%,transparent),rgba(0,0,0,0) 70%),linear-gradient(180deg,rgba(38,23,62,.9),rgba(16,10,28,.95));border:1px solid rgba(217,222,230,.12);box-shadow:var(--tn-shadow-card)}
+#tourneyContent .tn-lineup .tn-lu-head{display:flex;align-items:center;gap:9px}
+#tourneyContent .tn-lineup .tn-tdot{width:10px;height:10px;border-radius:50%;background:var(--tn-tc);box-shadow:0 0 5px color-mix(in srgb,var(--tn-tc) 45%,transparent),0 1px 2px rgba(0,0,0,.5);flex:none}
+#tourneyContent .tn-lineup .tn-lu-name{font-size:16.5px;font-weight:800;color:var(--tn-white);letter-spacing:.01em}
+#tourneyContent .tn-lineup .tn-lu-seed{margin-left:auto;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:600;letter-spacing:.13em;color:var(--tn-dim);text-transform:uppercase;white-space:nowrap}
+#tourneyContent .tn-lineup .tn-lu-champ{font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--tn-gold-hi);border:1px solid rgba(245,185,63,.4);border-radius:999px;padding:2px 8px;white-space:nowrap}
+#tourneyContent .tn-lineup .tn-lu-rows{margin-top:11px;display:grid;gap:8px}
+#tourneyContent .tn-lineup .tn-lu-row{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--tn-silver)}
+
+/* ---------- chart foot ---------- */
+#tourneyContent .tn-legend{margin-top:40px;border-top:1px solid var(--tn-line-soft);padding-top:16px;font-family:"Orbitron",sans-serif;font-size:9px;font-weight:600;line-height:2;letter-spacing:.06em;color:var(--tn-dim);text-transform:uppercase}
+#tourneyContent .tn-legend b{color:var(--tn-muted);font-weight:700}
+#tourneyContent .tn-foot{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-family:"Orbitron",sans-serif;font-size:8.5px;font-weight:600;letter-spacing:.12em;color:var(--tn-dim);text-transform:uppercase}
+
+/* ---------- skeleton ---------- */
+#tourneyContent .tn-ghost{border-radius:16px;border:1px solid var(--tn-line);background:linear-gradient(180deg,rgba(38,23,62,.6),rgba(16,10,28,.7));padding:16px;margin-top:12px}
+#tourneyContent .tn-gb{height:10px;border-radius:5px;background:rgba(217,222,230,.16);animation:tnskel 1.5s ease-in-out infinite}
+@keyframes tnskel{0%,100%{opacity:.45}50%{opacity:1}}
+#tourneyContent .tn-gc{width:26px;height:26px;border-radius:50%;background:rgba(217,222,230,.16);flex:none;animation:tnskel 1.5s ease-in-out infinite}
+#tourneyContent .tn-grow2{display:flex;gap:10px;align-items:center;margin-top:12px}
+#tourneyContent .tn-w40{width:40%}#tourneyContent .tn-w60{width:60%;flex:1}#tourneyContent .tn-w80{width:80%}
+
+/* ---------- entrance cascade (user-action renders only) ---------- */
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-champs,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-well,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-spot,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-match,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-result,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board,#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-lineup{animation:tnCardIn .65s var(--tn-ease-out) backwards}
+@keyframes tnCardIn{from{opacity:0;transform:translateY(14px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(2){animation-delay:.05s}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(3){animation-delay:.1s}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(4){animation-delay:.15s}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(5){animation-delay:.2s}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(6){animation-delay:.25s}
+#tourneyContent.tn-anim .tn-panel:not([hidden]) .tn-board:nth-child(7){animation-delay:.3s}
+#tourneyContent .tn-doc-hidden .tn-neon,#tourneyContent.tn-doc-hidden .tn-neon::before,#tourneyContent.tn-doc-hidden .tn-neon::after,#tourneyContent.tn-doc-hidden .tn-live-dot,#tourneyContent.tn-doc-hidden .tn-live-chip .tn-dot{animation-play-state:paused}
+
+@media (prefers-reduced-motion: reduce){
+#tourneyContent *,#tourneyContent *::before,#tourneyContent *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 
   <section id="tourney"><div class="wrap">
-    <div class="tk-head">
-      <div><div class="tk-kick">CRCMZ</div><h2 class="tk-title">Live</h2></div>
-      <div class="tk-fresh" id="ttFresh"><span class="tk-fdot"></span><span id="ttFreshTx">&mdash;</span></div>
-    </div>
     <div id="tourneyContent" class="reveal"></div>
   </div></section>
   </div>
@@ -3727,629 +3807,776 @@ document.getElementById('fcReset').addEventListener('click',function(){
 });
 fcRenderAll();
 } // end legacy FIFA block
-// ── Tourney live feed (app.crcmz.me) — 9R2 lean kit build ──────────────
-// Data contract unchanged: GET /api/tourney on view entry + every 20s,
-// #tourneyContent mount, #tourneyPrevLine preview. Everything visual is
-// the 9R2 lean design (tourney9r2-lean.html): fixture list + series rooms,
-// entrant lens, diff-derived bug strip, destination chips instead of
-// prose. Expansion/lens state is STATE-KEYED (not DOM-keyed) so the 20s
-// re-render preserves an open room and an active lens across polls and
-// updates their contents in place — a poll never slams a room shut.
+// ── Tourney · CRCMZ neon build ─────────────────────────────────
+// Data contract unchanged: GET /api/tourney on view entry + every
+// 20s, #tourneyContent mount, #tourneyPrevLine preview. The view is
+// the approved neon redesign: LIVE TOURNAMENT wall header (tournament
+// name never in the header), a tournament switcher, and four tabs —
+// Chart | Matches | Stats | Line-up — rendered per featured
+// tournament (the active one, else the most recent in feed order).
+// Stats is FEED-DRIVEN: entrant boards are built only from a
+// populated leaderboard (lobby-series tournaments); bracket
+// tournaments carry no player stat lines in the feed, so their Stats
+// tab shows an honest state instead of invented boards. Expansion
+// state is STATE-KEYED (rooms keyed by tournament|match) so the 20s
+// re-render preserves open rooms across polls and updates in place.
 (function(){
   var el=document.getElementById('tourneyContent');
   var prevLine=document.getElementById('tourneyPrevLine');
-  var freshBox=document.getElementById('ttFresh');
-  var freshTx=document.getElementById('ttFreshTx');
   var APP='https://app.crcmz.me/app/tourney';
-  var VIOLET='#A855F7', FALLBACK='#A7A4B2';
-  var REDUCED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-  /* ---------- state ---------- */
-  var S={ payload:null, feed:'loading', lastOk:'',
-          room:null,   // match key: tid|match-stamp
-          lens:null,   // entrant id
-          log:null,    // game-log key: tid|entrantId
-          strip:null,  // {kind,label,text}
-          queue:[],    // full sorted diff queue behind the strip (marquee at 2+)
-          mqPaused:false,
-          flash:[],    // keys flashed on this render (or NEW-tagged)
-          mePerson:null };
+  var GREEN='#4ADE80', FALLBACK='#A7A4B2';
+  var REDUCED=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var S={payload:null,feed:'loading',lastOk:'',sel:null,tab:'chart',rooms:{},anim:false,spotKey:''};
   var timer=null;
 
-  /* ---------- small helpers ---------- */
-  function h(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-  function hex(c,d){return (typeof c==='string'&&/^#[0-9a-fA-F]{6}$/.test(c))?c:(d||FALLBACK)}
-  function surname(name){var p=String(name||'').trim().split(/\s+/);return (p[p.length-1]||'').toUpperCase()}
-  function clockHM(){var d=new Date();function z(n){return (n<10?'0':'')+n}return z(d.getHours())+':'+z(d.getMinutes())}
-  function boOf(t){var s=t.settings||{};return s.legs===2?2:(s.best_of||1)}
-  function needOf(t){var bo=boOf(t);return bo>1?Math.floor(bo/2)+1:1}
-  function partialScore(m){var a=0,b=0;(m.partial||[]).forEach(function(g){if(g.s1>g.s2)a++;else if(g.s2>g.s1)b++});return [a,b]}
-  function seriesScore(m){if(m.status==='played'&&typeof m.score1==='number'&&typeof m.score2==='number')return [m.score1,m.score2];return partialScore(m)}
-  function entMap(t){var E={};(t.entrants||[]).forEach(function(e){E[e.id]=e});return E}
-  function nameOf(E,id){return E[id]?E[id].name:''}
-  function isBracket(t){return t.format!=='ffa'&&t.format!=='league'&&t.format!=='groups'}
-  function gfMatch(t){var ms=(t.matches||[]).filter(function(m){return m.stage==='GF'&&m.status!=='void'});ms.sort(function(a,b){return a.round-b.round});return ms[0]||null}
-
-  /* ---------- crew logos: entrant -> self-hosted logo by identity ------
-     Feed names/ids vary; match on id + name + members, alias spirit of
-     the server's PERSON_ALIASES. Brendan Campbell IS Deception (owner-
-     confirmed) — checked before Soup because "BrendanSoup" contains it. */
-  var LOGOS={ samad:{img:'samad',tag:'ASAMAD89'}, soup:{img:'soup',tag:'INTERESTINGSOUP'},
-              moose:{img:'moose',tag:'THEMOOSECOMPANY'}, kap:{img:'kap',tag:'KAPTAAN'},
-              decep:{img:'decep',tag:'DECEPTION'}, killer:{img:'killer',tag:'KILLERX096'} };
-  var LOGO_RULES=[ ['decep',['deception','brendan','brendansoup']],
-                   ['samad',['abdulsamad','asamad89','asamad','samad']],
-                   ['soup',['interestingsoup','moiiz41510','moiz','soup']],
-                   ['moose',['themoosecompany','thegoopcompany','mutasif','moose']],
-                   ['kap',['kaptaan','kap']],
-                   ['killer',['killerx096','killer']] ];
-  function logoKey(e){
-    if(!e)return null;
-    var cands=[e.id,e.name].concat(e.members||[]).map(function(x){return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'')});
-    for(var r=0;r<LOGO_RULES.length;r++){
-      for(var c=0;c<cands.length;c++){
-        if(!cands[c])continue;
-        for(var a=0;a<LOGO_RULES[r][1].length;a++){
-          var al=LOGO_RULES[r][1][a];
-          if(cands[c]===al||(al.length>=4&&cands[c].indexOf(al)>=0))return LOGO_RULES[r][0];
-        }
-      }
-    }
+  /* ---------- small helpers (contract logic kept from 9R2) ---------- */
+  function h(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function hex(c){return /^#[0-9a-fA-F]{6}$/.test(c||'')?c:FALLBACK;}
+  function surname(n){n=String(n||'').trim();if(!n)return'—';var p=n.split(/\s+/);return p.length>1?p[p.length-1]:p[0];}
+  function boOf(t,m){if(m&&m.legs===2)return 2;var b=(m&&m.best_of)||(t&&t.settings&&t.settings.best_of)||1;return b>1?b:1;}
+  function needOf(bo){return Math.floor(bo/2)+1;}
+  function partialScore(m){var s=[0,0];(m.partial||[]).forEach(function(g){if(g.s1>g.s2)s[0]++;else if(g.s2>g.s1)s[1]++;});return s;}
+  function seriesScore(m){if(m.status==='played')return [m.score1||0,m.score2||0];return partialScore(m);}
+  function entMap(t){var o={};(t.entrants||[]).forEach(function(e){o[e.id]=e;});return o;}
+  function nameOf(t,id){var e=entMap(t)[id];return e?e.name:'TBD';}
+  function initials(n){var p=String(n||'?').trim().split(/\s+/);return ((p[0]||'?').charAt(0)+(p.length>1?p[p.length-1].charAt(0):'')).toUpperCase();}
+  function isBracket(t){return t.format==='double_elim'||t.format==='single_elim';}
+  function gfMatch(t){var ms=t.matches||[];for(var i=0;i<ms.length;i++){if(ms[i].stage==='GF')return ms[i];}return null;}
+  var STAGE_ORDER={W:0,L:1,P:2,K:3,GF:4};
+  function fixtureList(t){return (t.matches||[]).slice().sort(function(a,b){
+    var d=(STAGE_ORDER[a.stage]==null?9:STAGE_ORDER[a.stage])-(STAGE_ORDER[b.stage]==null?9:STAGE_ORDER[b.stage]);
+    if(d)return d; d=(a.round||0)-(b.round||0); if(d)return d; return (a.slot||0)-(b.slot||0);});}
+  function mkey(t,m){return t.id+'|'+(m.id?('i'+m.id):(m.stage+':'+m.round+':'+m.slot));}
+  function byKeyMap(t){var o={};(t.matches||[]).forEach(function(m){o[mkey(t,m)]=m;});return o;}
+  function findMatch(t,id){
+    if(!id)return null;
+    var ms=t.matches||[];
+    for(var i=0;i<ms.length;i++){if(ms[i].id===id||mkey(t,ms[i])===id)return ms[i];}
     return null;
   }
-  function meEntrantId(list){
-    var want={Mutasif:'moose',Moiz:'soup',Samad:'samad',Brendan:'decep'}[S.mePerson];
-    if(!want)return null;
-    var found=null;
-    (list||[]).forEach(function(t){(t.entrants||[]).forEach(function(e){if(logoKey(e)===want)found=e.id})});
-    return found;
+  var LABELS={W:function(m){return m.round===1&&!m.next_id?'FINAL':'W R'+m.round;},
+    L:function(m){return 'LOSERS R'+m.round;},
+    P:function(m){return m.round===1?'3RD PLACE':'PLAYOFF R'+m.round;},
+    K:function(m){return 'KNOCKOUT';},
+    GF:function(m){return m.round>1?'GF RESET':'GRAND FINAL';}};
+  function labelOf(m){var f=LABELS[m.stage];return f?f(m):(m.stage||'MATCH');}
+  function codeOf(m){return (m.stage||'')+(m.round||'')+'.'+(m.slot||'');}
+  function destFor(t,m,side){
+    var winner=side===0;
+    if(m.stage==='GF')return winner?'CHAMPION':'RUNNER-UP';
+    if(!m.next_id){
+      if(!winner)return null;
+      if(m.stage==='P')return '3RD PLACE';
+      if(t.format==='single_elim')return 'CHAMPION';
+      if(m.stage==='W')return t.champion_id?'':'W FINAL';
+      return null;
+    }
+    var nx=findMatch(t,m.next_id); if(!nx||!nx.stage)return null;
+    if(winner){
+      if(nx.stage==='GF')return 'THE FINAL';
+      var nx2=findMatch(t,nx.next_id);
+      if(nx.stage==='W'&&nx2&&nx2.stage==='GF')return 'W FINAL';
+      return labelOf(nx).replace('GRAND FINAL','THE FINAL');
+    }
+    if(m.stage==='GF')return null;
+    if(m.stage==='W'){
+      var lr=(t.matches||[]).filter(function(x){return x.stage==='L';})
+        .sort(function(a,b){return a.round-b.round;})[0];
+      return lr?'LOSERS R'+lr.round:'LOSERS';
+    }
+    if(m.stage==='L')return 'OUT';
+    if(m.stage==='K')return 'OUT';
+    return null;
   }
-  function youTag(eid,st){return st.meId&&eid===st.meId?'<span class="tk-tag tk-you">YOU</span>':''}
-  function chip(eid,e,extra){
-    var k=logoKey(e),col=hex(e?e.color:'');
-    if(k)return '<span class="tk-chip '+(extra||'')+'" data-lens="'+h(eid)+'" style="--tk-ec:'+col+'"><img src="assets/'+LOGOS[k].img+'.webp" alt=""></span>';
-    var init=surname(e?e.name:'?').slice(0,2)||'?';
-    return '<span class="tk-chip tk-mono '+(extra||'')+'" data-lens="'+h(eid)+'" style="--tk-ec:'+col+'">'+h(init)+'</span>';
+  function slotWait(t,m,side){
+    var eid=side===0?m.e1:m.e2, w=side===0?m.wait1:m.wait2;
+    if(eid)return nameOf(t,eid);
+    if(w)return w.charAt(0)+w.slice(1).toLowerCase();
+    return 'TBD';
   }
-  function chipStill(eid,e){
-    var k=logoKey(e),col=hex(e?e.color:'');
-    if(k)return '<span class="tk-chip tk-lg" style="--tk-ec:'+col+'"><img src="assets/'+LOGOS[k].img+'.webp" alt=""></span>';
-    var init=surname(e?e.name:'?').slice(0,2)||'?';
-    return '<span class="tk-chip tk-lg tk-mono" style="--tk-ec:'+col+'">'+h(init)+'</span>';
+  function lossesIn(t,eid){
+    var n=0;(t.matches||[]).forEach(function(m){
+      if(m.status==='played'&&m.winner_id&&(m.e1===eid||m.e2===eid)&&m.winner_id!==eid)n++;});
+    return n;
+  }
+  var LOGOS={samad:'samad',soup:'soup',moose:'moose',kap:'kap',decep:'decep',killer:'killer'};
+  function logoKey(name){
+    var n=String(name||'').toLowerCase();
+    if(/brendan|decep/.test(n))return 'decep';
+    if(/samad/.test(n))return 'samad';
+    if(/moose|themoosecompany|mutasif/.test(n))return 'moose';
+    if(/kap/.test(n))return 'kap';
+    if(/killer/.test(n))return 'killer';
+    if(/soup|moiz/.test(n))return 'soup';
+    return null;
+  }
+  function monoChip(name,color,cls){
+    var lk=logoKey(name);
+    var inner=lk?'<img src="assets/'+LOGOS[lk]+'.webp" alt="" loading="lazy">':h(initials(name));
+    return '<span class="tn-mono '+(cls||'')+'" style="--tn-pc:'+hex(color)+'">'+inner+'</span>';
+  }
+  function teamSize(t){
+    var mx=0;(t.entrants||[]).forEach(function(e){mx=Math.max(mx,(e.members||[]).length);});
+    return mx;
+  }
+  function isLiveStatus(t){return t.status==='active';}
+  function isDone(t){return !!t.champion_id||t.status==='complete'||t.status==='finished';}
+  function liveMatches(t){
+    return fixtureList(t).filter(function(m){
+      return m.status!=='played'&&(m.playable||(m.partial||[]).length>0);});
+  }
+  function ffaLive(t){
+    return (t.format==='ffa'||t.kind==='ffa')&&isLiveStatus(t)&&t.progress&&t.progress.played<t.progress.total;
+  }
+  function liveCount(t){
+    if(t.format==='ffa'||t.kind==='ffa')return ffaLive(t)?1:0;
+    return liveMatches(t).length;
+  }
+  function leaderRow(t){
+    var lb=t.leaderboard||[]; if(!lb.length)return null;
+    var best=lb[0]; lb.forEach(function(r){if((r.pos||99)<(best.pos||99))best=r;});
+    return best;
+  }
+  function lbRows(t){ /* leaderboard rows joined to entrants, pos order */
+    var em=entMap(t);
+    return (t.leaderboard||[]).map(function(r){return {r:r,e:em[r.entrant_id]||{name:'?'}};})
+      .sort(function(a,b){return (a.r.pos||99)-(b.r.pos||99);});
+  }
+  function featured(){
+    var list=(S.payload&&S.payload.tournaments)||[];
+    if(!list.length)return null;
+    if(S.sel){for(var i=0;i<list.length;i++)if(list[i].id===S.sel)return list[i];}
+    for(var j=0;j<list.length;j++)if(isLiveStatus(list[j]))return list[j];
+    return list[0];
   }
 
-  /* ---------- fixture order, labels, destinations ---------- */
-  var STAGE_ORDER={W:0,L:1,P:2,K:3,GF:4};
-  function fixtureList(t){
-    var ms=(t.matches||[]).filter(function(m){return m.status!=='void'});
-    ms.sort(function(a,b){
-      var sa=STAGE_ORDER[a.stage]!=null?STAGE_ORDER[a.stage]:5, sb=STAGE_ORDER[b.stage]!=null?STAGE_ORDER[b.stage]:5;
-      if(sa!==sb)return sa-sb;
-      if(a.round!==b.round)return a.round-b.round;
-      return (a.slot||0)-(b.slot||0);
-    });
-    return ms;
+  /* ---------- header / switcher / tabs ---------- */
+  function taglineHTML(t){
+    var parts=[t.game_label,t.mode_label,t.format_label].filter(Boolean);
+    var s=parts.map(function(p,i){
+      return (i?'<span class="tn-sep"> · </span>':'')+h(p);}).join('');
+    var ts=teamSize(t);
+    if(ts>1)s+='<span class="tn-sep"> · </span><span class="tn-tail">'+ts+'V'+ts+'</span>';
+    return s;
   }
-  function mkey(t,m){return t.id+'|'+(m.id!=null?('i'+m.id):(m.stage+':'+m.round+':'+m.slot))}
-  function byKeyMap(t,list){var map={};list.forEach(function(m){map[mkey(t,m)]=m});return map}
-  function labelMap(t,list){
-    var maxW=0;list.forEach(function(m){if(m.stage==='W'&&m.round>maxW)maxW=m.round});
-    var wIdx=0,map={};
-    list.forEach(function(m){
-      var L;
-      if(m.stage==='W'){ if(m.round===maxW)L='W FINAL'; else { wIdx++; L='M'+wIdx; } }
-      else if(m.stage==='L')L='LOSERS R'+m.round;
-      else if(m.stage==='GF')L=m.round>1?'GF RESET':'GRAND FINAL';
-      else if(m.stage==='P')L='3RD PLACE';
-      else if(m.stage==='K')L='KNOCKOUT';
-      else L=(m.stage||'MATCH')+' R'+m.round;
-      map[mkey(t,m)]=L;
-    });
-    var counts={};Object.keys(map).forEach(function(k){counts[map[k]]=(counts[map[k]]||0)+1});
-    list.forEach(function(m){var k=mkey(t,m);if(counts[map[k]]>1)map[k]=map[k]+' · '+(m.slot||'')});
-    return map;
+  function statusChip(t){
+    if(isDone(t))return '<span class="tn-chip tn-status-full">Finished</span>';
+    var n=liveCount(t);
+    if(n>0)return '<span class="tn-chip tn-status-live">Live · '+n+' on</span>';
+    if(isLiveStatus(t))return '<span class="tn-chip tn-status-live">In progress</span>';
+    return '<span class="tn-chip">'+h(t.status||'—')+'</span>';
   }
-  function destFor(t,m,labels,byKey){
-    var hasGF=(t.matches||[]).some(function(x){return x.stage==='GF'&&x.status!=='void'});
-    var hasL=(t.matches||[]).some(function(x){return x.stage==='L'&&x.status!=='void'});
-    var maxL=0;(t.matches||[]).forEach(function(x){if(x.stage==='L'&&x.round>maxL)maxL=x.round});
-    var win=null,lose=null;
-    if(m.next_id!=null){var tgt=byKey[t.id+'|i'+m.next_id];if(tgt)win=labels[mkey(t,tgt)]}
-    if(!win){
-      if(m.stage==='GF')win='CHAMPION';
-      else if(m.stage==='P')win='3RD';
-      else if(m.stage==='W'&&labels[mkey(t,m)]!=='W FINAL')win='W FINAL';
-      else win=hasGF?'GRAND FINAL':'CHAMPION';
+  function infoChips(t){
+    var out='';
+    if(t.format==='ffa'||t.kind==='ffa'){
+      if(t.progress)out+='<span class="tn-chip"><b>'+t.progress.total+'</b>&nbsp;lobbies</span>';
+    }else{
+      var ms=t.matches||[];
+      var bo=(t.settings&&t.settings.best_of)||(ms.length?boOf(t,ms[0]):0);
+      if(bo>1)out+='<span class="tn-chip">Best of&nbsp;<b>'+bo+'</b></span>';
     }
-    if(m.stage==='GF')lose='2ND';
-    else if(m.stage==='L'||m.stage==='P'||m.stage==='K')lose='OUT';
-    else if(m.stage==='W')lose=hasL?('LOSERS R'+Math.min(m.round,maxL)):'OUT';
-    else lose='OUT';
-    return {win:win,lose:lose};
+    if(t.progress&&t.progress.total)out+='<span class="tn-chip"><b>'+t.progress.played+' of '+t.progress.total+'</b>&nbsp;played</span>';
+    if((t.entrants||[]).length)out+='<span class="tn-chip"><b>'+t.entrants.length+'</b>&nbsp;'+(teamSize(t)>1?'teams':'players')+'</span>';
+    return out;
   }
-  function destChips(t,m,labels,byKey){
-    var R=destFor(t,m,labels,byKey);
+  function heroHTML(t){
+    return '<header class="tn-hero">'
+      +'<h1>Live <span class="tn-neon" data-text="Tournament">Tournament</span></h1>'
+      +(t?'<div class="tn-tagline">'+taglineHTML(t)+'</div>':'')
+      +'<div class="tn-metaline">'
+      +(t?statusChip(t)+infoChips(t):'')
+      +'<span class="tn-chip tn-fresh" id="ttFresh"><span class="tn-fdot"></span><span id="ttFreshTx">—</span></span>'
+      +'</div></header>';
+  }
+  function switchHTML(list,feat){
+    if(list.length<2)return '';
+    var out='<div class="tn-switch" role="tablist" aria-label="Tournaments">';
+    list.forEach(function(t){
+      var on=feat&&t.id===feat.id, live=isLiveStatus(t);
+      var st=isDone(t)?'FINAL':(live?'LIVE':String(t.status||'').toUpperCase());
+      out+='<button type="button" class="tn-sw-chip'+(on?' on':'')+'" data-sel="'+h(t.id)+'" role="tab" aria-selected="'+(on?'true':'false')+'">'
+        +'<span class="tn-sw-dot'+(live&&!isDone(t)?' live':'')+'"></span>'+h(t.name)
+        +'<span class="tn-sw-st'+(live&&!isDone(t)?' live':'')+'">'+h(st)+'</span></button>';
+    });
+    return out+'</div>';
+  }
+  var TABS=[['chart','Chart'],['matches','Matches'],['stats','Stats'],['lineup','Line-up']];
+  function tabsHTML(t){
+    var dot=liveCount(t)>0;
+    var out='<nav class="tn-tabs" role="tablist" aria-label="Tournament sections">';
+    TABS.forEach(function(tb){
+      out+='<button type="button" role="tab" data-tab="'+tb[0]+'" aria-selected="'+(S.tab===tb[0]?'true':'false')+'">'
+        +tb[1]+(tb[0]==='chart'&&dot?'<span class="tn-tab-dot"></span>':'')+'</button>';
+    });
+    return out+'</nav>';
+  }
+
+  /* ---------- shared match rendering ---------- */
+  function pipsHTML(m,side,wins){
+    var need=needOf(boOf(null,m)); if(need<2)return '';
+    var s=''; for(var i=0;i<need;i++)s+='<span class="tn-pip'+(i<wins?' on':'')+'"></span>';
+    return '<span class="tn-pips">'+s+'</span>';
+  }
+  function teamRowHTML(t,m,side,opts){
+    opts=opts||{};
+    var eid=side===0?m.e1:m.e2;
+    var e=eid?entMap(t)[eid]:null;
+    var ss=opts.score||seriesScore(m);
+    var played=m.status==='played';
+    var isWin=played&&m.winner_id&&eid===m.winner_id;
+    var isLose=played&&m.winner_id&&eid&&eid!==m.winner_id;
+    var champ=isWin&&t.champion_id&&eid===t.champion_id&&opts.finale;
+    var label=e?e.name:slotWait(t,m,side);
+    var scoreTxt=opts.hideScore?'':(played||(m.partial||[]).length?String(ss[side]):'–');
+    return '<div class="tn-team-row'+(isWin?' winner':'')+(isLose?' loser':'')+'" style="--tn-tc:'+hex(e?e.color:null)+'">'
+      +'<span class="tn-tdot"></span>'
+      +'<span class="tn-tname">'+h(label)+'</span>'
+      +(champ?'<span class="tn-crown">Champions</span>':'')
+      +pipsHTML(m,side,ss[side])
+      +'<span class="tn-tscore">'+scoreTxt+'</span></div>';
+  }
+  function finaleMatch(t){
+    var g=gfMatch(t); if(g)return g;
+    var played=fixtureList(t).filter(function(m){return m.status==='played';});
+    return played.length?played[played.length-1]:null;
+  }
+  function metaLine(t,m){
     if(m.status==='played'&&m.winner_id){
-      var E=entMap(t),lid=m.winner_id===m.e1?m.e2:m.e1;
-      return '<div class="tk-dchips"><span class="tk-dchip"><b>'+h(surname(nameOf(E,m.winner_id)))+'</b> &rarr; '+h(R.win)+'</span><span class="tk-dchip"><b>'+h(surname(nameOf(E,lid)))+'</b> &rarr; '+h(R.lose)+'</span></div>';
+      var parts=[];
+      var wSide=m.winner_id===m.e1?0:1;
+      var wd=destFor(t,m,wSide), ld=destFor(t,m,1-wSide);
+      if(wd)parts.push(surname(nameOf(t,m.winner_id))+' → '+wd);
+      if(ld)parts.push(surname(nameOf(t,m.winner_id===m.e1?m.e2:m.e1))+' → '+ld);
+      return parts.join(' · ');
     }
-    return '<div class="tk-dchips"><span class="tk-dchip"><b>WIN</b> &rarr; '+h(R.win)+'</span><span class="tk-dchip"><b>LOSE</b> &rarr; '+h(R.lose)+'</span></div>';
+    if(m.e1&&m.e2){
+      var d0=destFor(t,m,0), d1=destFor(t,m,1);
+      if(d0||d1)return 'WIN → '+(d0||'—')+' · LOSE → '+(d1||'—');
+      return 'Fixture set';
+    }
+    var waits=[m.wait1,m.wait2].filter(Boolean);
+    return waits.length?('Waiting on '+waits.join(' · ')):'Awaiting teams';
   }
-  function slotName(m,side){var id=side===1?m.e1:m.e2;if(id)return null;return side===1?m.wait1:m.wait2}
-  function slotShort(t,m,side,E){var id=side===1?m.e1:m.e2;if(id)return surname(nameOf(E,id));return (side===1?m.wait1:m.wait2)||'TBD'}
-  function lossesIn(t,eid){var n=0;(t.matches||[]).forEach(function(m){if(m.status==='played'&&m.winner_id&&m.winner_id!==eid&&(m.e1===eid||m.e2===eid))n++});return n}
-  function arrivalNote(t,m){
-    var notes=[],E=entMap(t);
-    [m.e1,m.e2].forEach(function(eid){
-      if(!eid)return;
-      (t.matches||[]).forEach(function(f){
-        if(f.status!=='played'||!f.winner_id)return;
-        var ss=seriesScore(f);
-        if(f.next_id!=null&&m.id!=null&&String(f.next_id)===String(m.id)&&f.winner_id===eid)
-          notes.push('TOOK '+labelMap(t,fixtureList(t))[mkey(t,f)]+' '+ss[0]+'–'+ss[1]);
-        else if(m.stage==='L'&&f.stage==='W'&&f.winner_id!==eid&&(f.e1===eid||f.e2===eid)){
-          var mine=eid===f.e1?ss[0]:ss[1],theirs=eid===f.e1?ss[1]:ss[0];
-          notes.push('LOST '+labelMap(t,fixtureList(t))[mkey(t,f)]+' '+mine+'–'+theirs);
-        }
-      });
-    });
-    return notes.length?notes.join(' · '):null;
-  }
+  function num2(v){return v==null?'—':String(v);}
 
-  /* ---------- bug strip: derived from the payload diff ---------- */
-  function deriveStrip(prevList,nextList){
-    if(!prevList){S.queue=[];return null}
-    var ev=[];
-    function findTour(list,id){for(var i=0;i<(list||[]).length;i++)if(list[i].id===id)return list[i];return null}
-    nextList.forEach(function(t){
-      var pt=findTour(prevList,t.id);if(!pt)return;
-      var E=entMap(t),list=fixtureList(t),labels=labelMap(t,list),byKey=byKeyMap(t,list);
-      if(t.champion_id&&!pt.champion_id){
-        var gf=gfMatch(t),ss=gf?seriesScore(gf):[0,0];
-        ev.push({p:1,kind:'champion',label:'CHAMPION',text:surname(nameOf(E,t.champion_id))+' · GF '+ss[0]+'–'+ss[1],flash:['strip','band-'+t.id]});
-      }
-      list.forEach(function(m){
-        var pm=null;(pt.matches||[]).forEach(function(x){if(mkey(pt,x)===mkey(t,m))pm=x});
-        if(!pm)return;
-        var lbl=labels[mkey(t,m)],fk='fx-'+mkey(t,m);
-        if(pm.status!=='played'&&m.status==='played'&&m.stage!=='GF'){
-          var ss=seriesScore(m),lid=m.winner_id===m.e1?m.e2:m.e1,R=destFor(t,m,labels,byKey);
-          var cons=(m.stage==='L'||m.stage==='P')?' → OUT':' → '+R.lose;
-          ev.push({p:2,kind:'latest',label:'LATEST',text:lbl+' FINAL · '+surname(nameOf(E,m.winner_id))+' '+ss[0]+'–'+ss[1]+' '+surname(nameOf(E,lid))+cons,flash:['strip',fk]});
-        }
-        if(m.status!=='played'&&(m.partial||[]).length>(pm.partial||[]).length){
-          var s2=partialScore(m);
-          if(s2[0]===s2[1])ev.push({p:3,kind:'live',label:'LIVE',text:lbl+' · TIED '+s2[0]+'–'+s2[1]+' · G'+(m.partial.length+1)+' NEXT',flash:['strip',fk,'room-'+mkey(t,m)+'-g'+m.partial.length]});
-          else ev.push({p:3,kind:'live',label:'LIVE',text:lbl+' · '+surname(nameOf(E,s2[0]>s2[1]?m.e1:m.e2))+' '+s2[0]+'–'+s2[1]+' · G'+(m.partial.length+1)+' NEXT',flash:['strip',fk,'room-'+mkey(t,m)+'-g'+m.partial.length]});
-        }
-        if(!pm.playable&&m.playable&&m.status!=='played'&&!(m.partial||[]).length){
-          ev.push({p:4,kind:'upnext',label:'UP NEXT',text:lbl+' · '+slotShort(t,m,1,E)+' V '+slotShort(t,m,2,E),flash:['strip',fk]});
-        }
-      });
-      if(t.format==='ffa'&&pt.format==='ffa'&&t.progress&&pt.progress&&t.progress.played>pt.progress.played){
-        var rows=t.leaderboard||[],prows=pt.leaderboard||[];
-        if(rows.length){
-          var lead=rows[0],plead=prows[0];
-          if(plead&&plead.entrant_id!==lead.entrant_id)
-            ev.push({p:5,kind:'latest',label:'LATEST',text:String(t.name).toUpperCase()+' · LEAD '+surname(nameOf(E,lead.entrant_id))+' '+lead.points+' PTS',flash:['strip','ffa-'+t.id+'-'+lead.entrant_id]});
-          else
-            ev.push({p:2,kind:'latest',label:'LATEST',text:String(t.name).toUpperCase()+' · G'+t.progress.played+' IN · '+surname(nameOf(E,lead.entrant_id))+' '+lead.points+' PTS',flash:['strip','ffa-'+t.id+'-'+lead.entrant_id]});
-        }
-      }
-    });
-    if(!ev.length){S.queue=[];return null}
-    ev.sort(function(a,b){return a.p-b.p});
-    S.queue=ev;
-    return ev[0];
-  }
-  function statusStrip(list){
-    var play=[];
-    (list||[]).forEach(function(t){
-      if(!isBracket(t))return;
-      var fl2=fixtureList(t),labels=labelMap(t,fl2);
-      fl2.forEach(function(m){if(m.playable&&!(m.partial||[]).length)play.push(labels[mkey(t,m)]+' PLAYABLE')});
-    });
-    var suffix='',ffa=(list||[]).filter(function(t){return t.format==='ffa'})[0];
-    if(ffa&&ffa.progress)suffix=' · '+ffa.progress.played+'/'+ffa.progress.total;
-    if(!(list||[]).length)return {kind:'status',label:'STATUS',text:'NO TOURNAMENTS'};
-    return {kind:'status',label:'STATUS',text:(play.length?play.join(' · '):'ALL WAITING')+suffix};
-  }
-
-  /* ---------- lens: next + chips + stat lines, generated ---------- */
-  function ffaStatLine(t,row){
-    var rows=(t.leaderboard||[]).slice().sort(function(a,b){return a.pos-b.pos});
-    var lead=rows[0],p2=rows[1],p=t.progress||{played:0,total:0},n=rows.length;
-    var s='FFA P'+row.pos+'/'+n+' · '+row.points+' PTS';
-    if(p.played===0)return s+' · 0/'+p.total+' PLAYED';
-    if(row.pos===1&&p2)s+=' · +'+(row.points-p2.points)+' LEAD';
-    else if(row.pos>1&&lead)s+=' · −'+(lead.points-row.points);
-    return s+' · '+(p.total-p.played)+' LEFT';
-  }
-  function leagueStatLine(t,row,g){
-    var rows=((t.tables||{})[g]||[]).slice().sort(function(a,b){return a.pos-b.pos});
-    var top=rows[0];
-    var s=(g?('GROUP '+String(g).toUpperCase()+' · '):'LEAGUE ')+'P'+row.pos+' · '+row.pts+' PTS · '+row.w+'W '+row.d+'D '+row.l+'L';
-    if(row.pos===1)s+=' · TOP';else if(top)s+=' · −'+(top.pts-row.pts);
-    var adv=t.settings&&t.settings.advance;
-    if(t.format==='groups'&&adv){
-      if(row.pos<=adv){var below=rows[adv];s+=' · IN CUT'+(below?' +'+(row.pts-below.pts):'');}
-      else{var cut=rows[adv-1];s+=' · OUT CUT'+(cut?' −'+(cut.pts-row.pts):'');}
-    }
-    return s;
-  }
-  function lensInfo(eid,list){
-    var info={name:'',tag:'',color:VIOLET,next:'',chips:[],stats:[],champion:false};
-    list.forEach(function(t){var e=entMap(t)[eid];if(e&&!info.name){info.name=e.name;info.color=hex(e.color,VIOLET);var k=logoKey(e);info.tag=k?LOGOS[k].tag:''}});
-    var bracketNext=null,outLabel=null;
-    list.forEach(function(t){
-      if(!isBracket(t))return;
-      var E=entMap(t);if(!E[eid])return;
-      var fl2=fixtureList(t),labels=labelMap(t,fl2);
-      if(t.champion_id){
-        if(t.champion_id===eid&&!info.champion){
-          info.champion=true;var gf=gfMatch(t),ss=gf?seriesScore(gf):[0,0];
-          info.next='CHAMPION · GF '+ss[0]+'–'+ss[1];info.chips=['★ CHAMPION'];
-        }
-        return;
-      }
-      var losses=lossesIn(t,eid),maxL=t.format==='double_elim'?2:1;
-      if(losses>=maxL){
-        var last=null;fl2.forEach(function(m){if(m.status==='played'&&m.winner_id&&m.winner_id!==eid&&(m.e1===eid||m.e2===eid))last=m});
-        if(last&&!outLabel)outLabel='OUT · '+labels[mkey(t,last)];
-        return;
-      }
-      for(var i=0;i<fl2.length;i++){
-        var m=fl2[i];
-        if(m.status!=='played'&&m.status!=='bye'&&(m.e1===eid||m.e2===eid)){
-          if(!bracketNext)bracketNext={t:t,m:m,labels:labels,byKey:byKeyMap(t,fl2),lives:maxL-losses};
-          break;
-        }
-      }
-    });
-    if(!info.champion&&bracketNext){
-      var t=bracketNext.t,m=bracketNext.m,E=entMap(t);
-      var oppId=m.e1===eid?m.e2:m.e1;
-      var opp=oppId?h(surname(nameOf(E,oppId))):h((m.e1===eid?m.wait2:m.wait1)||'TBD');
-      var nx=h(bracketNext.labels[mkey(t,m)])+' V '+opp;
-      if((m.partial||[]).length){var ss2=partialScore(m);nx+=' · '+ss2[0]+'–'+ss2[1]}
-      else if(m.playable)nx+=' · <span class="tk-play">PLAYABLE</span>';
-      else nx+=' · WAIT';
-      info.next=nx;
-      var R=destFor(t,m,bracketNext.labels,bracketNext.byKey);
-      info.chips=['WIN → '+R.win,'LOSE → '+R.lose];
-      if(t.format==='double_elim')info.stats.push('LIVES '+bracketNext.lives);
-    } else if(!info.champion&&outLabel){
-      info.next=outLabel;
-    }
-    list.forEach(function(t){
-      var E=entMap(t);if(!E[eid])return;
-      if(t.format==='ffa'){
-        var row=(t.leaderboard||[]).filter(function(r){return r.entrant_id===eid})[0];
-        if(row){
-          info.stats.push(ffaStatLine(t,row));
-          if(!info.next&&!info.champion){
-            var p=t.progress||{played:0,total:0};
-            info.next=p.played<p.total?('G'+(p.played+1)+' · '+String(t.name).toUpperCase()):'SERIES COMPLETE';
-          }
-        }
-      } else if(t.format==='league'||t.format==='groups'){
-        var tbls=t.tables||{};
-        Object.keys(tbls).forEach(function(g){
-          var row=(tbls[g]||[]).filter(function(r){return r.entrant_id===eid})[0];
-          if(row)info.stats.push(leagueStatLine(t,row,g));
+  /* game lines for a match room: richest feed source wins —
+     series_history maps, else games[] (map names / round scores),
+     else partial[] game scores, else bare game slots. */
+  function gameLines(t,m){
+    var out=[], i, g, gm, side;
+    var sh=m.series_history;
+    if(Array.isArray(sh)&&sh.length){
+      sh.forEach(function(sg,gi){
+        gm=(m.games||[])[gi]||{};
+        side=(gm.s2||0)>(gm.s1||0)?2:((gm.s1||0)>(gm.s2||0)?1:(sg.won===2?2:(sg.won===1?1:null)));
+        var rounds=sg.rounds||[];
+        var w1=0,w2=0;
+        var maps=rounds.map(function(r,mi){
+          var a=(r.s1!=null?r.s1:r[0]), b=(r.s2!=null?r.s2:r[1]);
+          if(a>b)w1++; else if(b>a)w2++;
+          return {label:(gm.map&&gi===0?gm.map:'MAP '+(mi+1)),winSide:b>a?2:(a>b?1:null),hi:Math.max(a,b),lo:Math.min(a,b)};
         });
-      }
-    });
-    if(!info.next&&!info.champion)info.next='TABLE ONLY · NO FIXTURE IN FEED';
-    return info;
-  }
-
-  /* ---------- shared render helpers ---------- */
-  function fl(key){return (!REDUCED&&S.flash.indexOf(key)>=0)?' tk-flash':''}
-  function ntag(key){return (REDUCED&&S.flash.indexOf(key)>=0)?'<span class="tk-newtag">NEW</span>':''}
-  function lit(eid){return S.lens===eid?' tk-lit':''}
-  function pips(m,side,need,eid,E,big){
-    var ss=seriesScore(m),mine=side===1?ss[0]:ss[1],out='';
-    for(var i=0;i<need;i++)out+='<span class="tk-pip'+(i<mine?' tk-on':'')+'" style="--tk-ec:'+hex(eid&&E[eid]?E[eid].color:'')+'"></span>';
-    return '<span class="'+(big?'tk-bigpips':'tk-pips')+'">'+out+'</span>';
-  }
-  function fxState(m){
-    if(m.status==='played')return '<span class="tk-state tk-final">FINAL</span>';
-    if((m.partial||[]).length){var ss=partialScore(m);return '<span class="tk-state tk-series">SERIES '+ss[0]+'–'+ss[1]+'</span>'}
-    if(m.playable)return '<span class="tk-state tk-play">PLAYABLE</span>';
-    return '';
-  }
-  function roomState(m){
-    if(m.status==='played')return {t:'FINAL',done:true};
-    if((m.partial||[]).length){var ss=partialScore(m);return {t:ss[0]===ss[1]?('SERIES TIED '+ss[0]+'–'+ss[1]):('LIVE · GAME '+(m.partial.length+1)),done:false}}
-    if(m.playable)return {t:'UP NEXT',done:false};
-    return {t:'WAITING',done:true};
-  }
-  function champBand(t,E,st){
-    if(!t.champion_id||!E[t.champion_id])return '';
-    var sub='',gf=gfMatch(t);
-    if(gf&&gf.status==='played'&&gf.winner_id){
-      var ss=seriesScore(gf),lid=gf.winner_id===gf.e1?gf.e2:gf.e1;
-      sub='GF '+ss[0]+'–'+ss[1]+' V '+surname(nameOf(E,lid));
+        out.push({label:'GAME '+(gi+1),side:side,score:side?(Math.max(w1,w2)+'–'+Math.min(w1,w2)+' MAPS'):'',maps:maps});
+      });
+      return out;
     }
-    return '<div class="tk-champband'+fl('band-'+t.id)+'" data-band="'+h(t.id)+'"><div class="tk-ck">★ CHAMPION</div><div class="tk-cn">'+h(E[t.champion_id].name)+'</div>'+(sub?'<div class="tk-cs">'+h(sub)+'</div>':'')+'</div>';
-  }
-  function metaFor(t){
-    var g=String(t.game_label||'').toUpperCase(),abbr=g.indexOf('DUTY')>=0?'COD':g;
-    if(t.format==='ffa')return abbr+' · FFA';
-    var mode=String(t.mode_label||'').toUpperCase();
-    return abbr==='COD'?mode:(abbr+' · '+mode);
-  }
-  function progFrac(t){
-    var p=t.progress||{played:0,total:0},s=p.played+'/'+p.total;
-    if(t.format==='ffa'&&p.played>0&&p.played<p.total)s+=' · NEXT G'+(p.played+1);
-    return s;
-  }
-  function cardHead(t){
-    var fin=t.status!=='active';
-    return '<div class="tk-tc-head"><div><div class="tk-tc-name">'+h(t.name)+'</div><div class="tk-tc-meta"><span class="tk-gdot"></span>'+h(metaFor(t))+'</div></div>'
-      +(fin?'<div class="tk-live tk-fin"><i></i>FINISHED</div>':'<div class="tk-live"><i></i>LIVE</div>')+'</div>';
-  }
-
-  /* ---------- cards ---------- */
-  function gameLog(t,r){
-    var p=t.progress||{played:0,total:0},out='';
-    for(var g=1;g<=p.total;g++){
-      var note='—';
-      if(g<=p.played)note=(p.played===1)?(r.kills+' KILLS'+(r.wins?' · W':'')):'✓';
-      out+='<div class="tk-glog"><span>G'+g+'</span><b>'+h(note)+'</b></div>';
+    var gs=m.games||[];
+    if(gs.length&&gs.some(function(x){return x.map||((x.s1||0)+(x.s2||0))>1;})){
+      gs.forEach(function(x,gi){
+        side=(x.s2||0)>(x.s1||0)?2:((x.s1||0)>(x.s2||0)?1:null);
+        out.push({label:x.map?('MAP '+(gi+1)):'GAME '+(gi+1),mapName:x.map||'',side:side,
+          score:side?(Math.max(x.s1||0,x.s2||0)+'–'+Math.min(x.s1||0,x.s2||0)):'',
+          scoreUnit:x.map?'ROUNDS':'',maps:[]});
+      });
+      return out;
+    }
+    var ps=m.partial||[];
+    if(ps.length){
+      ps.forEach(function(p,gi){
+        side=p.s2>p.s1?2:(p.s1>p.s2?1:null);
+        out.push({label:'GAME '+(gi+1),side:side,score:p.s1+' – '+p.s2,maps:[]});
+      });
+    }else if(gs.length){
+      gs.forEach(function(x,gi){
+        side=(x.s2||0)>(x.s1||0)?2:((x.s1||0)>(x.s2||0)?1:null);
+        out.push({label:'GAME '+(gi+1),side:side,score:'',maps:[]});
+      });
+    }
+    /* pad remaining game slots for live / pending / early-decided series */
+    var bo=boOf(t,m), sc=seriesScore(m), need=needOf(bo);
+    var decided=m.status==='played'||sc[0]>=need||sc[1]>=need;
+    for(i=out.length;i<bo;i++){
+      var note='';
+      if(decided)note='✕ NOT NEEDED';
+      else if(i===bo-1&&bo>1&&ps.length<bo-1)note='IF NEEDED';
+      out.push({label:'GAME '+(i+1),side:null,score:'—',note:note,maps:[]});
     }
     return out;
   }
-  function ffaCard(t,st){
-    var E=entMap(t);
-    var rows=(t.leaderboard||[]).map(function(r){
-      var e=E[r.entrant_id]||{name:'—',color:''},eid=r.entrant_id,lk=t.id+'|'+eid;
-      var detail='';
-      if(st.log===lk)detail='<div class="tk-detail"><div class="tk-dh">GAME LOG</div>'+gameLog(t,r)+'</div>';
-      return '<div class="tk-srow'+(st.log===lk?' tk-open':'')+lit(eid)+fl('ffa-'+t.id+'-'+eid)+'" data-who="'+h(eid)+'" data-row="'+h(eid)+'" data-tid="'+h(t.id)+'" style="--tk-ec:'+hex(e.color)+'">'
-        +'<span class="tk-pos">'+h(r.pos)+'</span>'+chip(eid,e)
-        +'<span class="tk-who"><span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)
-        +'<div class="tk-sub">'+h(r.kills)+'K\u00b7'+h(r.wins)+'W</div></span>'
-        +'<span class="tk-pts">'+h(r.points)+'</span><span class="tk-chev">›</span></div>'+detail;
-    }).join('');
-    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+rows
-      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
-  }
-  function tableHTML(t,rows,E,g,st){
-    var adv=t.settings&&t.settings.advance;
-    var team=t.entrants&&t.entrants.length&&t.entrants[0].members&&t.entrants[0].members.length>1;
-    var head='<div class="tk-lhead"><span class="tk-c-pos">POS</span><span class="tk-c-pl">'+(team?'TEAM':'PLAYER')+'</span><span class="tk-c-n">P</span><span class="tk-c-n">W</span><span class="tk-c-n">D</span><span class="tk-c-n">L</span><span class="tk-c-n tk-c-pts">PTS</span></div>';
-    var body=rows.map(function(r){
-      var e=E[r.entrant_id]||{name:'—',color:''},eid=r.entrant_id;
-      var q=t.format==='groups'&&adv&&r.pos<=adv;
-      return '<div class="tk-lrow'+(q?' tk-q':'')+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-c-pos">'+h(r.pos)+'</span>'
-        +'<span class="tk-c-pl">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)+'</span>'
-        +'<span class="tk-c-n">'+h(r.p)+'</span><span class="tk-c-n">'+h(r.w)+'</span><span class="tk-c-n">'+h(r.d)+'</span><span class="tk-c-n">'+h(r.l)+'</span>'
-        +'<span class="tk-c-n tk-cpts tk-c-pts">'+h(r.pts)+'</span></div>';
-    }).join('');
-    return (g!==''?'<div class="tk-tsub">GROUP '+h(String(g).toUpperCase())+'</div>':'')+head+body;
-  }
-  function roomHTML(t,m,labels,byKey,st){
-    var E=entMap(t),rs=roomState(m),ss=seriesScore(m),bo=boOf(t),need=needOf(t),ssP=partialScore(m);
-    var sides=[1,2].map(function(s){
-      var eid=s===1?m.e1:m.e2;
-      if(!eid){
-        var snm=slotName(m,s)||'TBD';
-        return '<div class="tk-serow"><span class="tk-who tk-pad"><span class="tk-nm tk-dimnm">'+h(snm)+'</span></span><span class="tk-snum" style="color:var(--tk-muted)">–</span></div>';
-      }
-      var e=E[eid]||{name:'—',color:''},mine=s===1?ss[0]:ss[1];
-      return '<div class="tk-serow'+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-who">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span></span>'
-        +pips(m,s,need,eid,E,true)+'<span class="tk-snum">'+h(mine)+'</span></div>';
-    }).join('');
-    var games='';
-    if(m.e1&&m.e2){
-      var decided=m.status==='played'||ssP[0]>=need||ssP[1]>=need;
-      for(var g=0;g<bo;g++){
-        if(g<(m.partial||[]).length){
-          var pg=m.partial[g],wn=pg.s1>pg.s2?surname(nameOf(E,m.e1)):surname(nameOf(E,m.e2));
-          games+='<div class="tk-grow'+fl('room-'+mkey(t,m)+'-g'+(g+1))+'"><span>G'+(g+1)+' · <span class="tk-gw">'+h(wn)+'</span></span><b>'+h(pg.s1)+' – '+h(pg.s2)+'</b></div>';
-        }
-        else if(decided)games+='<div class="tk-grow"><span>G'+(g+1)+'</span><b>✕</b></div>';
-        else if(g===bo-1&&(m.partial||[]).length<bo-1)games+='<div class="tk-grow"><span>G'+(g+1)+' · IF NEEDED</span><b>—</b></div>';
-        else games+='<div class="tk-grow"><span>G'+(g+1)+'</span><b>—</b></div>';
-      }
-      if(m.pens1!=null&&m.pens2!=null)games+='<div class="tk-grow"><span>PENS</span><b>'+h(m.pens1)+' – '+h(m.pens2)+'</b></div>';
-    }
-    var note=arrivalNote(t,m);
-    var solid=m.playable&&m.status!=='played';
-    return '<div class="tk-room" data-room="'+h(mkey(t,m))+'">'
-      +'<div class="tk-rh"><span class="tk-rl">BO'+bo+'</span><span class="tk-rs'+(rs.done?' tk-done':'')+'">'+rs.t+'</span><button type="button" class="tk-rx" data-close="1" aria-label="Close">✕</button></div>'
-      +sides+games
-      +(note?'<div class="tk-vnote">↪ '+h(note)+'</div>':'')
-      +destChips(t,m,labels,byKey)
-      +'<a class="tk-cta'+(solid?'':' tk-ghost')+'" href="'+APP+'/'+encodeURIComponent(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ</a></div>';
-  }
-  function fxHTML(t,m,labels,byKey,st){
-    var E=entMap(t),k=mkey(t,m),ss=seriesScore(m),need=needOf(t);
-    function line(side){
-      var eid=side===1?m.e1:m.e2,sc=side===1?ss[0]:ss[1];
-      if(!eid){
-        var snm=(m.stage==='GF'&&m.round===1)?'···':(slotName(m,side)||'TBD');
-        return '<div class="tk-fline"><span class="tk-who tk-pad"><span class="tk-nm tk-dimnm">'+h(snm)+'</span></span><span class="tk-score tk-dim">–</span></div>';
-      }
-      var e=E[eid]||{name:'—',color:''};
-      var lost=m.status==='played'&&m.winner_id&&m.winner_id!==eid;
-      var life=(t.format==='double_elim'&&m.stage==='L'&&m.status!=='played'&&lossesIn(t,eid)===1)?'<span class="tk-tag tk-life">1 LIFE LEFT</span>':'';
-      var show=m.status==='played'||(m.partial||[]).length>0;
-      return '<div class="tk-fline'+(lost?' tk-loser':'')+lit(eid)+'" data-who="'+h(eid)+'" style="--tk-ec:'+hex(e.color)+'"><span class="tk-who">'+chip(eid,e)+'<span class="tk-nm">'+h(e.name)+'</span>'+youTag(eid,st)+life+'</span>'
-        +(show?pips(m,side,need,eid,E,false):'')+'<span class="tk-score'+(show?'':' tk-dim')+'">'+(show?h(sc):'–')+'</span></div>';
-    }
-    return '<div class="tk-fx'+(st.room===k?' tk-open':'')+fl('fx-'+k)+'" data-match="'+h(k)+'">'
-      +'<div class="tk-fx-top"><span class="tk-fx-id">'+h(labels[k])+'</span>'+fxState(m)+'</div>'
-      +line(1)+line(2)
-      +(st.room===k?roomHTML(t,m,labels,byKey,st):'')
+  function gameLineHTML(t,m,gl){
+    var winE=gl.side?(gl.side===1?entMap(t)[m.e1]:entMap(t)[m.e2]):null;
+    var head='<div class="tn-game-head"><span class="tn-g-label">'+h(gl.label)+(gl.mapName?' · '+h(gl.mapName):'')+'</span>'
+      +(winE?'<span class="tn-g-win" style="--tn-tc:'+hex(winE.color)+'"><span class="tn-wdot"></span>'+h(winE.name)+'</span>':'')
+      +(gl.note?'<span class="tn-g-win" style="color:var(--tn-dim)">'+h(gl.note)+'</span>':'')
+      +(gl.score?'<span class="tn-g-score">'+h(gl.score)+(gl.scoreUnit?' '+gl.scoreUnit:'')+'</span>':'')
       +'</div>';
-  }
-  function bracketCard(t,st){
-    var E=entMap(t),list=fixtureList(t),labels=labelMap(t,list),byKey=byKeyMap(t,list);
-    var body=list.map(function(m){return fxHTML(t,m,labels,byKey,st)}).join('');
-    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+body
-      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
-  }
-  function tableCard(t,st){
-    var E=entMap(t),tbls=t.tables||{},body='';
-    if(t.format==='groups'){
-      Object.keys(tbls).sort().forEach(function(g){body+=tableHTML(t,tbls[g]||[],E,g,st)});
-      var ks=fixtureList(t).filter(function(m){return m.stage==='K'});
-      if(ks.length){
-        var labels=labelMap(t,fixtureList(t)),byKey=byKeyMap(t,fixtureList(t));
-        body+='<div class="tk-tsub">KNOCKOUT</div>'+ks.map(function(m){return fxHTML(t,m,labels,byKey,st)}).join('');
-      }
-    } else {
-      body=tableHTML(t,tbls['']||[],E,'',st);
+    var maps='';
+    if(gl.maps&&gl.maps.length){
+      maps='<div class="tn-plines">'+gl.maps.map(function(mp){
+        var we=mp.winSide?(mp.winSide===1?entMap(t)[m.e1]:entMap(t)[m.e2]):null;
+        return '<div class="tn-pline"><span class="tn-pname">'+h(mp.label)+'</span>'
+          +(we?'<span class="tn-map-win" style="color:'+hex(we.color)+'">'+h(we.name)+'</span>':'')
+          +'<span class="tn-pline-stats"><b>'+mp.hi+'</b> – '+mp.lo+' rounds</span></div>';
+      }).join('')+'</div>';
     }
-    return '<div class="tk-tc" style="--tk-gc:'+hex(t.game_color,VIOLET)+'">'+cardHead(t)+champBand(t,E,st)+body
-      +'<div class="tk-prog">'+h(progFrac(t))+'</div></div>';
+    return '<div class="tn-game">'+head+maps+'</div>';
   }
-  function cardFor(t,st){
-    if(t.format==='ffa')return ffaCard(t,st);
-    if(t.format==='league'||t.format==='groups')return tableCard(t,st);
-    return bracketCard(t,st);
+  function roomHTML(t,m){
+    var key=mkey(t,m), open=!!S.rooms[key];
+    var lines=gameLines(t,m).map(function(gl){return gameLineHTML(t,m,gl);}).join('');
+    var pens='';
+    if(m.pens1!=null&&m.pens2!=null){
+      var pw=m.pens1>m.pens2?entMap(t)[m.e1]:(m.pens2>m.pens1?entMap(t)[m.e2]:null);
+      pens='<div class="tn-game"><div class="tn-game-head"><span class="tn-g-label">PENALTIES</span>'
+        +(pw?'<span class="tn-g-win" style="--tn-tc:'+hex(pw.color)+'"><span class="tn-wdot"></span>'+h(pw.name)+'</span>':'')
+        +'<span class="tn-g-score">'+m.pens1+' – '+m.pens2+'</span></div></div>';
+    }
+    var chips='';
+    if(m.status==='played'&&m.winner_id){
+      var wSide=m.winner_id===m.e1?0:1;
+      var wd=destFor(t,m,wSide), ld=destFor(t,m,1-wSide);
+      if(wd)chips+='<span class="tn-dchip"><b>'+h(surname(nameOf(t,m.winner_id)))+'</b> → '+h(wd)+'</span>';
+      if(ld)chips+='<span class="tn-dchip"><b>'+h(surname(nameOf(t,m.winner_id===m.e1?m.e2:m.e1)))+'</b> → '+h(ld)+'</span>';
+    }else if(m.e1&&m.e2){
+      var d0=destFor(t,m,0), d1=destFor(t,m,1);
+      if(d0)chips+='<span class="tn-dchip">WIN → <b>'+h(d0)+'</b></span>';
+      if(d1)chips+='<span class="tn-dchip">LOSE → <b>'+h(d1)+'</b></span>';
+    }
+    return '<button type="button" class="tn-room-btn" data-room="'+h(key)+'" aria-expanded="'+(open?'true':'false')+'">'
+      +'<span>'+(open?'Hide the room':'Open the room')+'</span><span class="tn-chev">⌄</span></button>'
+      +'<div class="tn-room'+(open?' open':'')+'"><div class="tn-room-inner"><div class="tn-room-body">'
+      +lines+pens
+      +'<div class="tn-room-foot">'+chips
+      +'<a class="tn-cta" href="'+APP+'/'+h(t.id)+'" target="_blank" rel="noopener">Open in CRCMZ ↗</a></div>'
+      +'</div></div></div>';
+  }
+  function stateChip(m){
+    if(m.status==='played')return '<span class="tn-state-chip tn-final">Final</span>';
+    if((m.partial||[]).length)return '<span class="tn-live-chip"><span class="tn-dot"></span>Live</span>';
+    if(m.playable)return '<span class="tn-live-chip"><span class="tn-dot"></span>Playable</span>';
+    return '<span class="tn-state-chip">Up next</span>';
+  }
+  function matchCardHTML(t,m,opts){
+    opts=opts||{};
+    var fin=finaleMatch(t);
+    var isFin=fin&&mkey(t,fin)===mkey(t,m);
+    var rowsOrder=[0,1];
+    if(m.status==='played'&&m.winner_id){var ws=m.winner_id===m.e1?0:1;rowsOrder=[ws,1-ws];}
+    var rows=rowsOrder.map(function(sd){return teamRowHTML(t,m,sd,{finale:isFin});}).join('');
+    return '<article class="tn-match'+(opts.live?' tn-live-card':'')+'">'
+      +'<div class="tn-match-head"><div class="tn-match-top"><span class="tn-stage">'+h(labelOf(m))+'</span>'
+      +'<span>Best of '+boOf(t,m)+'</span>'
+      +'<span class="tn-right">'+(opts.live?stateChip(m):h(codeOf(m)))+'</span></div>'
+      +'<div class="tn-team-rows">'+rows+'</div>'
+      +'<div class="tn-match-meta">'+h(metaLine(t,m))+'</div></div>'
+      +roomHTML(t,m)+'</article>';
+  }
+  function liveCardHTML(t,m){
+    var card=matchCardHTML(t,m,{live:true});
+    var ps=m.partial||[];
+    if(ps.length){
+      var sc=partialScore(m), need=needOf(boOf(t,m));
+      var np='<div class="tn-now-panel"><div class="tn-np-head"><span class="tn-np-label">Series</span>'
+        +'<span class="tn-np-round">Game '+(ps.length+1)+' next · first to '+need+'</span></div>'
+        +'<div class="tn-now-score"><span class="tn-ns">'+sc[0]+'<small>'+h(surname(nameOf(t,m.e1)))+'</small></span>'
+        +'<span class="tn-dash">–</span>'
+        +'<span class="tn-ns">'+sc[1]+'<small>'+h(surname(nameOf(t,m.e2)))+'</small></span></div></div>';
+      card=card.replace('<div class="tn-match-meta">',np+'<div class="tn-match-meta">');
+    }
+    return card;
   }
 
-  /* ---------- strip / lens / foot / legend ---------- */
-  function stripHTML(){
-    var s=S.strip;
-    if(!s)return '';
-    var q=S.queue||[];
-    if(q.length>=2){
-      if(REDUCED){
-        /* reduced motion: the same facts as a static stacked list */
-        return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span><span class="tk-st">'
-          +q.map(function(f){return '<div class="tk-mq-row"><b>'+h(f.label)+'</b> '+h(f.text)+'</div>'}).join('')+ntag('strip')+'</span></div>';
-      }
-      var half=q.map(function(f){return '<b>'+h(f.label)+'</b> '+h(f.text)}).join(' ▲ ')+' ▲ ';
-      return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span>'
-        +'<span class="tk-mq'+(S.mqPaused?' tk-paused':'')+'"><span class="tk-mq-in">'+half+half+'</span></span></div>';
+  /* ---------- Chart tab ---------- */
+  function champsHTML(t){
+    if(!t.champion_id)return '';
+    var em=entMap(t), champ=em[t.champion_id]; if(!champ)return '';
+    var fin=finaleMatch(t), story='';
+    if(fin&&fin.winner_id===t.champion_id){
+      var loserId=fin.e1===t.champion_id?fin.e2:fin.e1;
+      var ss=seriesScore(fin);
+      var cs=fin.e1===t.champion_id?ss[0]:ss[1], ls=fin.e1===t.champion_id?ss[1]:ss[0];
+      story='<b>'+h(champ.name)+'</b> beat <b>'+h(nameOf(t,loserId))+'</b> <b>'+cs+'–'+ls+'</b> in '+(fin.stage==='GF'?'the Grand Final':'the final')+'.';
+    }else{
+      story='<b>'+h(champ.name)+'</b> won '+h(t.name)+'.';
     }
-    return '<div class="tk-strip'+fl('strip')+'" data-kind="'+h(s.kind)+'"><span class="tk-sk">'+h(s.label)+'</span><span class="tk-st">'+h(s.text)+ntag('strip')+'</span></div>';
+    var members=(champ.members||[]).map(function(mb){
+      return '<span class="tn-member">'+monoChip(mb.display_name,champ.color)+h(mb.display_name)+'</span>';}).join('');
+    return '<div class="tn-champs">'
+      +'<svg class="tn-trophy" viewBox="0 0 24 24" fill="none" aria-hidden="true"><defs><linearGradient id="tnTg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#F5B93F"/><stop offset="1" stop-color="#C07F16"/></linearGradient></defs><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" fill="url(#tnTg)"/><path d="M7 5H4.5a2.5 2.5 0 0 0 2.6 4.4M17 5h2.5a2.5 2.5 0 0 1-2.6 4.4" stroke="url(#tnTg)" stroke-width="1.7" stroke-linecap="round"/><path d="M12 14v2.2M8.8 20h6.4M10 16.2h4l.7 3.8H9.3L10 16.2Z" stroke="url(#tnTg)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      +'<div class="tn-c-label">Champions</div>'
+      +'<div class="tn-c-name tn-disp">'+h(champ.name)+'</div>'
+      +(members?'<div class="tn-c-members">'+members+'</div>':'')
+      +'<p class="tn-c-story">'+story+'</p></div>';
   }
-  function lensHTML(list,st){
-    if(!S.lens)return '';
-    var eid=S.lens,info=lensInfo(eid,list),e=null;
-    list.forEach(function(t){var x=entMap(t)[eid];if(x)e=x});
-    if(!e)return '';
-    var chips=info.chips.map(function(c){
-      var p=c.split(' → ');
-      if(p.length===2)return '<span class="tk-dchip"><b>'+h(p[0])+'</b> → '+h(p[1])+'</span>';
-      return '<span class="tk-dchip"><b>'+h(c)+'</b></span>';
+  function ffaLiveCardHTML(t){
+    var rows=lbRows(t), lead=rows[0];
+    var playedN=(t.lobbies||[]).filter(function(l){return l.status==='played'||(l.results||[]).length;});
+    var last=playedN.length?playedN[playedN.length-1]:null;
+    var leadLine=lead?('<b>'+h(lead.e.name)+'</b> lead on <b>'+(lead.r.points||0)+' pts</b>'):'Standings are level';
+    var lastLine='';
+    if(last){
+      var res=(last.results||[]).slice().sort(function(a,b){return (a.placement||99)-(b.placement||99);});
+      if(res.length)lastLine='Lobby '+(last.number||playedN.length)+' went to <b>'+h(nameOf(t,res[0].entrant_id))+'</b> · '+res[0].kills+' kills.';
+    }
+    return '<article class="tn-match tn-live-card"><div class="tn-match-head">'
+      +'<div class="tn-match-top"><span class="tn-stage">Lobby series</span><span>Game '+((t.progress?t.progress.played:0)+1)+' of '+(t.progress?t.progress.total:'—')+'</span>'
+      +'<span class="tn-right"><span class="tn-live-chip"><span class="tn-dot"></span>Live</span></span></div>'
+      +'<p class="tn-sp-story" style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.9;color:var(--tn-silver)">'+leadLine+(lastLine?'<br>'+lastLine:'')+'</p>'
+      +'</div></article>';
+  }
+  function liveSectionHTML(t){
+    var items=[];
+    if(t.format==='ffa'||t.kind==='ffa'){
+      if(ffaLive(t))items.push(ffaLiveCardHTML(t));
+    }else{
+      items=liveMatches(t).map(function(m){return liveCardHTML(t,m);});
+    }
+    var head='<div class="tn-subhead tn-live-head"><h2><span class="tn-live-dot"></span>Live</h2>'
+      +(items.length?'<span class="tn-live-tag">Live now</span>':'')
+      +'<span class="tn-sub-note">'+(items.length?'Happening now':'All quiet')+'</span></div>';
+    if(items.length)return '<section class="tn-live-sec">'+head+items.join('')+'</section>';
+    var sub;
+    if(t.champion_id){
+      var champ=entMap(t)[t.champion_id];
+      var fin=finaleMatch(t);
+      if(fin&&fin.winner_id===t.champion_id){
+        var loserId=fin.e1===t.champion_id?fin.e2:fin.e1;
+        var ss=seriesScore(fin);
+        var cs=fin.e1===t.champion_id?ss[0]:ss[1], ls=fin.e1===t.champion_id?ss[1]:ss[0];
+        sub='The final is complete — <b>'+h(champ?champ.name:'')+'</b> took it <b>'+cs+'–'+ls+'</b> over <b>'+h(nameOf(t,loserId))+'</b>.';
+      }else sub='The final is complete — <b>'+h(champ?champ.name:'')+'</b> took the title.';
+    }else if(isDone(t))sub='<b>'+h(t.name)+'</b> is complete.';
+    else if(t.format==='ffa'||t.kind==='ffa')sub='The lobby series is between games.';
+    else sub='No fixture is playable right now.';
+    return '<section class="tn-live-sec idle">'+head
+      +'<div class="tn-well"><div class="tn-well-title">No live match</div>'
+      +'<p class="tn-well-sub">'+sub+'</p></div></section>';
+  }
+  function tableCardHTML(t,g){
+    var rows=(g.table||[]).map(function(r,i){
+      var e=entMap(t)[r.entrant_id]||{name:'?'};
+      return '<tr><td>'+(i+1)+'</td><td>'+h(e.name)+'</td><td>'+num2(r.played)+'</td><td>'+num2(r.won)+'</td><td>'+num2(r.drawn)+'</td><td>'+num2(r.lost)+'</td><td class="tn-td-pts">'+num2(r.points)+'</td></tr>';
     }).join('');
-    var stats=info.stats.filter(Boolean).map(function(s){return '<div class="tk-lstat">'+h(s)+'</div>'}).join('');
-    return '<div class="tk-lens" id="tkLensCard">'
-      +'<div class="tk-lh">'+chipStill(eid,e)
-      +'<span><span class="tk-lk">LENS</span><br><span class="tk-ln">'+h(info.name)+'</span>'+youTag(eid,st)+(info.tag?'<br><span class="tk-lt">'+h(info.tag)+'</span>':'')+'</span>'
-      +'<button type="button" class="tk-clear" data-clear="1">CLEAR ✕</button></div>'
-      +'<div class="tk-nextbox"><div class="tk-nk">NEXT</div><div class="tk-nv">'+info.next+'</div></div>'
-      +(chips?'<div class="tk-dchips">'+chips+'</div>':'')
-      +(stats?'<div class="tk-lstats">'+stats+'</div>':'')
-      +'</div>';
+    return '<div class="tn-board"><h3><span class="tn-b-ico">▦</span><span class="tn-b-title">'+h(g.name||'Table')+'</span></h3>'
+      +'<table class="tn-table"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
-  var LEGEND=[['W FINAL','WINNERS FINAL'],['L','LOSERS'],['GF','GRAND FINAL'],['→','ADVANCES'],['✕','NOT NEEDED'],['—','NOT PLAYED'],['K','KILLS'],['W','WINS'],['PTS','POINTS']];
-  function legendHTML(){
-    return '<div class="tk-legend" aria-label="Legend">'+LEGEND.map(function(p){return '<span class="tk-leg"><b>'+h(p[0])+'</b> '+h(p[1])+'</span>'}).join('')+'</div>';
+  function lobbyLinesHTML(t,lb){
+    var res=(lb.results||[]).slice().sort(function(a,b){return (a.placement||99)-(b.placement||99);});
+    return res.map(function(r){
+      var e=entMap(t)[r.entrant_id]||{name:'?'};
+      var place=r.placement===1?'1ST':(r.placement===2?'2ND':(r.placement===3?'3RD':('#'+r.placement)));
+      return '<div class="tn-pline">'+monoChip(e.name,e.color)
+        +'<span class="tn-pname">'+h(e.name)+'</span>'
+        +'<span class="tn-map-win" style="color:'+(r.placement===1?'var(--tn-gold-hi)':hex(e.color))+'">'+place+'</span>'
+        +'<span class="tn-pline-stats"><b>'+num2(r.kills)+'</b> K · '+num2(r.deaths)+' D</span></div>';
+    }).join('');
   }
-  function footHTML(){
-    var l=S.room?'ROOM OPEN':(S.lens?'LENS ON':'TAP LOGO = LENS');
-    return '<div class="tk-foot"><span>'+l+'</span><span>POLL 20S</span></div>';
+  function lobbyCardHTML(t,lb,idx,playedCount){
+    var played=lb.status==='played'||(lb.results||[]).length>0;
+    var chip=played?'<span class="tn-state-chip tn-final">Final</span>'
+      :(idx===playedCount?'<span class="tn-live-chip"><span class="tn-dot"></span>Up next</span>':'<span class="tn-state-chip">Queued</span>');
+    return '<article class="tn-match"><div class="tn-match-head">'
+      +'<div class="tn-match-top"><span class="tn-stage">Lobby '+(lb.number||idx+1)+'</span>'
+      +'<span class="tn-right">'+chip+'</span></div>'
+      +(played?'<div class="tn-plines" style="margin-top:10px">'+lobbyLinesHTML(t,lb)+'</div>'
+              :'<div class="tn-match-meta">Not played yet</div>')
+      +'</div></article>';
   }
-  function skeletonHTML(){
-    function ghost(rows){
-      var r='';
-      for(var i=0;i<rows;i++)r+='<div class="tk-grow2"><span class="tk-gc"></span><span class="tk-gb tk-w60"></span></div>';
-      return '<div class="tk-ghost"><div class="tk-gb tk-w40"></div><div class="tk-gb tk-w80" style="margin-top:10px"></div>'+r+'</div>';
+  function roadHTML(t){
+    var out='';
+    if(t.format==='ffa'||t.kind==='ffa'){
+      var lbs=t.lobbies||[];
+      var playedCount=lbs.filter(function(l){return l.status==='played'||(l.results||[]).length;}).length;
+      out+='<div class="tn-subhead"><h2>The Road</h2><span class="tn-sub-note">'+playedCount+' of '+(t.progress?t.progress.total:lbs.length)+' lobbies in</span></div>';
+      if(lbs.length){
+        out+=lbs.map(function(lb,i){return lobbyCardHTML(t,lb,i,playedCount);}).join('');
+      }else{
+        var rows=lbRows(t);
+        out+='<div class="tn-board"><h3><span class="tn-b-ico">◆</span><span class="tn-b-title">Standings</span></h3><div class="tn-b-rows">'
+          +rows.map(function(x,i){
+            return '<div class="tn-b-row'+(i===0?' first':'')+'" style="--tn-pc:'+hex(x.e.color)+'"><span class="tn-rank">'+(i+1)+'</span>'
+              +monoChip(x.e.name,x.e.color)+'<span class="tn-b-name">'+h(x.e.name)+'</span>'
+              +'<span class="tn-b-val">'+(x.r.points||0)+'</span></div>';}).join('')
+          +'</div><div class="tn-b-unit">Points · lobby results land here as games are played</div></div>';
+      }
+      return out;
     }
-    return '<div class="tk-strip" data-kind="status"><span class="tk-sk">STATUS</span><span class="tk-st">···</span></div>'
-      +ghost(3)+ghost(2)
-      +'<div class="tk-foot"><span>NO DATA YET</span><span>POLL 20S</span></div>';
+    (t.groups||[]).forEach(function(g){out+='<div style="margin-top:12px">'+tableCardHTML(t,g)+'</div>';});
+    var ms=fixtureList(t);
+    var note=ms.length===1?'One series · game by game':(ms.length+' series · winners first');
+    out+='<div class="tn-subhead"><h2>The Road</h2><span class="tn-sub-note">'+note+'</span></div>';
+    out+=ms.map(function(m){return matchCardHTML(t,m);}).join('');
+    return out;
+  }
+  var LEGEND=[['W FINAL','Winners Final'],['L','Losers'],['GF','Grand Final'],['→','Advances'],['✕','Not Needed'],['—','Not Played'],['K','Kills'],['W','Wins'],['PTS','Points']];
+  function legendHTML(){
+    return '<div class="tn-legend">'+LEGEND.map(function(p){return '<b>'+h(p[0])+'</b> '+h(p[1]);}).join(' &nbsp;·&nbsp; ')+'</div>'
+      +'<div class="tn-foot"><span>Feed · app.crcmz.me</span><span>Poll 20s · updates in place</span></div>';
+  }
+  function chartHTML(t){
+    return liveSectionHTML(t)+champsHTML(t)+roadHTML(t)+legendHTML();
+  }
+
+  /* ---------- Matches tab ---------- */
+  function matchesHTML(t){
+    var head='<div class="tn-subhead"><h2>Previous matches</h2><span class="tn-sub-note">Settled · rooms open</span></div>';
+    if(t.format==='ffa'||t.kind==='ffa'){
+      var lbs=(t.lobbies||[]).filter(function(l){return l.status==='played'||(l.results||[]).length;});
+      if(!lbs.length)return head+'<p class="tn-well-sub" style="margin:2px">Nothing settled yet — played lobbies land here.</p>';
+      return head+lbs.map(function(lb,i){
+        var res=(lb.results||[]).slice().sort(function(a,b){return (a.placement||99)-(b.placement||99);});
+        var win=res.length?entMap(t)[res[0].entrant_id]:null;
+        var rest=res.slice(1).map(function(r){return surname(nameOf(t,r.entrant_id))+' '+(r.placement===2?'2nd':r.placement===3?'3rd':'#'+r.placement);}).join(' · ');
+        return '<article class="tn-result"><div class="tn-match-head">'
+          +'<div class="tn-match-top"><span class="tn-stage">Lobby '+(lb.number||i+1)+'</span><span class="tn-right">Final</span></div>'
+          +'<div class="tn-team-rows"><div class="tn-team-row winner" style="--tn-tc:'+hex(win?win.color:null)+'">'
+          +'<span class="tn-tdot"></span><span class="tn-tname">'+h(win?win.name:'—')+'</span>'
+          +'<span class="tn-tscore">'+(res.length?res[0].kills+' K':'')+'</span></div></div>'
+          +(rest?'<div class="tn-match-meta">'+h(rest)+'</div>':'')
+          +'</div>'
+          +'<div style="border-top:1px solid var(--tn-line-soft)"><div class="tn-room-body"><div class="tn-plines">'+lobbyLinesHTML(t,lb)+'</div></div></div>'
+          +'</article>';
+      }).join('');
+    }
+    var played=fixtureList(t).filter(function(m){return m.status==='played';});
+    if(!played.length)return head+'<p class="tn-well-sub" style="margin:2px">Nothing settled yet — finished series land here with their rooms.</p>';
+    return head+played.map(function(m){
+      var fin=finaleMatch(t), isFin=fin&&mkey(t,fin)===mkey(t,m);
+      var ws=m.winner_id===m.e1?0:1;
+      var rows=[ws,1-ws].map(function(sd){return teamRowHTML(t,m,sd,{finale:isFin});}).join('');
+      return '<article class="tn-result"><div class="tn-match-head">'
+        +'<div class="tn-match-top"><span class="tn-stage">'+h(labelOf(m))+'</span><span>Best of '+boOf(t,m)+'</span>'
+        +'<span class="tn-right">Final</span></div>'
+        +'<div class="tn-team-rows">'+rows+'</div></div>'
+        +roomHTML(t,m)+'</article>';
+    }).join('');
+  }
+
+  /* ---------- Stats tab (feed-driven) ---------- */
+  function boardHTML(title,icon,rows,unit,fmt){
+    if(!rows.length)return '';
+    var leader=rows[0].val;
+    var body=rows.map(function(x,i){
+      var w=leader>0?(x.val/leader):0; if(x.val>0&&w<0.04)w=0.04;
+      return '<div class="tn-b-row'+(i===0?' first':'')+'" style="--tn-pc:'+hex(x.e.color)+'">'
+        +'<span class="tn-b-bar" style="--tn-w:'+w.toFixed(3)+';--tn-bd:'+(i*70)+'ms"></span>'
+        +'<span class="tn-rank">'+(i+1)+'</span>'
+        +monoChip(x.e.name,x.e.color)
+        +'<span class="tn-b-name">'+h(x.e.name)+'</span>'
+        +'<span class="tn-b-val">'+fmt(x.val)+'</span></div>';
+    }).join('');
+    return '<div class="tn-board"><h3><span class="tn-b-ico">'+icon+'</span><span class="tn-b-title">'+title+'</span></h3>'
+      +'<div class="tn-b-rows">'+body+'</div>'
+      +(unit?'<div class="tn-b-unit">'+unit+'</div>':'')+'</div>';
+  }
+  function boardRows(rows,field,compute){
+    return rows.filter(function(x){return compute?compute(x.r)!=null:x.r[field]!=null;})
+      .map(function(x){return {e:x.e,val:compute?compute(x.r):x.r[field],pos:x.r.pos||99};})
+      .sort(function(a,b){return b.val-a.val||a.pos-b.pos;});
+  }
+  function statsHTML(t){
+    var rows=lbRows(t);
+    if(rows.length){
+      var lead=rows[0], lr=lead.r, le=lead.e;
+      var storyParts=[];
+      if(lr.kills!=null)storyParts.push('<b>'+lr.kills+'</b> kills');
+      if(lr.wins!=null)storyParts.push('<b>'+lr.wins+'</b> wins');
+      if(lr.played!=null)storyParts.push('across <b>'+lr.played+'</b> games');
+      var log='';
+      if(lr.games&&typeof lr.games==='object'){
+        var keys=Object.keys(lr.games).sort(function(a,b){return (+a)-(+b);});
+        if(keys.length){
+          log='<div class="tn-sp-log">'+keys.map(function(k){
+            var g=lr.games[k];
+            return '<div class="tn-pline"><span class="tn-pname">Game '+h(k)+'</span>'
+              +'<span class="tn-map-win" style="color:'+hex(le.color)+'">P'+num2(g.placement)+'</span>'
+              +'<span class="tn-pline-stats"><b>'+num2(g.kills)+'</b> K · '+num2(g.deaths)+' D · '+num2(g.points)+' PT</span></div>';
+          }).join('')+'</div>';
+        }
+      }
+      var spot='<div class="tn-spot"><div class="tn-sp-label">Spotlight · Series leader</div>'
+        +'<div class="tn-sp-who">'+monoChip(le.name,le.color,'tn-lg')
+        +'<div><div class="tn-sp-name">'+h(le.name)+'</div>'
+        +'<div class="tn-sp-sub">'+h(t.name)+' · #1 of '+rows.length+'</div></div></div>'
+        +'<div class="tn-sp-big"><span class="tn-sp-num" data-count="'+(lr.points||0)+'">'+(lr.points||0)+'</span>'
+        +'<span class="tn-sp-unit">Points<br>Tournament total</span></div>'
+        +(storyParts.length?'<p class="tn-sp-story">'+storyParts.join(' · ')+'</p>':'')
+        +log+'</div>';
+      var boards=[];
+      boards.push(boardHTML('Standings','◆',boardRows(rows,'points'),'Points · tournament total',function(v){return v;}));
+      boards.push(boardHTML('Most Kills','✛',boardRows(rows,'kills'),'Kills · tournament total',function(v){return v;}));
+      boards.push(boardHTML('Most Deaths','†',boardRows(rows,'deaths'),'Deaths · tournament total',function(v){return v;}));
+      boards.push(boardHTML('Best K/D','÷',boardRows(rows,null,function(r){
+        return (r.kills!=null&&r.deaths!=null&&r.deaths>0)?(r.kills/r.deaths):null;}),
+        'Kills per death',function(v){return v.toFixed(2);}));
+      boards.push(boardHTML('Most Wins','▲',boardRows(rows,'wins'),'Lobby wins',function(v){return v;}));
+      boards.push(boardHTML('Win Rate','%',boardRows(rows,null,function(r){
+        return (r.wins!=null&&r.played)?(r.wins/r.played*100):null;}),
+        'Share of games won',function(v){return Math.round(v)+'%';}));
+      boards.push(boardHTML('Games Played','▦',boardRows(rows,'played'),'Games in the series',function(v){return v;}));
+      boards=boards.filter(Boolean);
+      return '<div class="tn-subhead"><h2>Stats</h2><span class="tn-sub-note">From the feed · entrant boards</span></div>'
+        +spot+'<div class="tn-boards">'+boards.join('')+'</div>';
+    }
+    if((t.groups||[]).length){
+      return '<div class="tn-subhead"><h2>Stats</h2><span class="tn-sub-note">Group tables</span></div>'
+        +(t.groups||[]).map(function(g){return tableCardHTML(t,g);}).join('');
+    }
+    return '<div class="tn-subhead"><h2>Stats</h2><span class="tn-sub-note">Feed scope</span></div>'
+      +'<div class="tn-well"><div class="tn-well-title">Player stats aren\'t in the feed</div>'
+      +'<p class="tn-well-sub">For bracket tournaments the feed carries <b>results, not player stat lines</b> — no kills, deaths or scores per player. The full series record lives on <b>Chart</b>: winners, game scores and round lines are all there.</p></div>';
+  }
+
+  /* ---------- Line-up tab ---------- */
+  function lineupHTML(t){
+    var ents=(t.entrants||[]).slice().sort(function(a,b){
+      return (a.seed==null?99:a.seed)-(b.seed==null?99:b.seed);});
+    var cards=ents.map(function(e){
+      var champ=t.champion_id&&e.id===t.champion_id;
+      var members=(e.members||[]).map(function(mb){
+        return '<div class="tn-lu-row">'+monoChip(mb.display_name,e.color)+h(mb.display_name)+'</div>';}).join('');
+      if(!members)members='<div class="tn-lu-row">'+monoChip(e.name,e.color)+h(e.name)+'</div>';
+      return '<div class="tn-lineup" style="--tn-tc:'+hex(e.color)+'">'
+        +'<div class="tn-lu-head"><span class="tn-tdot"></span><span class="tn-lu-name">'+h(e.name)+'</span>'
+        +(champ?'<span class="tn-lu-champ">Champions</span>':'')
+        +(e.seed!=null?'<span class="tn-lu-seed">Seed '+e.seed+'</span>':'')
+        +'</div><div class="tn-lu-rows">'+members+'</div></div>';
+    }).join('');
+    return '<div class="tn-subhead"><h2>Line-up</h2><span class="tn-sub-note">'+ents.length+' '+(teamSize(t)>1?'teams':'players')+' in</span></div>'
+      +'<div class="tn-lineups">'+cards+'</div>';
+  }
+
+  /* ---------- states ---------- */
+  function skeletonHTML(){
+    var ghost=function(n){
+      var rows=''; for(var i=0;i<n;i++)rows+='<div class="tn-grow2"><span class="tn-gc"></span><span class="tn-gb tn-w60"></span></div>';
+      return '<div class="tn-ghost"><div class="tn-gb tn-w40"></div><div class="tn-gb tn-w80" style="margin-top:10px"></div>'+rows+'</div>';};
+    return heroHTML(null)+ghost(3)+ghost(2);
+  }
+  function emptyHTML(){
+    return heroHTML(null)
+      +'<div class="tn-well" style="margin-top:16px"><div class="tn-well-title">No tournaments</div>'
+      +'<p class="tn-well-sub">No tournaments running right now. Start one in the CRCMZ app and it lands here live.</p></div>';
+  }
+  function errorHTML(){
+    return heroHTML(null)
+      +'<div class="tn-well" style="margin-top:16px"><div class="tn-well-title">Feed unreachable</div>'
+      +'<p class="tn-well-sub">Couldn\'t reach the tournament feed. Retrying automatically.</p></div>';
   }
 
   /* ---------- render ---------- */
-  function setFresh(){
-    if(!freshBox||!freshTx)return;
-    freshBox.classList.remove('tk-stale','tk-loading');
-    if(S.feed==='stale'){freshBox.classList.add('tk-stale');freshTx.textContent='STALE '+(S.lastOk||'')}
-    else if(S.feed==='loading'){freshBox.classList.add('tk-loading');freshTx.textContent='—'}
-    else freshTx.textContent='UPDATED '+(S.lastOk||'');
+  function paintFresh(){
+    var box=el.querySelector('#ttFresh'), tx=el.querySelector('#ttFreshTx');
+    if(!box||!tx)return;
+    box.classList.remove('tn-stale','tn-loading');
+    if(S.feed==='loading'){box.classList.add('tn-loading');tx.textContent='LOADING';}
+    else if(S.feed==='stale'){box.classList.add('tn-stale');tx.textContent='STALE · '+(S.lastOk||'—');}
+    else tx.textContent=S.lastOk?('UPDATED '+S.lastOk):'LIVE';
   }
   function render(){
     if(!el)return;
-    setFresh();
-    el.classList.toggle('tk-lensing',!!S.lens);
-    el.classList.toggle('tk-isstale',S.feed==='stale');
-    if(S.feed==='loading'&&!S.payload){el.innerHTML=skeletonHTML();S.flash=[];return}
-    var list=S.payload||[];
-    var st={room:S.room,log:S.log,meId:meEntrantId(list)};
-    if(!list.length){
-      el.innerHTML=stripHTML()+'<div class="tk-empty">No tournaments running right now. Start one in the CRCMZ app.</div>'+footHTML()+legendHTML();
-      S.flash=[];return;
+    el.classList.toggle('tn-isstale',S.feed==='stale');
+    el.classList.toggle('tn-anim',!!S.anim); S.anim=false;
+    if(!S.payload){
+      el.innerHTML=S.feed==='error'?errorHTML():skeletonHTML();
+      paintFresh(); return;
     }
-    el.innerHTML=stripHTML()+lensHTML(list,st)+list.map(function(t){return cardFor(t,st)}).join('')+footHTML()+legendHTML();
-    S.flash=[];
-  }
-
-  /* ---------- load / poll (contract: same lifecycle as before) ------- */
-  function load(){
-    fetch('/api/tourney',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-      var list=d.tournaments||[];
-      if(d.error&&!list.length){ /* soft failure: keep last good payload */
-        S.queue=[];S.mqPaused=false;
-        if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
-        else if(S.feed==='loading'){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
-        return;
+    var list=S.payload.tournaments||[];
+    if(!list.length){el.innerHTML=emptyHTML();paintFresh();return;}
+    var t=featured(); if(!t){el.innerHTML=emptyHTML();paintFresh();return;}
+    var panels={
+      chart:chartHTML(t), matches:matchesHTML(t),
+      stats:statsHTML(t), lineup:lineupHTML(t)};
+    el.innerHTML=heroHTML(t)+switchHTML(list,t)+tabsHTML(t)
+      +TABS.map(function(tb){
+        return '<div class="tn-panel" data-panel="'+tb[0]+'" role="tabpanel"'
+          +(S.tab===tb[0]?'':' hidden')+'>'+panels[tb[0]]+'</div>';}).join('');
+    paintFresh();
+    if(S.tab==='stats'){
+      var boards=el.querySelector('.tn-boards');
+      if(boards)requestAnimationFrame(function(){boards.classList.add('tn-bars-in');});
+      var num=el.querySelector('.tn-sp-num');
+      if(num){
+        var target=+num.getAttribute('data-count')||0;
+        var key=t.id+'|'+target;
+        if(S.spotKey!==key){S.spotKey=key;countUp(num,target);}
       }
-      var ev=deriveStrip(S.payload,list);
-      if(ev){S.strip={kind:ev.kind,label:ev.label,text:ev.text};S.flash=ev.flash||['strip'];S.mqPaused=false}
-      else {S.strip=statusStrip(list);S.flash=[];S.mqPaused=false}
-      S.payload=list;S.feed='live';S.lastOk=clockHM();
-      if(S.lens&&!lensStillValid(list))S.lens=null;
-      var live=list.filter(function(t){return t.status==='active'});
-      if(prevLine)prevLine.textContent=live.length?live.length+' live now':(list.length?'Latest results':'No active tournaments');
-      render();
-    }).catch(function(){
-      S.queue=[];S.mqPaused=false;
-      if(S.payload){S.feed='stale';S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE '+(S.lastOk||'—')};render()}
-      else if(el){S.feed='stale';S.payload=[];S.strip={kind:'stale',label:'STALE',text:'LAST UPDATE —'};render()}
-    });
+    }
   }
-  function lensStillValid(list){
-    var ok=false;
-    (list||[]).forEach(function(t){if(entMap(t)[S.lens])ok=true});
-    return ok;
+  function countUp(node,target){
+    if(REDUCED||!target){node.textContent=target;return;}
+    var t0=null;
+    function step(ts){
+      if(!t0)t0=ts;
+      var p=Math.min(1,(ts-t0)/750), e=1-Math.pow(1-p,3);
+      node.textContent=Math.round(target*e);
+      if(p<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
-  document.addEventListener('viewchange',function(e){clearInterval(timer);if(e.detail==='tourney'){load();timer=setInterval(load,20000)}});
-  document.addEventListener('visibilitychange',function(){if(el)el.classList.toggle('tk-doc-hidden',!!document.hidden)});
-  if(document.body.getAttribute('data-view')==='tourney'){load();timer=setInterval(load,20000)}
-  load();
-  fetch('/api/me',{headers:{'Accept':'application/json'}}).then(function(r){return r.json()}).then(function(j){
-    S.mePerson=j&&j.person?j.person:null;
-    if(S.payload)render();
-  }).catch(function(){});
 
-  /* ---------- interactions (delegated; state-keyed) ---------- */
+  /* ---------- data ---------- */
+  function updatePrev(list){
+    if(!prevLine)return;
+    var anyLive=list.some(function(t){return liveCount(t)>0;});
+    if(anyLive){
+      var totalLive=list.reduce(function(a,t){return a+liveCount(t);},0);
+      prevLine.textContent=totalLive+' live now';
+    }
+    else if(list.length)prevLine.textContent='Latest results';
+    else prevLine.textContent='No active tournaments';
+  }
+  function load(){
+    fetch('/api/tourney',{credentials:'same-origin',cache:'no-store'})
+      .then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.json();})
+      .then(function(j){
+        if(!j||!Array.isArray(j.tournaments)||j.error)throw new Error('bad payload');
+        S.payload=j;
+        var now=new Date();
+        var hh=now.getHours(), mm=('0'+now.getMinutes()).slice(-2);
+        var ap=hh>=12?'PM':'AM'; hh=hh%12; if(hh===0)hh=12;
+        S.lastOk=hh+':'+mm+' '+ap;
+        S.feed='live';
+        updatePrev(j.tournaments);
+        render();
+      }).catch(function(){
+        if(S.payload){S.feed='stale';render();}
+        else{S.feed='error';render();}
+      });
+  }
+  function start(){if(!timer){load();timer=setInterval(load,20000);}}
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+
   el.addEventListener('click',function(ev){
-    var t=ev.target;
-    var chipEl=t.closest?t.closest('[data-lens]'):null;
-    if(chipEl){var id=chipEl.getAttribute('data-lens');S.lens=(S.lens===id)?null:id;render();return}
-    if(t.closest&&t.closest('[data-clear]')){S.lens=null;render();return}
-    var mqEl=t.closest?t.closest('.tk-mq'):null;
-    if(mqEl){S.mqPaused=!S.mqPaused;mqEl.classList.toggle('tk-paused',S.mqPaused);return}
-    if(t.closest&&t.closest('[data-close]')){S.room=null;render();return}
-    if(t.closest&&t.closest('.tk-room'))return;   /* taps inside a room don't close it */
-    if(t.closest&&t.closest('.tk-cta'))return;    /* let the link work */
-    var fx=t.closest?t.closest('[data-match]'):null;
-    if(fx){var mid=fx.getAttribute('data-match');S.room=(S.room===mid)?null:mid;render();return}
-    var row=t.closest?t.closest('[data-row]'):null;
-    if(row){var lk=row.getAttribute('data-tid')+'|'+row.getAttribute('data-row');S.log=(S.log===lk)?null:lk;render();return}
+    var tabBtn=ev.target.closest('[data-tab]');
+    if(tabBtn){S.tab=tabBtn.getAttribute('data-tab');S.anim=true;render();return;}
+    var sw=ev.target.closest('[data-sel]');
+    if(sw){S.sel=sw.getAttribute('data-sel');S.anim=true;render();return;}
+    var rb=ev.target.closest('[data-room]');
+    if(rb){var k=rb.getAttribute('data-room');S.rooms[k]=!S.rooms[k];render();}
   });
-  document.addEventListener('keydown',function(ev){
-    if(ev.key==='Escape'&&(S.lens||S.room)){S.lens=null;S.room=null;render()}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&Object.keys(S.rooms).length){S.rooms={};render();}
   });
+  document.addEventListener('visibilitychange',function(){
+    el.classList.toggle('tn-doc-hidden',document.hidden);
+  });
+  document.addEventListener('viewchange',function(e){
+    if(e.detail==='tourney')start(); else stop();
+  });
+  if(document.body&&document.body.dataset&&document.body.dataset.view==='tourney')start();
+  render();
+  load();
 })();
 </script>
 <script>
