@@ -727,19 +727,7 @@ async function passwordLogin(){
   const LEDGER_PATH = process.env.LEDGER_PATH || path.join(__dirname, 'data', 'ledger.json');
   const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi'];
 
-  function readLedger() {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
-      if (parsed && Array.isArray(parsed.expenses) && Array.isArray(parsed.settlements)) return parsed;
-    } catch { /* fall through to an empty ledger */ }
-    return { expenses: [], settlements: [] };
-  }
-  function writeLedger(ledger) {
-    fs.mkdirSync(path.dirname(LEDGER_PATH), { recursive: true });
-    const tmp = `${LEDGER_PATH}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(ledger, null, 2));
-    fs.renameSync(tmp, LEDGER_PATH);
-  }
+  const { read: readLedger, write: writeLedger } = require('./ledger-store').createLedgerStore(LEDGER_PATH);
   const isCents = (n) => Number.isInteger(n) && n > 0;
   function validShares(shares, total) {
     if (!shares || typeof shares !== 'object' || Array.isArray(shares)) return false;
@@ -2128,6 +2116,12 @@ ${text.trim()}`;
       }
     },
   }));
+
+  app.use((err, req, res, next) => {
+    if (err.code !== 'LEDGER_UNAVAILABLE') return next(err);
+    console.error('[crcmz-trip] Split storage failure:', err.cause);
+    res.status(503).json({ error: err.message, code: err.code });
+  });
 
   app.use((req, res) => res.status(404).type('text/plain').send('Not found'));
 
