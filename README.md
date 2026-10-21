@@ -70,3 +70,47 @@ All three sit behind the same Zitadel login. Files are stored under
 **Coolify:** mount a persistent volume at `/app/data` (or set `UPLOADS_DIR`
 to wherever the volume is mounted). Without a volume, uploaded photos are
 wiped on every redeploy.
+
+## Split ledger protection and recovery
+
+`LEDGER_PATH` defaults to `/app/data/ledger.json` in the container. Keep its
+parent directory on persistent storage. Split runs in a **single process**;
+do not share this JSON store between replicas or edit it while the app runs.
+
+A genuinely new store initializes an empty ledger. Malformed JSON, an invalid
+ledger structure, storage read errors, or a missing ledger with an existing
+backup directory cause HTTP **503** with `code: LEDGER_UNAVAILABLE` and a
+human-readable error. Expense/settlement additions and deletions stop; damaged
+bytes are never silently replaced with empty arrays. The dashboard also reports
+this error rather than presenting misleading zero totals.
+
+Before each replacement, the current validated ledger is saved under
+`<LEDGER_PATH>.backups/<sha256>.json`. Snapshots are immutable and deduplicated;
+backup failure aborts the mutation. Writes use unique temporary files, file
+fsync, atomic rename, and directory fsync. Snapshots contain the same sensitive
+expense data as the ledger. Back up this directory off-host as well; local
+snapshots cannot protect against loss of the entire volume. No automatic
+retention deletes snapshots; monitor disk usage.
+
+### Explicit offline recovery
+
+1. Stop the app so recovery cannot race with purchases or settlements.
+2. Preserve/copy the ledger and backup directory off-host. Inspect candidate
+   snapshots and compare their expense/settlement IDs and totals. Filenames
+   are content hashes, **not chronological order**. Each snapshot represents
+   the state **before** a write, so the latest purchase may need reconciliation.
+3. Run with the same volume, filesystem permissions, and `LEDGER_PATH` as the app:
+
+   ```sh
+   LEDGER_PATH=/app/data/ledger.json node ledger-store.js recover /app/data/ledger.json.backups/CHOSEN_HASH.json
+   ```
+
+   The command validates the chosen file before changing anything, preserves
+   an existing primary as `ledger.json.damaged-<uuid>` (and aborts if it cannot
+   preserve it), then atomically restores the chosen snapshot. It also works
+   when the primary is missing. It never repairs automatically on a request.
+4. Review restored totals and any missing recent entries before restarting.
+   Keep the preserved file and other snapshots for reconciliation.
+
+Run `npm test` for isolated temporary-directory regression tests; no production
+records, live authentication, or Photo Wall storage are used.
