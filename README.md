@@ -41,7 +41,7 @@ names the missing ones.
 | `UPLOADS_DIR` | Optional — photo storage dir, defaults to `/app/data/uploads` in the container |
 | `MAX_FILE_MB` | Optional — max size per uploaded file, defaults to `50` |
 
-| `TRIP_SERVICE_TOKEN` | Optional — lets app.crcmz.me's read-only MCP read the trip (`POST /api/service/tool`, Trip AI read tools only). Same value in the CRCMZ app. Unset = off. |
+| `TRIP_SERVICE_TOKEN` | Optional — lets app.crcmz.me's read-only MCP read the trip (`GET /api/service/tool/<name>`, Trip AI read tools only). Same value in the CRCMZ app. Unset = off. |
 
 ### Zitadel setup (one-time)
 

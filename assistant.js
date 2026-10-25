@@ -517,9 +517,11 @@ Rules:
   });
 
   // ---------- read-only service access (app.crcmz.me's MCP) ----------
-  // POST {name, args} with "Authorization: Bearer TRIP_SERVICE_TOKEN" runs one of the
-  // Trip AI's READ tools and returns its JSON. GET lists them with their schemas.
-  // No session is created; the propose_* tools cannot be named here.
+  // GET /api/service/tool/<name>?args=<json> with "Authorization: Bearer
+  // TRIP_SERVICE_TOKEN" runs one of the Trip AI's READ tools and returns its JSON;
+  // GET /api/service/tools lists them with their schemas. Reads are GETs, so the
+  // caller never needs a mutating verb. No session is created; the propose_*
+  // tools cannot be named here.
   function serviceAuth(req, res) {
     const want = SERVICE_TOKEN();
     const got = (req.get('authorization') || '').replace(/^Bearer\s+/i, '');
@@ -531,11 +533,13 @@ Rules:
     if (!serviceAuth(req, res)) return;
     res.json({ tools: LOCAL_TOOLS.map((t) => t.function).filter((f) => SERVICE_TOOLS.includes(f.name)) });
   });
-  app.post('/api/service/tool', async (req, res) => {
+  app.get('/api/service/tool/:name', async (req, res) => {
     if (!serviceAuth(req, res)) return;
-    const name = String((req.body && req.body.name) || '');
+    const name = String(req.params.name || '');
     if (!SERVICE_TOOLS.includes(name)) return res.status(400).json({ error: 'not a read tool', tools: SERVICE_TOOLS });
-    const args = req.body && typeof req.body.args === 'object' && req.body.args ? req.body.args : {};
+    let args = {};
+    try { args = req.query.args ? JSON.parse(String(req.query.args)) : {}; } catch { return res.status(400).json({ error: 'args must be JSON' }); }
+    if (!args || typeof args !== 'object' || Array.isArray(args)) args = {};
     const svc = { tripService: true, headers: {}, session: { user: { name: 'CRCMZ MCP' } } };
     try {
       const result = await runTool(svc, name, args, () => {});
