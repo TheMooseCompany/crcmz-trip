@@ -17,6 +17,11 @@ const AI_BASE = () => (process.env.AI_BASE_URL || 'http://192.168.4.38:1234/v1')
 const AI_MODEL = () => process.env.AI_MODEL || 'Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-8bit';
 const MCP_URL = process.env.CRCMZ_MCP_URL || 'https://app.crcmz.me/mcp';
 const MCP_TOKEN = () => process.env.TRIP_MCP_TOKEN || '';
+// app.crcmz.me's MCP reads the trip through /api/service/tool with this bearer.
+const SERVICE_TOKEN = () => process.env.TRIP_SERVICE_TOKEN || '';
+// The read tools a service caller may run; the propose_* (write) tools are never reachable.
+const SERVICE_TOOLS = ['get_overview', 'get_days', 'search_food', 'search_buds', 'get_stay', 'get_split',
+  'get_packing', 'get_poll', 'get_flights', 'get_weather'];
 // Read-only CRCMZ tools worth having on a trip; the service token has no write scope anyway.
 const MCP_PICK = ['person_profile', 'squad_facts', 'memory_search', 'tournament_list', 'tournament_bracket',
   'tourney_leaderboard', 'tourney_player_stats', 'recent_clips', 'psn_squad_status', 'whatsapp_search', 'web_search'];
@@ -35,9 +40,11 @@ module.exports = function mountAssistant(app, ctx) {
   const userKey = (req) => (req.session.user && (req.session.user.sub || req.session.user.email)) || 'anon';
   function content() { return readContent() || defaultContent() || {}; }
   async function internal(req, method, p, body) {
+    const headers = { cookie: req.headers.cookie || '', 'content-type': 'application/json', accept: 'application/json' };
+    if (req.tripService) headers['x-trip-service'] = SERVICE_TOKEN();   // see /api/service/tool
     const r = await fetch(`http://127.0.0.1:${port}${p}`, {
       method,
-      headers: { cookie: req.headers.cookie || '', 'content-type': 'application/json', accept: 'application/json' },
+      headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(20000),
     });
@@ -507,5 +514,34 @@ Rules:
 
   app.get('/api/assistant/status', requireAuth, async (req, res) => {
     res.json({ model: AI_MODEL(), mcp: Boolean(MCP_TOKEN()), mcp_tools: (await mcpTools()).length, admin: isAdminUser(req.session.user) });
+  });
+
+  // ---------- read-only service access (app.crcmz.me's MCP) ----------
+  // POST {name, args} with "Authorization: Bearer TRIP_SERVICE_TOKEN" runs one of the
+  // Trip AI's READ tools and returns its JSON. GET lists them with their schemas.
+  // No session is created; the propose_* tools cannot be named here.
+  function serviceAuth(req, res) {
+    const want = SERVICE_TOKEN();
+    const got = (req.get('authorization') || '').replace(/^Bearer\s+/i, '');
+    const ok = want && got.length === want.length && crypto.timingSafeEqual(Buffer.from(got), Buffer.from(want));
+    if (!ok) res.status(401).json({ error: 'service token required' });
+    return ok;
+  }
+  app.get('/api/service/tools', (req, res) => {
+    if (!serviceAuth(req, res)) return;
+    res.json({ tools: LOCAL_TOOLS.map((t) => t.function).filter((f) => SERVICE_TOOLS.includes(f.name)) });
+  });
+  app.post('/api/service/tool', async (req, res) => {
+    if (!serviceAuth(req, res)) return;
+    const name = String((req.body && req.body.name) || '');
+    if (!SERVICE_TOOLS.includes(name)) return res.status(400).json({ error: 'not a read tool', tools: SERVICE_TOOLS });
+    const args = req.body && typeof req.body.args === 'object' && req.body.args ? req.body.args : {};
+    const svc = { tripService: true, headers: {}, session: { user: { name: 'CRCMZ MCP' } } };
+    try {
+      const result = await runTool(svc, name, args, () => {});
+      res.set('Cache-Control', 'no-store').json({ result });
+    } catch (e) {
+      res.status(500).json({ error: String(e.message || e).slice(0, 200) });
+    }
   });
 };

@@ -584,8 +584,19 @@ async function passwordLogin(){
     });
   });
 
+  // A machine caller (app.crcmz.me's read-only MCP) may GET a few data endpoints
+  // with TRIP_SERVICE_TOKEN instead of a session. GET only, these paths only: those
+  // handlers never touch req.session.user. Unset token = no service access at all.
+  const SERVICE_TOKEN = process.env.TRIP_SERVICE_TOKEN || '';
+  const SERVICE_GET_PATHS = new Set(['/api/expenses', '/api/packing', '/api/poll', '/api/flights', '/api/weather']);
+  function isService(req) {
+    const got = req.get('x-trip-service') || '';
+    if (!SERVICE_TOKEN || !got || got.length !== SERVICE_TOKEN.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(got), Buffer.from(SERVICE_TOKEN));
+  }
   function requireAuth(req, res, next) {
     if (req.session.user) return next();
+    if (req.method === 'GET' && SERVICE_GET_PATHS.has(req.path) && isService(req)) return next();
     if (req.path.startsWith('/api/')) {
       return res.status(401).json({ error: 'Not logged in.' });
     }
