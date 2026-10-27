@@ -587,12 +587,14 @@ async function passwordLogin(){
   // A machine caller (app.crcmz.me's read-only MCP) may GET a few data endpoints
   // with TRIP_SERVICE_TOKEN instead of a session. GET only, these paths only: those
   // handlers never touch req.session.user. Unset token = no service access at all.
-  const SERVICE_TOKEN = process.env.TRIP_SERVICE_TOKEN || '';
+  // Not named SERVICE_TOKEN: that would shadow the Zitadel token (top of file)
+  // for everything in main(), and passkey + password sign-in would send this one.
+  const TRIP_SERVICE_TOKEN = process.env.TRIP_SERVICE_TOKEN || '';
   const SERVICE_GET_PATHS = new Set(['/api/expenses', '/api/packing', '/api/poll', '/api/flights', '/api/weather']);
   function isService(req) {
     const got = req.get('x-trip-service') || '';
-    if (!SERVICE_TOKEN || !got || got.length !== SERVICE_TOKEN.length) return false;
-    return crypto.timingSafeEqual(Buffer.from(got), Buffer.from(SERVICE_TOKEN));
+    if (!TRIP_SERVICE_TOKEN || !got || got.length !== TRIP_SERVICE_TOKEN.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(got), Buffer.from(TRIP_SERVICE_TOKEN));
   }
   function requireAuth(req, res, next) {
     if (req.session.user) return next();
