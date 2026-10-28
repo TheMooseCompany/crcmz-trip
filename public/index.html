@@ -260,7 +260,7 @@ section{padding:40px 0 4px}
 .stay-photo{border-radius:22px;overflow:hidden;border:1px solid var(--line);position:relative}
 .stay-photo img{width:100%;height:clamp(180px,32vw,300px);object-fit:cover;display:block}
 .stay-compact{padding:0;overflow:hidden}
-.stay-compact .stay-body{padding:18px 22px 20px}
+.stay-compact .stay-body{padding:14px 18px 16px}
 .stay-compact .kv{padding:9px 0}
 details.house-details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
 details.house-details summary{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);font-weight:600;list-style:none}
@@ -470,16 +470,17 @@ body[data-view="food"] .nav-links a,body[data-view="split"] .nav-links a,body[da
 body[data-view="food"] footer,body[data-view="split"] footer,body[data-view="admin"] footer{color:var(--paper-mut2);border-top-color:var(--line-d)}
 body[data-view="food"] footer a,body[data-view="split"] footer a,body[data-view="admin"] footer a{color:var(--amber-deep)}
 /* Home: light cards on the dark shell */
-#view-home .stay-compact,#view-home .day-card{background:var(--paper-card);border-color:var(--line-d);color:var(--ink)}
-#view-home .stay-compact p{color:var(--paper-mut)}
-#view-home .stay-compact .kv{border-color:var(--line-d)}
-#view-home .stay-compact .kv span:first-child{color:var(--paper-mut)}
-#view-home .stay-compact .label{color:var(--amber-deep)}
-#view-home .stay-compact .stat-row{color:var(--ink)}
-#view-home .stay-compact .stat-row span b{color:var(--amber-deep)}
-#view-home .stay-compact details.house-details{border-top-color:var(--line-d)}
-#view-home .stay-compact details summary{color:var(--amber-deep)}
-#view-home .stay-compact details p b{color:var(--ink)}
+#view-home .day-card{background:var(--paper-card);border-color:var(--line-d);color:var(--ink)}
+#view-home .stay-compact{background:var(--panel);border-color:var(--line);color:var(--cream)}
+#view-home .stay-compact p{color:var(--muted)}
+#view-home .stay-compact .kv{border-color:var(--line)}
+#view-home .stay-compact .kv span:first-child{color:var(--muted)}
+#view-home .stay-compact .label{color:var(--amber2)}
+#view-home .stay-compact .stat-row{color:var(--cream)}
+#view-home .stay-compact .stat-row span b{color:var(--amber2)}
+#view-home .stay-compact details.house-details{border-top-color:var(--line)}
+#view-home .stay-compact details summary{color:var(--amber2)}
+#view-home .stay-compact details p b{color:var(--cream)}
 #view-home .day-card .dow{color:var(--amber-deep)}
 #view-home .day-card .dnum{color:var(--ink)}
 #view-home .day-card .dmon{color:var(--paper-mut2)}
@@ -1554,18 +1555,18 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 .stay-scrim-sub{font-size:14px;color:rgba(245,239,224,.78);margin-top:2px}
 .stay-phase-chip{flex:none;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber2);border:1px solid var(--line-amber);background:rgba(6,8,24,.65);padding:6px 11px;border-radius:999px;white-space:nowrap}
 .stay-intro{margin:0}
-.stay-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0 2px}
-.stay-stat span{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-mut);font-weight:600}
-.stay-stat b{display:block;font-size:28px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}
-.stay-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stay-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 0}
+.stay-stat span{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stay-stat b{display:block;font-size:25px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;color:var(--cream);margin-top:0}
+.stay-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 @media(max-width:480px){.stay-tiles{grid-template-columns:1fr}}
-.stay-tile{border:1px solid var(--line-d);border-radius:16px;padding:14px 16px;background:rgba(23,20,37,.02)}
-.stay-tile-lab{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-deep);font-weight:600}
-.stay-tile-time{font-size:20px;line-height:1.3;font-weight:600;color:var(--ink);margin-top:4px}
-.stay-tile p{color:var(--paper-mut);font-size:14px;line-height:1.45;margin:4px 0 12px}
+.stay-tile{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:rgba(245,239,224,.04)}
+.stay-tile-lab{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber2);font-weight:600}
+.stay-tile-time{font-size:20px;line-height:1.3;font-weight:600;color:var(--cream);margin-top:4px}
+.stay-tile p{color:var(--muted);font-size:14px;line-height:1.45;margin:4px 0 8px}
 .stay-tile-btn{min-height:44px;padding:10px 18px;font-size:14px}
-.stay-warns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.stay-warn{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(138,94,16,.5);background:rgba(242,179,61,.14);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45}
+.stay-warns{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.stay-warn{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(242,179,61,.45);background:rgba(242,179,61,.10);color:var(--cream);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.45}
 .stay-receipt{border-top:1px dashed var(--line-d);margin-top:16px;padding-top:14px}
 .stay-receipt .kv.total span{color:var(--ink);font-weight:700;font-size:16px}
 .stay-receipt-note{color:var(--paper-mut);font-size:14px;line-height:1.45;margin:10px 0 0}
@@ -1921,28 +1922,28 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
       .carousel { margin: 44px 0 0; }
       .car-head {
         display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-        margin: 0 0 6px;
+        margin: 0 0 2px;
       }
-      .car-head .label-mono { color: var(--amber-deep); }
+      .car-head .label-mono { color: var(--amber2); }
       .car-counter {
         font-family: var(--font-mono); font-size: 13px; font-weight: 500;
-        letter-spacing: 0.08em; color: var(--ink-soft);
+        letter-spacing: 0.08em; color: var(--muted);
       }
       .car-stage {
-        position: relative; height: clamp(300px, 60vw, 500px);
+        position: relative; height: clamp(200px, 54vw, 470px);
         perspective: 1400px; perspective-origin: 50% 50%;
         touch-action: pan-y; cursor: grab;
         border-radius: 22px;
       }
-      .car-stage:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 4px; }
+      .car-stage:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
       .car-stage.dragging { cursor: grabbing; }
       .car-slide {
         position: absolute; left: 50%; top: 50%;
         width: min(78%, 620px); aspect-ratio: 3 / 2; margin: 0;
         border-radius: 22px; overflow: hidden;
-        border: 1px solid var(--line-d);
-        background: var(--paper-2);
-        box-shadow: 0 26px 55px rgba(23, 20, 37, 0.28);
+        border: 1px solid var(--line);
+        background: var(--panel2);
+        box-shadow: 0 26px 55px rgba(2, 3, 10, 0.5);
         will-change: transform, opacity;
         user-select: none; -webkit-user-select: none;
       }
@@ -1963,17 +1964,17 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
       .carousel.snapping .car-slide {
         transition: transform 0.6s var(--glide), opacity 0.6s var(--glide);
       }
-      .car-ui { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+      .car-ui { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
       .car-btn {
         width: 46px; height: 46px; border-radius: 999px;
-        border: 1px solid var(--line-d); background: var(--paper-card);
-        color: var(--ink); font-size: 19px; line-height: 1; cursor: pointer;
+        border: 1px solid var(--line); background: rgba(16,22,58,.6);
+        color: var(--cream); font-size: 19px; line-height: 1; cursor: pointer;
         display: inline-flex; align-items: center; justify-content: center;
         transition: transform 0.3s var(--spring), border-color 0.25s var(--ease);
       }
-      .car-btn:hover { border-color: var(--ink); }
+      .car-btn:hover { border-color: var(--amber); }
       .car-btn:active { transform: scale(0.92); }
-      .car-btn:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
+      .car-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
       @media (prefers-reduced-motion: reduce) {
         .carousel.snapping .car-slide { transition: opacity 0.25s linear; }
       }
@@ -1994,7 +1995,7 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
   border-radius:22px;border:1px solid var(--line);
   box-shadow:0 30px 60px rgba(2,3,10,.45);
 }
-#stay .scene-melt{background:linear-gradient(to bottom,rgba(255,253,246,0),var(--paper-card) 92%)}
+#stay .scene-melt{background:linear-gradient(to bottom,rgba(16,22,58,0),var(--panel) 92%)}
 #stay .scene-headlines{bottom:92px}
 #stay .scroll-hint{bottom:96px}
 #stay .rating{position:absolute;top:14px;left:14px;z-index:4;background:rgba(6,8,24,.9);border:1px solid var(--line-amber);color:var(--amber2);font-family:"IBM Plex Mono",monospace;font-size:var(--micro);letter-spacing:.06em;padding:7px 12px;border-radius:999px}
@@ -2002,8 +2003,11 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
 #stay .stay-scrim{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:flex-end;padding:34px 18px 14px;background:linear-gradient(to top,rgba(5,7,20,.66),rgba(5,7,20,0));pointer-events:none}
 #stay .stay-scrim-name{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:19px;color:var(--cream);line-height:1.15}
 #stay .stay-scrim-sub{font-size:13px;color:var(--muted);margin-top:2px}
-#stay .stay-compact{margin-top:16px}
-#stay .carousel{margin:26px 0 6px}
+#stay .stay-compact{margin-top:12px}
+#stay .stay-intro{color:var(--cream);font-size:17px;line-height:1.4;font-weight:600}
+#stay details.house-details{margin-top:10px;padding-top:10px}
+#stay .kv{padding:7px 0}
+#stay .carousel{margin:14px 0 0}
 #stay .car-stage{border-radius:22px}
 @media (max-width:560px){
   #stay .scene-sticky{height:calc(100dvh - var(--header-h) - 118px);min-height:400px}
