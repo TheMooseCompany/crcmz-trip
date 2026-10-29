@@ -115,4 +115,12 @@ module.exports = [
   { slug: "calan-beef-noodle", name: "Calan Beef Noodle", address: "2219 Centre St N Calgary AB", searchQuery: "Calan Beef Noodle 2219 Centre St N Calgary AB", photoIndex: 0 },
   { slug: "ca-town-halal-house", name: "Ca-Town Halal House", address: "1715 Centre St NW Calgary AB", searchQuery: "Ca-Town Halal House 1715 Centre St NW Calgary AB", photoIndex: 0 },
   { slug: "golden-dragon-hot-pot", name: "Golden Dragon Hot Pot", address: "30 Brentwood Common NW Calgary AB", searchQuery: "Golden Dragon Hot Pot 30 Brentwood Common NW Calgary AB", photoIndex: 0 },
+  { slug: "dave-s-hot-chicken-east-hills", name: "Dave's Hot Chicken — East Hills", address: "409 E Hills Blvd SE Calgary AB", searchQuery: "Dave's Hot Chicken 409 E Hills Blvd SE Calgary AB", photoIndex: 0 },
+  { slug: "original-shawarma", name: "Original Shawarma", address: "338 10 St NW Calgary AB", searchQuery: "Original Shawarma 338 10 St NW Calgary AB", photoIndex: 0 },
+  { slug: "saffron-garden-afghan-kebab", name: "Saffron Garden Afghan Kebab", address: "12445 Lake Fraser Dr SE Calgary AB", searchQuery: "Saffron Garden Afghan Kebab 12445 Lake Fraser Dr SE Calgary AB", photoIndex: 0 },
+  { slug: "chaiiwala-of-london-cityscape", name: "Chaiiwala of London — Cityscape", address: "10474 Cityscape Dr NE Calgary AB", searchQuery: "Chaiiwala of London 10474 Cityscape Dr NE Calgary AB", photoIndex: 0 },
+  { slug: "layali-cafe", name: "Layali Cafe", address: "617 11 Ave SW Calgary AB", searchQuery: "Layali Cafe 617 11 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "lutador", name: "Lutador", address: "Kensington Calgary AB", searchQuery: "Lutador Kensington Calgary AB", photoIndex: 0 },
+  { slug: "jungle-chicken", name: "Jungle Chicken", address: "3304 64 St NE Calgary AB", searchQuery: "Jungle Chicken 3304 64 St NE Calgary AB", photoIndex: 0 },
+  { slug: "calgary-momo-house", name: "Calgary Momo House", address: "Crowfoot Calgary AB", searchQuery: "Calgary Momo House Crowfoot Calgary AB", photoIndex: 0 },
 ];
