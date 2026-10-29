@@ -1732,7 +1732,16 @@ document.addEventListener('keydown', function(e) {
       const mapAttr = (p) => (p.authorAttributions
         ? p.authorAttributions.map((a) => ({ author: a.displayName || '', authorUri: a.uri || '' }))
         : []);
-      const photos = rawPhotos.map((p) => ({ name: p.name, attributions: mapAttr(p) }));
+      const photos = rawPhotos.map((p) => ({
+        name: p.name,
+        attributions: mapAttr(p),
+        // Pixel dims ride along (additive): the client picks the
+        // first landscape photo as the card gallery's opening slide
+        // (food/interior shots skew landscape; storefront openers
+        // skew portrait). Names themselves stay server-side.
+        widthPx: p.widthPx || 0,
+        heightPx: p.heightPx || 0,
+      }));
       const idx = venue.photoIndex < photos.length ? venue.photoIndex : 0;
       const photo = photos[idx] || null;
       const details = {
@@ -1768,6 +1777,11 @@ document.addEventListener('keydown', function(e) {
       photoCount: d.photoCount,
       photoIndex: d.photoIndex,
       photoAttributions: d.photos.map((p) => p.attributions),
+      // Per-index pixel dims, aligned with photoAttributions and the
+      // ?n= indexes of /api/places/photo (additive; older consumers
+      // ignore it). Lets the client open galleries on the first
+      // landscape photo instead of the storefront default.
+      photoDims: d.photos.map((p) => ({ w: p.widthPx || 0, h: p.heightPx || 0 })),
     };
   }
   app.get('/api/places/meta', requireAuth, async (req, res) => {

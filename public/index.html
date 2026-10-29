@@ -1630,7 +1630,7 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-tile{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#2C376F,#12173C 62%)}
 .nm-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 32%,rgba(245,239,224,.16) 47%,transparent 62%)}
 .nm-tile svg{width:46px;height:46px;stroke:#A5B4FF;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.nm-badge{position:absolute;top:12px;left:12px;z-index:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;color:var(--cream);background:rgba(6,8,24,.55);border:1px solid rgba(245,239,224,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.nm-badge{position:absolute;top:12px;left:12px;z-index:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;color:var(--cream);background:rgba(6,8,24,.68);border:1px solid rgba(245,239,224,.35)}
 .nm-plan-chip{position:absolute;top:12px;right:12px;z-index:2;font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;background:var(--amber);color:#221A04}
 .nm-body{padding:16px 18px 18px}
 .nm-body h3{font-size:20px;line-height:1.3;font-weight:600;margin:0;color:var(--cream)}
@@ -1642,15 +1642,21 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-dir{flex:none}
 .nm-add{flex:1;justify-content:center}
 .nm-photo{position:relative}
-.nm-credit{position:absolute;left:8px;bottom:8px;z-index:2;font-size:11px;line-height:1.3;color:var(--cream);background:rgba(6,8,24,.62);padding:3px 7px;border-radius:6px;text-decoration:none;backdrop-filter:blur(4px)}
-/* Places gallery: horizontal scroll-snap strip inside .nm-photo.
-   Built only after the venue's first Places photo loads; until then
-   the card keeps its baked category photo untouched. */
-.nm-strip{position:absolute;inset:0;z-index:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.nm-strip::-webkit-scrollbar{display:none}
-.nm-slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:linear-gradient(150deg,#262F66,#10163A)}
+.nm-credit{position:absolute;left:8px;bottom:8px;z-index:2;font-size:11px;line-height:1.3;color:var(--cream);background:rgba(6,8,24,.74);padding:3px 7px;border-radius:6px;text-decoration:none}
+/* Places gallery: transform-track carousel inside .nm-photo.
+   Built only after the venue's first chosen photo loads; until then
+   the card keeps its baked category photo untouched. The track is
+   transform-only; the strip takes pan-y so vertical page scroll
+   always wins over a horizontal swipe. */
+.nm-strip{position:absolute;inset:0;z-index:1;overflow:hidden;touch-action:pan-y;cursor:grab}
+.nm-strip.dragging{cursor:grabbing}
+.nm-track{display:flex;width:100%;height:100%;will-change:transform}
+.nm-track.snap{transition:transform .38s var(--glide)}
+.nm-slide{flex:0 0 100%;width:100%;height:100%;background:linear-gradient(150deg,#262F66,#10163A)}
 .nm-slide img{width:100%;height:100%;object-fit:cover;display:block}
-.nm-dots{position:absolute;right:8px;bottom:8px;z-index:2;display:flex;gap:5px;align-items:center;background:rgba(6,8,24,.62);padding:5px 8px;border-radius:999px;backdrop-filter:blur(4px);pointer-events:none}
+.nm-slide img.nm-fade{opacity:0;transition:opacity .35s ease}
+.nm-slide img.nm-fade.in{opacity:1}
+.nm-dots{position:absolute;right:8px;bottom:8px;z-index:2;display:flex;gap:5px;align-items:center;background:rgba(6,8,24,.74);padding:5px 8px;border-radius:999px;pointer-events:none}
 .nm-dots i{width:6px;height:6px;border-radius:50%;background:rgba(245,239,224,.45)}
 .nm-dots i.on{background:var(--cream)}
 .nm-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
@@ -1658,7 +1664,13 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-day.on{background:var(--amber);color:#221A04;border-color:transparent;font-weight:600}
 .nm-day.nm-remove{color:#FF9D8A;border-color:rgba(255,157,138,.4)}
 #view-food .food-note{color:var(--muted);margin-top:22px;font-size:14px;line-height:1.45}
-@media (prefers-reduced-motion: reduce){.food-band-img{animation:none}.pv{animation:none}.sheet{animation:none}}
+@media (prefers-reduced-motion: reduce){.food-band-img{animation:none}.pv{animation:none}.sheet{animation:none}.nm-grid.grid-enter .nm-card{animation:none}}
+/* Category switch: the fresh grid fades + rises, staggered per card
+   (JS adds .grid-enter only when the filter actually changed).
+   Fill is backwards only, so once the 250ms pass ends each card is
+   back under the .rv system's control - nothing stays pinned. */
+@keyframes nmGridIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.nm-grid.grid-enter .nm-card{animation:nmGridIn .25s var(--ease) backwards;animation-delay:min(calc(var(--ri,0)*20ms),240ms)}
 
 /* ================= V7 · DEVICE FIXES (owner's phones) =================
    Defect 1 — hero/header collision: the fixed top nav is now a defined
@@ -4966,10 +4978,10 @@ function foodPickerHTML(name){
   +(plan?'<button type="button" class="nm-day nm-remove" data-unpick="'+foodEsc(name)+'">Remove</button>':'')
   +'</div>';
 }
-function foodCard(f){
+function foodCard(f,i){
  var img=FOOD_IMG[(f.cats||[])[0]]||'';
  var plan=foodPlan[f.name];
- return '<article class="nm-card rv" data-place-slug="'+foodEsc(placeSlug(f.name))+'">'
+ return '<article class="nm-card rv" style="--ri:'+Math.min(i||0,12)+'" data-place-slug="'+foodEsc(placeSlug(f.name))+'">'
   +'<div class="nm-photo">'+(img?'<img src="'+img+'" alt="" loading="lazy">':foodGlyph())
   +'<span class="nm-badge">'+foodEsc(halalBadge(f))+'</span>'
   +(plan?'<span class="nm-plan-chip">\u2713 '+foodEsc(plan)+'</span>':'')
@@ -5009,17 +5021,27 @@ function renderFoodRail(){
   +'<div class="food-dd-panel" role="listbox" aria-label="Food categories"'+(foodDdOpen?'':' hidden')+'>'+opts+'</div>';
  foodRailEl.classList.toggle('open',foodDdOpen);
 }
+var lastFoodFilter=null;
 function renderFood(){
  renderFoodRail();
  if(!foodListEl)return;
  if(foodFilter==='all'){
    foodListEl.innerHTML='<div class="nm-grid">'+FOOD.map(foodCard).join('')+'</div>';
-   return;
  }
+ else{
  var cat=FOOD_CATS.filter(function(c){return c.id===foodFilter})[0];
  var items=FOOD.filter(function(f){return foodHas(f,foodFilter)});
  foodListEl.innerHTML='<div class="nm-cat-head"><span class="serif nm-accent">'+foodEsc(FOOD_ACCENT[foodFilter]||'')+'</span><h3>'+foodEsc(cat?cat.label:foodFilter)+'</h3><span class="nm-cat-n">'+items.length+' spots</span></div>'
   +'<div class="nm-grid">'+items.map(foodCard).join('')+'</div>';
+ }
+ /* Category-switch feel: only a genuine filter change animates the
+    fresh grid (picker toggles and plan edits re-render silently). */
+ var grid=foodListEl.querySelector('.nm-grid');
+ if(grid&&lastFoodFilter!==null&&lastFoodFilter!==foodFilter){
+   grid.classList.add('grid-enter');
+   setTimeout(function(){grid.classList.remove('grid-enter')},900);
+ }
+ lastFoodFilter=foodFilter;
 }
 function renderFoodPlan(){
  if(!foodPlanEl)return;
@@ -7291,21 +7313,61 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     exactly as a failed per-card fetch behaved before. */
  var metaState='idle', metaBySlug=null, metaWaiters=[];
  function photoUrl(slug,n){return '/api/places/photo?venue='+encodeURIComponent(slug)+(n==null?'':'&n='+n)}
+ function galleryOrder(meta,count){
+  // Slide order for the card carousel (max 4): FOOD FIRST - the
+  // opening slide is the first landscape photo in the venue's list
+  // (dish/interior shots skew landscape; storefront openers skew
+  // portrait), then the rest in Google order. With no dims in the
+  // payload (older server) the venue's configured default opens, as
+  // before; with dims but no landscape, Google's first photo opens.
+  var pool=[]; for(var k=0;k<count;k++)pool.push(k);
+  var dims=meta.photoDims||[];
+  var first=-1;
+  for(var k=0;k<pool.length;k++){ var d=dims[pool[k]]; if(d&&d.w>d.h){ first=pool[k]; break; } }
+  if(first<0) first=dims.length?0:((meta.photoIndex>=0&&meta.photoIndex<count)?meta.photoIndex:0);
+  var order=[first];
+  pool.forEach(function(n){ if(n!==first)order.push(n); });
+  return order;
+ }
  function applyMeta(card,photoEl,img,slug,meta){
   var count=meta.photoCount>0?Math.min(meta.photoCount,5):1;
-  var probe=new Image();
-  probe.onload=function(){
+  function pointDir(){
    var dir=card.querySelector('a.nm-dir');
    if(dir&&meta.googleMapsUri)dir.href=meta.googleMapsUri;
-   if(count<=1){ // original single-photo swap, unchanged
+  }
+  if(count<=1){ // original single-photo swap, unchanged
+   var probe=new Image();
+   probe.onload=function(){
+    pointDir();
     img.src=probe.src;
     addCredit(photoEl,meta,(meta.attributions||[])[0]||null);
-    return;
-   }
-   buildGallery(card,photoEl,img,meta,slug,count,probe);
+   };
+   probe.onerror=function(){};
+   probe.src=photoUrl(slug,null); // the venue's default photo, as before
+   return;
+  }
+  var order=galleryOrder(meta,Math.min(count,4));
+  var probe=new Image();
+  probe.onload=function(){
+   pointDir();
+   buildGallery(card,photoEl,img,meta,slug,order,probe);
   };
-  probe.onerror=function(){};
-  probe.src=photoUrl(slug,null); // the venue's default photo, as before
+  probe.onerror=function(){
+   // The chosen opener failed to load: fall back to the venue's
+   // default photo as a plain single swap - unless the default IS
+   // the photo that just failed.
+   var def=(meta.photoIndex>=0&&meta.photoIndex<count)?meta.photoIndex:0;
+   if(order[0]===def)return;
+   var p2=new Image();
+   p2.onload=function(){
+    pointDir();
+    img.src=p2.src;
+    addCredit(photoEl,meta,(meta.attributions||[])[0]||null);
+   };
+   p2.onerror=function(){};
+   p2.src=photoUrl(slug,null);
+  };
+  probe.src=photoUrl(slug,order[0]);
  }
  function flushMeta(){
   var waiters=metaWaiters; metaWaiters=[];
@@ -7351,40 +7413,37 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
   if(at.authorUri){c.href=at.authorUri;c.target='_blank';c.rel='noopener'}
   else{c.removeAttribute('href')}
  }
- function buildGallery(card,photoEl,fallbackImg,meta,slug,count,probe){
-  var start=(meta.photoIndex>=0&&meta.photoIndex<count)?meta.photoIndex:0;
-  var order=[]; for(var k=0;k<count;k++)order.push((start+k)%count);
+ function buildGallery(card,photoEl,fallbackImg,meta,slug,order,probe){
   var strip=document.createElement('div');
   strip.className='nm-strip';
   strip.setAttribute('aria-label','Photos');
+  var track=document.createElement('div');
+  track.className='nm-track';
+  strip.appendChild(track);
   var slides=[];
-  order.forEach(function(n,pos){
+  order.forEach(function(n,p){
    var s=document.createElement('div'); s.className='nm-slide';
    var im;
-   if(pos===0){ im=probe; }
+   if(p===0){ im=probe; }
    else{
-    im=new Image(); im.alt='';
+    im=new Image(); im.alt=''; im.decoding='async';
     im.setAttribute('data-src',photoUrl(slug,n));
     im.addEventListener('error',function(){ dropSlide(n); });
    }
-   s.appendChild(im); strip.appendChild(s);
-   slides.push({n:n,el:s,img:im,loaded:pos===0});
+   s.appendChild(im); track.appendChild(s);
+   slides.push({n:n,el:s,img:im,loaded:p===0});
   });
-  var dots=null;
-  function liveSlides(){return slides.filter(function(s){return s.el.parentNode===strip})}
-  function activePos(){
-   var w=strip.clientWidth||1;
-   return Math.max(0,Math.min(liveSlides().length-1,Math.round(strip.scrollLeft/w)));
-  }
+  var pos=0, dots=null;
+  var defIdx=(meta.photoIndex>=0&&meta.photoIndex<order.length+4)?meta.photoIndex:0;
+  function liveSlides(){return slides.filter(function(s){return s.el.parentNode===track})}
   function syncUI(){
    var live=liveSlides(); if(!live.length)return;
-   var pos=activePos();
    if(dots){
     var kids=dots.children;
     for(var i=0;i<kids.length;i++)kids[i].className=(i===pos?'on':'');
    }
    var at=creditFor(meta,live[pos].n);
-   if(!at&&live[pos].n===start)at=(meta.attributions||[])[0]||null;
+   if(!at&&live[pos].n===defIdx)at=(meta.attributions||[])[0]||null;
    addCredit(photoEl,meta,at);
   }
   function rebuildDots(){
@@ -7397,9 +7456,18 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    live.forEach(function(){dots.appendChild(document.createElement('i'))});
    photoEl.appendChild(dots);
   }
+  function setPos(p,animate){
+   var live=liveSlides(); if(!live.length)return;
+   pos=Math.max(0,Math.min(live.length-1,p));
+   track.classList.toggle('snap',!!animate);
+   track.style.transform='translateX('+(-pos*100)+'%)';
+   syncUI();
+   loadSlide(live[pos+1]); // keep one ahead of the swipe
+  }
   function dropSlide(n){
    var s=slides.filter(function(x){return x.n===n})[0];
-   if(!s||s.el.parentNode!==strip)return;
+   if(!s||s.el.parentNode!==track)return;
+   var idx=liveSlides().indexOf(s);
    s.el.remove();
    if(!liveSlides().length){ // every slide died: restore the baked photo
     strip.remove(); if(dots)dots.remove();
@@ -7407,37 +7475,77 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     fallbackImg.style.display='';
     return;
    }
-   rebuildDots(); syncUI();
+   if(idx<pos)pos--;
+   rebuildDots(); setPos(pos,false);
   }
   probe.addEventListener('error',function(){ dropSlide(order[0]); });
-  // Lazy-load the rest: a slide's bytes are fetched only when it nears
-  // the strip's viewport (or immediately when IO is unavailable).
+  // Lazy: a slide's bytes are fetched only when the card nears the
+  // viewport (one ahead), when a swipe lands next door, or when the
+  // strip is first touched - never all at render.
+  function fadeIn(im){
+   if(im.complete&&im.naturalWidth)return;
+   im.classList.add('nm-fade');
+   var shown=false;
+   function show(){ if(shown)return; shown=true; im.classList.add('in'); }
+   im.addEventListener('load',show);
+   setTimeout(show,900); // a photo can never strand invisible
+  }
   function loadSlide(s){
    if(!s||s.loaded)return; s.loaded=true;
-   var src=s.img.getAttribute('data-src'); if(src)s.img.src=src;
+   var src=s.img.getAttribute('data-src'); if(!src)return;
+   fadeIn(s.img);
+   s.img.src=src;
   }
-  var io=null;
+  function loadRest(){ slides.forEach(loadSlide); }
   if('IntersectionObserver' in window){
-   io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ loadSlide(slides.filter(function(x){return x.el===e.target})[0]); } });
-   },{root:strip,rootMargin:'0px 160px 0px 160px'});
-   slides.slice(1).forEach(function(s){ io.observe(s.el); });
-  }else{
-   slides.slice(1).forEach(loadSlide);
+   var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ loadSlide(liveSlides()[1]); io.disconnect(); } });
+   },{rootMargin:'240px 0px'});
+   io.observe(photoEl);
   }
-  var raf=0;
-  strip.addEventListener('scroll',function(){
-   if(raf)return;
-   raf=requestAnimationFrame(function(){
-    raf=0; syncUI();
-    var live=liveSlides(); var pos=activePos();
-    loadSlide(live[pos+1]); // keep one ahead of the swipe
-   });
-  },{passive:true});
+  /* Pointer swipe with horizontal intent: the strip is pan-y, so a
+     vertical drag scrolls the page natively and this gesture dies
+     by pointercancel; a horizontal drag past 9px (and more sideways
+     than down) captures and drives the track 1:1, then snaps by
+     distance on release. */
+  var drag=null;
+  strip.addEventListener('pointerdown',function(e){
+   if(e.button!==undefined&&e.button!==0)return;
+   loadRest();
+   drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,dx:0,engaged:false};
+  });
+  strip.addEventListener('pointermove',function(e){
+   if(!drag||e.pointerId!==drag.id)return;
+   var dx=e.clientX-drag.x0, dy=e.clientY-drag.y0;
+   if(!drag.engaged){
+    if(Math.abs(dx)<9)return;
+    if(Math.abs(dy)>Math.abs(dx)){ drag=null; return; }
+    drag.engaged=true;
+    strip.classList.add('dragging');
+    try{strip.setPointerCapture(e.pointerId)}catch(err){}
+    track.classList.remove('snap');
+   }
+   drag.dx=dx;
+   var off=dx;
+   if(pos===0&&dx>0)off=dx*0.35;
+   if(pos===liveSlides().length-1&&dx<0)off=dx*0.35;
+   track.style.transform='translateX(calc('+(-pos*100)+'% + '+off+'px))';
+  });
+  function endDrag(e){
+   if(!drag||e.pointerId!==drag.id)return;
+   var engaged=drag.engaged, dx=drag.dx;
+   drag=null; strip.classList.remove('dragging');
+   if(!engaged)return;
+   var w=strip.clientWidth||1;
+   setPos(pos+(Math.abs(dx)>w*0.18?(dx<0?1:-1):0),true);
+  }
+  strip.addEventListener('pointerup',endDrag);
+  strip.addEventListener('pointercancel',endDrag);
   fallbackImg.style.display='none';
   photoEl.insertBefore(strip,photoEl.firstChild);
-  rebuildDots(); syncUI();
+  rebuildDots(); setPos(0,false);
  }
+
  var armed=false;
  function wireAll(){if(!armed)return;document.querySelectorAll('#foodList article.nm-card[data-place-slug]').forEach(wire)}
  // renderFood() rebuilds #foodList on every filter change - re-wire then.
