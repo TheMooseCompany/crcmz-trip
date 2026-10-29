@@ -1641,6 +1641,10 @@ document.addEventListener('keydown', function(e) {
   const PLACES_CACHE_PATH =
     process.env.PLACES_CACHE_PATH || path.join(__dirname, 'data', 'places-cache.json');
   const PLACES_DETAILS_TTL = 60 * 60 * 1000;
+  const PLACES_DETAILS_DISK_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+  const PLACES_PHOTOS_DIR = process.env.PLACES_PHOTOS_DIR || path.join(DATA_DIR, 'places-photos');
+  const PLACES_PHOTO_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+  try { fs.mkdirSync(PLACES_PHOTOS_DIR, { recursive: true }); } catch {}
   const placesMem = new Map(); // slug -> { details, at } | { pending }
 
   function readPlacesCache() {
@@ -1654,6 +1658,28 @@ document.addEventListener('keydown', function(e) {
     const tmp = `${PLACES_CACHE_PATH}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify(cache, null, 2));
     fs.renameSync(tmp, PLACES_CACHE_PATH);
+  }
+  function photoMetaPath() { return path.join(PLACES_PHOTOS_DIR, 'meta.json'); }
+  function readPhotoMeta() {
+    try { return JSON.parse(fs.readFileSync(photoMetaPath(), 'utf8')) || {}; } catch { return {}; }
+  }
+  function writePhotoMeta(m) {
+    const tmp = photoMetaPath() + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(m));
+    fs.renameSync(tmp, photoMetaPath());
+  }
+  function photoKey(photoName) {
+    return crypto.createHash('sha256').update(photoName + '|800').digest('hex');
+  }
+  function cachePhotoToDisk(key, contentType, buf) {
+    try {
+      const p = path.join(PLACES_PHOTOS_DIR, key);
+      fs.writeFileSync(p + '.tmp', buf);
+      fs.renameSync(p + '.tmp', p);
+      const m = readPhotoMeta();
+      m[key] = { contentType, cachedAt: Date.now() };
+      writePhotoMeta(m);
+    } catch (e) { console.error('[crcmz-trip] photo cache write error:', e.message); }
   }
   function placesNorm(s) {
     return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -1716,6 +1742,14 @@ document.addEventListener('keydown', function(e) {
     const mem = placesMem.get(venue.slug);
     if (mem && mem.details && now - mem.at < PLACES_DETAILS_TTL) return mem.details;
     if (mem && mem.pending) return mem.pending;
+    // L2: disk cache (30-day TTL) — survives container restarts
+    const diskCache = readPlacesCache();
+    const diskEntry = diskCache[venue.slug];
+    if (diskEntry && diskEntry.details && diskEntry.detailsCachedAt
+        && (now - diskEntry.detailsCachedAt) < PLACES_DETAILS_DISK_TTL) {
+      placesMem.set(venue.slug, { details: diskEntry.details, at: now });
+      return diskEntry.details;
+    }
     const pending = (async () => {
       const placeId = await resolvePlaceId(venue);
       const r = await placesFetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
@@ -1754,6 +1788,13 @@ document.addEventListener('keydown', function(e) {
         photos,
       };
       placesMem.set(venue.slug, { details, at: Date.now() });
+      try {
+        const d2 = readPlacesCache();
+        if (!d2[venue.slug]) d2[venue.slug] = {};
+        d2[venue.slug].details = details;
+        d2[venue.slug].detailsCachedAt = Date.now();
+        writePlacesCache(d2);
+      } catch (e) { console.error('[crcmz-trip] places details disk write error:', e.message); }
       return details;
     })();
     placesMem.set(venue.slug, { pending });
@@ -1832,21 +1873,38 @@ document.addEventListener('keydown', function(e) {
   // Streams one photo's bytes. photoName comes only from the in-memory
   // Details cache — never from the client, never from disk.
   async function streamPlacePhoto(res, d, photoName) {
+    const key = photoKey(photoName);
+    const filePath = path.join(PLACES_PHOTOS_DIR, key);
+    const photoMeta = readPhotoMeta();
+    const cached = photoMeta[key];
+    if (cached && (Date.now() - cached.cachedAt) < PLACES_PHOTO_TTL_MS) {
+      try {
+        res.set('X-Place-Id', d.placeId);
+        res.set('Cache-Control', 'private, max-age=2592000');
+        res.type(cached.contentType);
+        return res.sendFile(filePath);
+      } catch { /* fall through to fetch */ }
+    }
     const media = await placesFetch(
       `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=800&skipHttpRedirect=true`,
       { headers: { 'X-Goog-Api-Key': PLACES_KEY } });
     const ct = media.headers.get('content-type') || '';
     res.set('X-Place-Id', d.placeId);
-    res.set('Cache-Control', 'private, max-age=3600');
+    res.set('Cache-Control', 'private, max-age=2592000');
+    let buf, finalCt;
     if (ct.startsWith('image/')) {
-      res.set('Content-Type', ct);
-      return res.send(Buffer.from(await media.arrayBuffer()));
+      buf = Buffer.from(await media.arrayBuffer());
+      finalCt = ct;
+    } else {
+      const mj = await media.json();
+      if (!mj || !mj.photoUri) return res.status(502).json({ error: 'places-upstream' });
+      const img = await placesFetch(mj.photoUri, {});
+      buf = Buffer.from(await img.arrayBuffer());
+      finalCt = img.headers.get('content-type') || 'image/jpeg';
     }
-    const mj = await media.json();
-    if (!mj || !mj.photoUri) return res.status(502).json({ error: 'places-upstream' });
-    const img = await placesFetch(mj.photoUri, {});
-    res.set('Content-Type', img.headers.get('content-type') || 'image/jpeg');
-    return res.send(Buffer.from(await img.arrayBuffer()));
+    cachePhotoToDisk(key, finalCt, buf);
+    res.type(finalCt);
+    return res.send(buf);
   }
   app.get('/api/places/photo', requireAuth, async (req, res) => {
     const venue = placesVenueOrError(req, res);
