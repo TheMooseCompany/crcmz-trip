@@ -148,19 +148,54 @@ async function main() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: BASE_URL.startsWith('https://'),
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-      },
-    })
-  );
+  const sessionMw = session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: BASE_URL.startsWith('https://'),
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  });
+
+  // The CRCMZ app's bridge (app.crcmz.me › Trips shows this trip's Split and Moments).
+  // TRIP_APP_TOKEN, NOT the read-only TRIP_SERVICE_TOKEN: it can write, so it's its own
+  // key, and only for the Split and Moments calls below. The app says who's asking
+  // (x-trip-user: their profile, base64 JSON); the site treats it as that person signed
+  // in, so every rule (the roster, admin-only deletes) applies as it does in the browser.
+  // A bridge request skips the session store: no cookie, nothing kept.
+  const TRIP_APP_TOKEN = process.env.TRIP_APP_TOKEN || '';
+  const APP_BRIDGE = [
+    ['GET', /^\/api\/(expenses|me|fx|moments)$/],
+    ['POST', /^\/api\/(expenses|settlements|receipts|moments)$/],
+    ['DELETE', /^\/api\/expenses\/[\w-]+$/],
+    ['POST', /^\/api\/moments\/[\w-]+\/like$/],
+    ['DELETE', /^\/api\/moments\/[\w-]+$/],
+    ['GET', /^\/uploads\/[^/]+$/],
+    ['GET', /^\/moments\/photo\/[^/]+$/],
+    ['GET', /^\/moments\/reel\.mp4$/],
+  ];
+  function appBridgeUser(req) {
+    const got = req.get('x-trip-app') || '';
+    if (!TRIP_APP_TOKEN || got.length !== TRIP_APP_TOKEN.length
+      || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(TRIP_APP_TOKEN))) return null;
+    if (!APP_BRIDGE.some(([m, re]) => m === req.method && re.test(req.path))) return null;
+    try {
+      const u = JSON.parse(Buffer.from(req.get('x-trip-user') || '', 'base64').toString('utf8'));
+      if (!u || typeof u !== 'object' || !(u.name || u.email || u.preferred_username)) return null;
+      return { name: String(u.name || ''), preferred_username: String(u.preferred_username || ''),
+        email: String(u.email || ''), sub: String(u.sub || '') };
+    } catch { return null; }
+  }
+  app.use((req, res, next) => {
+    if (!req.get('x-trip-app')) return sessionMw(req, res, next);
+    const user = appBridgeUser(req);
+    if (!user) return res.status(403).json({ error: 'Not allowed.' });
+    req.session = { user };
+    return next();
+  });
 
   app.use(express.json({ limit: '1mb' }));
 
