@@ -1185,16 +1185,22 @@ Return ONLY a valid JSON object with no explanation or markdown:
     + '<meta property="og:url" content="https://trip.crcmz.me/">'
     + '<meta property="og:title" content="CRCMZ BOYZ — Calgary Trip">'
     + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Southeast Calgary. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
-    + '<meta property="og:image" content="https://trip.crcmz.me/og-image.jpg">'
+    + '<meta property="og:image" content="https://trip.crcmz.me/og-image-v2.jpg">'
     + '<meta property="og:image:type" content="image/jpeg">'
     + '<meta property="og:image:width" content="1200">'
     + '<meta property="og:image:height" content="630">'
     + '<meta name="twitter:card" content="summary_large_image">'
-    + '<meta name="twitter:image" content="https://trip.crcmz.me/og-image.jpg">'
+    + '<meta name="twitter:image" content="https://trip.crcmz.me/og-image-v2.jpg">'
     + '</head><body>CRCMZ BOYZ — Calgary Trip</body></html>';
   app.get('/og-image.jpg', (req, res) => {
     res.set('Cache-Control', 'public, max-age=86400');
     res.sendFile(path.join(__dirname, 'public', 'og-image.jpg'));
+  });
+  /* v2 card (SE Calgary pool house). Versioned URL on purpose: chat apps
+     cache link previews per image URL, so a new card needs a new URL. */
+  app.get('/og-image-v2.jpg', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.sendFile(path.join(__dirname, 'public', 'og-image-v2.jpg'));
   });
   /* Browsers ask for /favicon.ico at the root regardless of the page's
      (placeholder) icon link — serve the app icon there, publicly, so the
