@@ -166,6 +166,20 @@ async function main() {
 
   app.get('/healthz', (req, res) => res.status(200).type('text/plain').send('ok'));
 
+  // Installable app ("Add to Home Screen") with "Share to CRCMZ Trip": the manifest, its
+  // icons and the service worker are fetched by the browser without the session cookie,
+  // so they're public. None of them holds anything private.
+  const PWA_FILES = { '/manifest.webmanifest': 'application/manifest+json', '/sw.js': 'text/javascript',
+    '/pwa-192.png': 'image/png', '/pwa-512.png': 'image/png' };
+  app.get(Object.keys(PWA_FILES), (req, res) => {
+    res.type(PWA_FILES[req.path]);
+    res.set('Cache-Control', req.path === '/sw.js' ? 'no-cache' : 'public, max-age=86400');
+    res.sendFile(path.join(__dirname, 'public', req.path));
+  });
+  // A share that arrives before the service worker is in place (it normally answers
+  // this POST itself): open the page and say so.
+  app.post('/share', (req, res) => res.redirect(303, '/?shared=nosw'));
+
   // ---------- Passkey auth (when ZITADEL_SERVICE_TOKEN is set) ----------
   app.post('/auth/passkey/begin', async (req, res) => {
     if (!SERVICE_TOKEN) return res.status(503).json({ error: 'not configured' });
@@ -881,6 +895,66 @@ async function passwordLogin(){
       };
       writeIndex(index);
       res.status(201).json({ ok: true, name: req.file.filename, url: `/uploads/${encodeURIComponent(req.file.filename)}` });
+    });
+  });
+
+  // Scan a receipt: the vision model on the local AI server reads the total, the
+  // currency and the place off the photo. Nothing is stored here: the client fills the
+  // Add expense sheet with it (payer = you), and the receipt is saved with the expense.
+  // Qwen3-VL 8B: ~5 s a receipt (gemma-4 26B read the same ones in ~40 s), totals with tax and tip right.
+  const RECEIPT_MODEL = process.env.RECEIPT_VISION_MODEL || 'Qwen3-VL-8B-Instruct-MLX-4bit';
+  const scanUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 12 * 1024 * 1024, files: 1 },
+    fileFilter: (req, file, cb) => (/^image\//.test(file.mimetype || '') ? cb(null, true) : cb(new Error('Images only.'))),
+  });
+  const RECEIPT_PROMPT = `This is a photo of a receipt or bill. Read it and return ONLY a JSON object, no prose:
+{"merchant": "the store or restaurant name, short", "total": the final amount paid as a number (the grand total after tax and tip, not a subtotal or a single item), "currency": "CAD" or "USD" or another ISO code (Canadian addresses, GST/PST or HST mean CAD; a US address or state sales tax means USD), "date": "YYYY-MM-DD" or "", "summary": "what it was for in 2-5 words, e.g. groceries, dinner, gas", "confidence": 0 to 1}
+If it is not a receipt or the total can't be read, return {"total": null, "confidence": 0}.`;
+
+  app.post('/api/receipts/scan', requireAuth, (req, res) => {
+    scanUpload.single('receipt')(req, res, async (err) => {
+      if (err) return res.status(400).json({ error: err.message || 'Upload failed.' });
+      if (!req.file) return res.status(400).json({ error: 'No photo received.' });
+      try {
+        let img = req.file.buffer;
+        let mime = req.file.mimetype;
+        if (sharpLib) {
+          img = await sharpLib(img).rotate().resize(1600, 1600, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+          mime = 'image/jpeg';
+        }
+        const base = (process.env.AI_BASE_URL || 'http://192.168.4.38:1234/v1').replace(/\/$/, '');
+        const headers = { 'Content-Type': 'application/json' };
+        if (process.env.OLLAMA_API_KEY) headers.Authorization = `Bearer ${process.env.OLLAMA_API_KEY}`;
+        const r = await fetch(`${base}/chat/completions`, {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            model: RECEIPT_MODEL, temperature: 0, max_tokens: 400, chat_template_kwargs: { enable_thinking: false },
+            messages: [{ role: 'user', content: [
+              { type: 'image_url', image_url: { url: `data:${mime};base64,${img.toString('base64')}` } },
+              { type: 'text', text: RECEIPT_PROMPT }] }],
+          }),
+          signal: AbortSignal.timeout(120000),
+        });
+        if (!r.ok) return res.status(502).json({ error: "The receipt reader isn't answering. Type the amount in." });
+        const data = await r.json();
+        const text = String(data.choices?.[0]?.message?.content || '').replace(/<think>[\s\S]*?<\/think>/gi, '');
+        const m = text.match(/\{[\s\S]*\}/);
+        let got = {};
+        try { got = m ? JSON.parse(m[0]) : {}; } catch { got = {}; }
+        const total = typeof got.total === 'number' ? got.total : parseFloat(String(got.total || '').replace(/[^0-9.]/g, ''));
+        const cents = Number.isFinite(total) && total > 0 && total < 100000 ? Math.round(total * 100) : 0;
+        if (!cents) return res.status(422).json({ error: "Couldn't find a total on that. Try a straighter, closer photo, or type it in." });
+        const cur = String(got.currency || '').toUpperCase();
+        res.json({
+          ok: true, cents, currency: cur === 'CAD' || cur === 'USD' ? cur : null, otherCurrency: cur && cur !== 'CAD' && cur !== 'USD' ? cur : null,
+          merchant: String(got.merchant || '').slice(0, 60), summary: String(got.summary || '').slice(0, 40),
+          date: /^\d{4}-\d{2}-\d{2}$/.test(String(got.date || '')) ? got.date : '',
+          confidence: typeof got.confidence === 'number' ? got.confidence : null,
+        });
+      } catch (e) {
+        res.status(502).json({ error: e.name === 'TimeoutError' ? 'The receipt reader took too long. Type the amount in.' : 'Could not read that receipt.' });
+      }
     });
   });
 
@@ -2176,6 +2250,12 @@ ${text.trim()}`;
     return defaultContentCache;
   }
   require('./assistant.js')(app, { requireAuth, isAdminUser, matchPerson, displayName, activePeople, port: PORT, readContent, defaultContent });
+  // Moments: the trip's feed, its photos in the gallery, and the end-of-trip reel.
+  require('./moments.js')(app, {
+    requireAuth, readIndex, writeIndex, uploadToImmich, photoUpload, UPLOADS_DIR, IMAGE_EXT, DATA_DIR,
+    displayName, matchPerson, isAdminUser, IMMICH_URL, IMMICH_API_KEY, sharpLib,
+    tripContent: () => readContent() || defaultContent(),
+  });
 
   // The admin console is NOT part of the public page. public/index.html
   // is a template carrying three placeholders; the dock button, the admin

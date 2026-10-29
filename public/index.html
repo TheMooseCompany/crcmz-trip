@@ -4,6 +4,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:,">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b0e24">
+<link rel="apple-touch-icon" href="/pwa-192.png">
 <title>CRCMZ Trip</title>
 <style>
 /* Newsreader italic is self-hosted (critique P2-5): a glyph subset of
@@ -160,6 +163,51 @@ nav>*{pointer-events:auto}
 #recapPanel p{margin:0;color:var(--muted);font-size:14.5px}
 #recapChamp{color:var(--cream);font-weight:600;margin-top:8px}
 #recapPanel .hero-cta{margin-top:18px}
+/* ---------- Moments: the trip's feed ---------- */
+#moments{padding-top:calc(var(--header-h) + 16px)}
+#view-moments .photo-head h2{margin:14px 0 7px}
+#view-moments .photo-head h2 .serif{color:var(--peri)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mm-compose,.mm-card,.mm-reel-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.mm-compose{margin-top:18px;padding:12px}
+.mm-compose textarea{width:100%;resize:vertical;min-height:52px;border:0;background:none;color:var(--cream);font:inherit;font-size:16px;line-height:1.45;outline:none}
+.mm-compose textarea::placeholder{color:var(--muted)}
+.mm-previews{display:flex;gap:6px;flex-wrap:wrap}
+.mm-previews:empty{display:none}
+.mm-previews img,.mm-previews .mm-vid{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#10101c;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px}
+.mm-compose-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.mm-add{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);color:var(--cream);font-size:14px;font-weight:600;cursor:pointer}
+.mm-hint{flex:1;min-width:0;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mm-post{min-height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--amber);color:#221A04;font:inherit;font-weight:700;cursor:pointer}
+.mm-post:disabled{opacity:.45;cursor:default}
+.mm-feed{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.mm-card{padding:14px 14px 10px}
+.mm-head{display:flex;align-items:center;gap:10px}
+.mm-av{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(185,138,255,.22);color:var(--cream);font-weight:700;font-size:14px}
+.mm-who{font-weight:700;color:var(--cream)}
+.mm-when{color:var(--muted);font-size:12.5px;font-family:"IBM Plex Mono",monospace}
+.mm-del{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:6px}
+.mm-text{margin:10px 0 0;color:var(--cream);font-size:15.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.mm-photos{display:grid;gap:3px;margin:10px -14px 0;grid-template-columns:repeat(2,minmax(0,1fr))}
+.mm-photos.one{grid-template-columns:1fr}
+.mm-photos button{position:relative;border:0;padding:0;background:#10101c;aspect-ratio:1;overflow:hidden;cursor:zoom-in}
+.mm-photos.one button{aspect-ratio:4/3}
+.mm-photos img,.mm-photos video{width:100%;height:100%;object-fit:cover;display:block}
+.mm-foot{display:flex;align-items:center;gap:8px;margin-top:8px}
+.mm-like{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--cream);font:inherit;font-size:14px;cursor:pointer}
+.mm-like[aria-pressed="true"]{border-color:var(--amber);color:var(--amber2)}
+.mm-reel:empty{display:none}
+.mm-reel-card{margin-top:18px;padding:14px}
+.mm-reel-card h3{margin:0 0 4px;font-size:18px;color:var(--cream)}
+.mm-reel-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.mm-reel-card video{display:block;width:100%;max-height:70vh;margin-top:12px;border-radius:14px;background:#000}
+.mm-reel-card .mm-post{margin-top:12px}
+.mm-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden}
+.mm-bar span{display:block;height:100%;background:var(--amber)}
+.mm-lb{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center}
+.mm-lb[hidden]{display:none}
+.mm-lb img{max-width:100%;max-height:100%;object-fit:contain}
+.mm-lb .pv-btn{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px}
 /* ---------- Photo Wall: Camera Roll ---------- */
 #photos{padding-top:calc(var(--header-h) + 16px)}
 /* One clearance token for every view (critique P1-3): a view's first
@@ -168,6 +216,30 @@ nav>*{pointer-events:auto}
    UNDER the fixed header. Food is exempt by design (its hero band
    carries the clearance); Home's sections are mid-page. */
 #split,#fifa,#buds,#pollSec,#packSec,#admin{padding-top:calc(var(--header-h) + 16px)}
+.sp-add-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.sp-add-row .sp-add-btn{margin-left:0;margin-right:0}
+.sp-scan-btn{background:var(--paper-card);color:var(--ink);border:1px solid var(--line-d);box-shadow:none}
+.sh-scan{margin:6px 0 0;font-size:13.5px;line-height:1.4;color:var(--paper-mut)}
+.sh-scan:empty{display:none}
+.sh-scan.ok{color:var(--ink)}
+.sh-scan.bad{color:var(--danger)}
+.spb-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.spb-row{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line-d);border-radius:16px;background:var(--paper-card)}
+.spb-row.added{opacity:.55}
+.spb-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.spb-main .sh-desc{margin:0}
+.spb-amt{display:flex;align-items:center;gap:6px}
+.spb-amt input{flex:1;min-width:0;font:inherit;font-size:20px;font-weight:700;border:1px solid var(--line-d);border-radius:12px;padding:8px 10px;background:#fff;color:var(--ink)}
+.spb-amt .spb-sym{font-weight:700;color:var(--paper-mut)}
+.spb-cur{min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line-d);background:none;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
+.spb-state{margin:0;font-size:13px;color:var(--paper-mut)}
+.spb-state.bad{color:var(--danger)}
+.spb-x{flex:none;min-height:36px}
+.spb-thumbs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.spb-thumbs img{width:58px;height:58px;border-radius:10px;object-fit:cover;border:1px solid var(--line-d)}
+.sh-save.sh-save-alt{margin-top:10px;background:var(--paper-card);color:var(--ink);border:1px solid var(--line-d)}
+.mm-share{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--cream);font:inherit;font-size:14px;cursor:pointer}
+.mm-reel-card .mm-share{margin:12px 0 0 8px}
 .photo-head{margin-bottom:0}
 .photo-head-top{display:flex;align-items:center;gap:14px}
 .photo-dates{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
@@ -576,7 +648,7 @@ body.switching .reveal,body.switching .rv,body.scrolling .reveal,body.scrolling 
 .nm-card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 .bud-card{content-visibility:auto;contain-intrinsic-size:auto 222px}
 html.booting .view{display:none!important}
-html.booting[data-boot="food"] #view-food,html.booting[data-boot="photos"] #view-photos,html.booting[data-boot="split"] #view-split,html.booting[data-boot="tourney"] #view-tourney,html.booting[data-boot="buds"] #view-buds,html.booting[data-boot="poll"] #view-poll,html.booting[data-boot="pack"] #view-pack{display:block!important}
+html.booting[data-boot="food"] #view-food,html.booting[data-boot="photos"] #view-photos,html.booting[data-boot="moments"] #view-moments,html.booting[data-boot="split"] #view-split,html.booting[data-boot="tourney"] #view-tourney,html.booting[data-boot="buds"] #view-buds,html.booting[data-boot="poll"] #view-poll,html.booting[data-boot="pack"] #view-pack{display:block!important}
 /* The tab bar is a <nav>, so the light-view top-nav overrides above
    (body[data-view="food"] nav, specificity 0-1-2) would otherwise beat
    .tabbar (0-1-0) and repaint the bar translucent cream on Food and
@@ -2031,7 +2103,7 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
 <script>/* Boot view (deep links): tag the hash's view before any view
 markup parses, so the first paint is the requested view, never a
 flash of Home. The router clears the tag when it takes over. */
-(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','split','tourney','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();
+(function(){var h=(location.hash||'').replace(/^#/,'');var V=['food','photos','moments','split','tourney','buds','poll','pack'];if(V.indexOf(h)>=0){var d=document.documentElement;d.classList.add('booting');d.setAttribute('data-boot',h);document.body.setAttribute('data-view',h);}})();
 /* On-device perf probe gate (diagnostics; diagnosis findings §6):
    with no flag this is a localStorage read and nothing else — no
    request, no DOM. ?probe=1 arms it (the flag, not the query, is
@@ -2531,13 +2603,44 @@ flash of Home. The router clears the tag when it takes over. */
     </div>
   </div></section>
   </div>
+  <div class="view amb-paused" id="view-moments" hidden="">
+<!-- ================= MOMENTS (the trip's feed) ================= -->
+  <section id="moments"><div class="wrap">
+    <div class="sec-head photo-head reveal">
+      <div class="photo-head-top">
+        <div class="label">Moments</div>
+        <div class="photo-dates">Oct 29 — Nov 1</div>
+        <button class="photo-refresh" type="button" id="mmRefresh">Refresh</button>
+      </div>
+      <h2>What <span class="serif">happened.</span></h2>
+      <p class="photo-count"><b id="mmCount">0</b> moments</p>
+    </div>
+    <div class="mm-reel" id="mmReel" aria-live="polite"></div>
+    <form class="mm-compose" id="mmCompose" novalidate>
+      <label class="sr-only" for="mmText">What happened?</label>
+      <textarea id="mmText" maxlength="1000" rows="2" placeholder="What just happened?"></textarea>
+      <div class="mm-previews" id="mmPreviews"></div>
+      <div class="mm-compose-row">
+        <label class="mm-add" for="mmPhotos">+ Photos</label>
+        <input type="file" id="mmPhotos" accept="image/*,video/*,.heic,.heif" multiple hidden>
+        <span class="mm-hint" id="mmHint">Photos land in the album too.</span>
+        <button type="submit" class="mm-post" id="mmPost" disabled>Post</button>
+      </div>
+    </form>
+    <p class="photo-note photo-status" id="mmStatus" aria-live="polite"></p>
+    <div class="mm-feed" id="mmFeed"></div>
+    <p class="photo-empty" id="mmEmpty" hidden>No moments yet. Post the first thing that happened.</p>
+    <div class="mm-lb" id="mmLb" hidden><button type="button" class="pv-btn" id="mmLbClose" aria-label="Close">✕</button><img id="mmLbImg" alt=""></div>
+  </div></section>
+  </div>
   <div class="view view-light amb-paused" id="view-split" hidden="">
 <!-- ================= THE SPLIT (calculator) ================= -->
   <section id="split"><div class="wrap" id="splitRoot">
     <div class="sec-head reveal"><div class="nb-sec-top"><div class="label">Split</div><div class="nb-dates">Oct 29 – Nov 1</div></div><h2 class="t-display2">Settle <span class="serif">up.</span></h2></div>
     <div class="nb-strip reveal"><div><div class="k" id="spStripMeta">Trip total · 0 expenses</div><div class="v" id="spStripTotal">$0.00</div></div><div class="nb-pill" id="spPill" hidden=""></div></div>
     <div class="nb-board reveal" id="spSettle"><div class="nb-empty">Nothing to settle yet.</div></div>
-    <button type="button" class="sp-add-btn" id="spAddBtn">+ Add expense</button>
+    <div class="sp-add-row"><button type="button" class="sp-add-btn" id="spAddBtn">+ Add expense</button><button type="button" class="sp-add-btn sp-scan-btn" id="spScanBtn">Scan receipt</button></div>
+    <input type="file" id="spScanInput" accept="image/*" multiple hidden>
     <div class="nb-footrow reveal">
       <p class="split-fxnote" id="spFxNote">Balances kept in CAD.</p>
       <span class="seg" id="spCurSeg" role="group" aria-label="View currency">
@@ -2567,6 +2670,7 @@ flash of Home. The router clears the tag when it takes over. */
         </span>
       </div>
       <p class="sh-fx" id="spAmtFx"></p>
+      <p class="sh-scan" id="spScanNote" aria-live="polite"></p>
       <div class="sh-label">Who paid</div>
       <div class="sh-chips" id="spPayerChips"></div>
       <div class="sh-label">Split</div>
@@ -2586,6 +2690,21 @@ flash of Home. The router clears the tag when it takes over. */
         <button type="button" class="sh-mini-btn danger" id="spReceiptRemove" hidden="">Remove</button>
       </div>
       <button type="button" class="sh-save" id="spSaveBtn" disabled="">Save expense</button>
+    </div>
+  </div>
+  <!-- Scan receipts: several at once -->
+  <div class="sheet-wrap" id="spBatch" data-lenis-prevent="" hidden="">
+    <div class="sheet-bg" data-close="1"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="spBatchTitle">
+      <div class="sheet-grab"></div>
+      <h3 id="spBatchTitle">Receipts</h3>
+      <p class="sh-sub" id="spBatchSub" aria-live="polite"></p>
+      <div class="sh-label">Who paid</div>
+      <div class="sh-chips" id="spBatchPayer"></div>
+      <p class="sh-scan">Each one splits equally between everyone. Open one afterwards to change it.</p>
+      <div class="spb-list" id="spBatchList"></div>
+      <button type="button" class="sh-save" id="spBatchSave" disabled="">Add expenses</button>
+      <button type="button" class="sh-mini-btn" data-close="1" style="width:100%;margin-top:10px;min-height:50px">Cancel</button>
     </div>
   </div>
   <!-- Expense detail sheet -->
@@ -2930,10 +3049,24 @@ flash of Home. The router clears the tag when it takes over. */
   <span class="foot-brand"><img class="foot-logo" src="assets/crcmz-crest.png" alt="CRCMZ crest" loading="lazy"><span>Designed by Moose. Deployed by Soup</span></span>
   <span><a href="https://crcmz.me" target="_blank" rel="noopener">crcmz.me</a></span>
 </div></footer>
+  <!-- Shared to CRCMZ Trip (the phone's share sheet): receipts or a moment? -->
+  <div class="sheet-wrap" id="shareAsk" data-lenis-prevent="" hidden="">
+    <div class="sheet-bg" data-close="1"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shareAskTitle">
+      <div class="sheet-grab"></div>
+      <h3 id="shareAskTitle">Shared to the trip</h3>
+      <p class="sh-sub" id="shareAskSub"></p>
+      <div class="spb-thumbs" id="shareAskThumbs"></div>
+      <button type="button" class="sh-save" id="shareAsReceipts">Receipts → Split</button>
+      <button type="button" class="sh-save sh-save-alt" id="shareAsMoment">Post as a moment</button>
+      <button type="button" class="sh-mini-btn" data-close="1" style="width:100%;margin-top:10px;min-height:50px">Cancel</button>
+    </div>
+  </div>
 <nav class="tabbar" aria-label="Trip sections">
   <button type="button" class="tab on" data-view="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"></path></svg><span>Home</span></button>
   <button type="button" class="tab" data-view="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"></path><path d="M2.5 19.5h19"></path><path d="M12 8V6.5"></path><circle cx="12" cy="5" r="1"></circle></svg><span>Food</span></button>
   <button type="button" class="tab" data-view="photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M3 17l5-4 4 3 3-2 6 4"></path></svg><span>Photos</span></button>
+  <button type="button" class="tab" data-view="moments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z"></path><path d="M8 10h8M8 13h5"></path></svg><span>Moments</span></button>
   <button type="button" class="tab" data-view="split"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"></path><circle cx="12" cy="6" r="1.7"></circle><circle cx="12" cy="18" r="1.7"></circle></svg><span>Split</span></button>
   <button type="button" class="tab" data-view="tourney"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v7a5 5 0 0 1-10 0V3z"/><path d="M3 6h4M17 6h4M12 10v5M9 19h6M12 15v4"/></svg><span>Tourney</span></button>
   <button type="button" class="tab" data-view="buds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c0-6 1-10 6-14 3-2.4 4-2 4-2s.3 5.5-2 9.5C17.8 18.3 14 20 12 21z"></path><path d="M12 21c0-6-1-10-6-14C3 4.6 2 5 2 5s-.3 5.5 2 9.5C6.2 18.3 10 20 12 21z"></path><path d="M12 21v-6"></path></svg><span>Buds</span></button>
@@ -5118,11 +5251,200 @@ updateFoodPreview();
 </script>
 
 <script>
+/* ================= Moments: the trip's feed =================
+   Post what happened (text and/or photos); everyone's posts newest first, with likes.
+   Photos go through the server into the shared Immich album like the Photo Wall's.
+   The reel card on top: cut by the server when the trip ends (or by an admin now). */
+(function(){
+ var feed=document.getElementById('mmFeed'); if(!feed)return;
+ var text=document.getElementById('mmText'),input=document.getElementById('mmPhotos'),post=document.getElementById('mmPost'),
+     prev=document.getElementById('mmPreviews'),status=document.getElementById('mmStatus'),empty=document.getElementById('mmEmpty'),
+     reelEl=document.getElementById('mmReel'),count=document.getElementById('mmCount'),lb=document.getElementById('mmLb'),lbImg=document.getElementById('mmLbImg');
+ var files=[],data=null,loading=false,pollT=0,posting=false;
+ function e(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+ function say(t){status.textContent=t||'';}
+ function api(url,opt){
+   return fetch(url,opt).then(function(r){
+     if(r.status===401){location.href='/auth/login';throw new Error('auth');}
+     return r.json().then(function(j){ if(!r.ok)throw new Error((j&&j.error)||'Something went wrong. Try again.'); return j; });
+   });
+ }
+ function ago(iso){
+   var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+   if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago';
+   return new Date(iso).toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+ }
+ function reelCard(){
+   if(!data)return '';
+   var r=data.reel||{},n=data.moments.length,adm=data.canReel,withPhotos=data.moments.some(function(m){return m.photos.some(function(p){return p.kind==='image'})});
+   var when=new Date(data.reelAt).toLocaleString('en-CA',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Edmonton'});
+   var btn=adm&&withPhotos&&r.status!=='building'?'<button type="button" class="mm-post" id="mmMakeReel">'+(r.status==='ready'?'Make it again':'Make the reel now')+'</button>':'';
+   if(r.status==='ready'&&r.url)return '<div class="mm-reel-card"><h3>The trip reel</h3><p>'+(r.slides||0)+' shots from '+(r.moments||n)+' moments, about '+(r.seconds||0)+' seconds.'+(r.immichId?' It\u2019s in the album too.':'')+'</p>'
+     +'<video controls playsinline preload="metadata" src="'+e(r.url)+'"></video>'+btn
+     +(navigator.share?'<button type="button" class="mm-share" id="mmShareReel">Share</button>':'')+'</div>';
+   if(r.status==='building'){var pct=r.slides?Math.round(100*(r.done||0)/r.slides):0;
+     return '<div class="mm-reel-card"><h3>Making the reel…</h3><p>'+(r.done||0)+' of '+(r.slides||0)+' shots cut. This page updates by itself.</p><div class="mm-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><span style="width:'+pct+'%"></span></div></div>';}
+   if(r.status==='failed')return '<div class="mm-reel-card"><h3>The reel didn\u2019t make it</h3><p>'+e(r.error||'Something went wrong.')+'</p>'+btn+'</div>';
+   return '<div class="mm-reel-card"><h3>The trip reel</h3><p>When the trip ends ('+e(when)+'), every moment with a photo gets cut into one reel. '+n+(n===1?' moment':' moments')+' so far.</p>'+btn+'</div>';
+ }
+ function card(m){
+   var ph=m.photos.length?'<div class="mm-photos'+(m.photos.length===1?' one':'')+'">'+m.photos.map(function(p,i){
+     return p.kind==='video'?'<button type="button" tabindex="-1"><video src="'+e(p.url)+'" controls playsinline preload="metadata"></video></button>'
+       :'<button type="button" data-full="'+e(p.url)+'" aria-label="Open photo '+(i+1)+' of '+m.photos.length+'"><img loading="lazy" src="'+e(p.thumb)+'" alt=""></button>';
+   }).join('')+'</div>':'';
+   return '<article class="mm-card" data-id="'+e(m.id)+'"><div class="mm-head"><span class="mm-av" aria-hidden="true">'+e((m.by||'?').charAt(0).toUpperCase())+'</span>'
+     +'<span><span class="mm-who">'+e(m.by)+'</span><br><span class="mm-when"><time datetime="'+e(m.at)+'">'+e(ago(m.at))+'</time></span></span>'
+     +(m.mine?'<button type="button" class="mm-del" data-del="'+e(m.id)+'">Delete</button>':'')+'</div>'
+     +(m.text?'<p class="mm-text">'+e(m.text)+'</p>':'')+ph
+     +'<div class="mm-foot"><button type="button" class="mm-like" data-like="'+e(m.id)+'" aria-pressed="'+(m.liked?'true':'false')+'" aria-label="'+(m.liked?'Unlike':'Like')+', '+m.likes+(m.likes===1?' like':' likes')+'">'
+     +(m.liked?'\u2665':'\u2661')+' <span>'+m.likes+'</span></button>'
+     +(navigator.share?'<button type="button" class="mm-share" data-share="'+e(m.id)+'">Share</button>':'')+'</div></article>';
+ }
+ function render(){
+   if(!data)return;
+   count.textContent=data.moments.length;
+   reelEl.innerHTML=reelCard();
+   feed.innerHTML=data.moments.map(card).join('');
+   empty.hidden=data.moments.length>0;
+   var sr=document.getElementById('mmShareReel');
+   if(sr)sr.addEventListener('click',function(){ shareFiles('reel',[data.reel.url],'CRCMZ Trip reel','The CRCMZ BOYZ Calgary trip',sr); });
+   var mk=document.getElementById('mmMakeReel');
+   if(mk)mk.addEventListener('click',function(){
+     mk.disabled=true;
+     api('/api/moments/reel',{method:'POST'}).then(function(){load(true);}).catch(function(err){mk.disabled=false;say(err.message);});
+   });
+   clearTimeout(pollT);
+   if(data.reel&&data.reel.status==='building')pollT=setTimeout(function(){load(true);},5000);
+ }
+ function load(force){
+   if(loading||(data&&!force))return; loading=true;
+   api('/api/moments',{headers:{'Accept':'application/json'}})
+     .then(function(j){ data=j; loading=false; render(); if(status.textContent==='The feed couldn\u2019t load. Tap Refresh.')say(''); })
+     .catch(function(err){ loading=false; if(err.message!=='auth')say('The feed couldn\u2019t load. Tap Refresh.'); });
+ }
+ function canPost(){ post.disabled=posting||(!text.value.trim()&&!files.length); }
+ function showPreviews(){
+   prev.innerHTML=files.map(function(f){
+     return /^image\//.test(f.type)?'<img alt="" src="'+URL.createObjectURL(f)+'">':'<span class="mm-vid">video</span>';
+   }).join('');
+   canPost();
+ }
+ text.addEventListener('input',canPost);
+ /* From the share sheet: put the shared photos (and any text) in the composer. */
+ window.__momentsCompose=function(fs,t){
+   files=files.concat(fs||[]).slice(0,10);
+   if(t&&!text.value.trim())text.value=t;
+   showPreviews(); text.focus();
+ };
+ input.addEventListener('change',function(){
+   var add=Array.prototype.slice.call(input.files||[]); input.value='';
+   files=files.concat(add).slice(0,10);
+   if(add.length&&files.length===10)say('Up to 10 photos in one moment.');
+   showPreviews();
+ });
+ document.getElementById('mmCompose').addEventListener('submit',function(ev){
+   ev.preventDefault(); if(post.disabled)return;
+   var fd=new FormData(); fd.append('text',text.value.trim());
+   files.forEach(function(f){fd.append('photos',f);});
+   posting=true; canPost(); say(files.length?'Posting '+files.length+(files.length===1?' photo…':' photos…'):'Posting…');
+   api('/api/moments',{method:'POST',body:fd})
+     .then(function(){ text.value=''; files=[]; prev.innerHTML=''; say('Posted.'); setTimeout(function(){ if(status.textContent==='Posted.')say(''); },2500); load(true); })
+     .catch(function(err){ if(err.message!=='auth')say(err.message); })
+     .then(function(){ posting=false; canPost(); });
+ });
+ feed.addEventListener('click',function(ev){
+   var t=ev.target.closest&&ev.target.closest('[data-like],[data-del],[data-full],[data-share]'); if(!t)return;
+   if(t.hasAttribute('data-share')){
+     var sm=data.moments.find(function(x){return x.id===t.getAttribute('data-share')}); if(!sm)return;
+     shareFiles('m:'+sm.id,sm.photos.slice(0,4).map(function(p){return p.url}),'CRCMZ Trip \u00b7 '+sm.by,(sm.text||'')+(sm.text?'\n':'')+'\u2014 '+sm.by+', CRCMZ BOYZ Calgary',t);
+     return;
+   }
+   if(t.hasAttribute('data-full')){ lbImg.src=t.getAttribute('data-full'); lb.hidden=false; document.getElementById('mmLbClose').focus(); return; }
+   if(t.hasAttribute('data-del')){
+     if(!confirm('Delete this moment? Its photos stay in the album.'))return;
+     api('/api/moments/'+encodeURIComponent(t.getAttribute('data-del')),{method:'DELETE'}).then(function(){load(true);}).catch(function(err){say(err.message);});
+     return;
+   }
+   var id=t.getAttribute('data-like'); t.disabled=true;
+   api('/api/moments/'+encodeURIComponent(id)+'/like',{method:'POST'})
+     .then(function(j){ var m=data.moments.find(function(x){return x.id===id}); if(m){m.likes=j.likes;m.liked=j.liked;} render(); })
+     .catch(function(err){ t.disabled=false; say(err.message); });
+ });
+ /* Share (the phone's share sheet): the photos or the reel as files where the phone takes
+    files, else the words. Fetching them can outlast the tap the browser needs to open the
+    share sheet; then they're kept, and the next tap shares straight away. */
+ var shareReady={};
+ function shareFiles(key,urls,title,txt,btn){
+   function go(fs){
+     var payload={title:title,text:txt};
+     if(fs&&fs.length&&navigator.canShare&&navigator.canShare({files:fs}))payload.files=fs;
+     return navigator.share(payload).then(function(){ btn.textContent='Share'; })
+       .catch(function(err){ if(err&&err.name==='AbortError'){btn.textContent='Share';return;} btn.textContent='Tap again to share'; });
+   }
+   if(shareReady[key])return go(shareReady[key]);
+   if(!urls.length)return go([]);
+   btn.textContent='Getting it ready…';
+   Promise.all(urls.map(function(u,i){
+     return fetch(u).then(function(r){ if(!r.ok)throw new Error('fetch'); return r.blob(); }).then(function(bl){
+       var ext=/video/.test(bl.type)?'mp4':'jpg';
+       return new File([bl],(key==='reel'?'crcmz-trip-reel':'crcmz-moment-'+(i+1))+'.'+ext,{type:bl.type||(ext==='mp4'?'video/mp4':'image/jpeg')});
+     });
+   })).then(function(fs){ shareReady[key]=fs; return go(fs); })
+     .catch(function(){ btn.textContent='Share'; go([]); });
+ }
+ function closeLb(){ lb.hidden=true; lbImg.removeAttribute('src'); }
+ document.getElementById('mmLbClose').addEventListener('click',closeLb);
+ lb.addEventListener('click',function(ev){ if(ev.target===lb)closeLb(); });
+ document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'&&!lb.hidden)closeLb(); });
+ document.getElementById('mmRefresh').addEventListener('click',function(){load(true);});
+ document.addEventListener('viewchange',function(ev){ if(ev.detail==='moments')load(true); else clearTimeout(pollT); });
+ if((location.hash||'')==='#moments')load(true);
+})();
+</script>
+<script>
+/* ================= Share to CRCMZ Trip =================
+   The installed app is a target in the phone's share sheet (manifest share_target); the
+   service worker keeps what was shared and opens /?shared=1. Here: receipts (Split) or
+   a moment? Then the files go to that screen and the share is cleared. */
+(function(){
+ if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); }); }
+ var q=new URLSearchParams(location.search),flag=q.get('shared'); if(!flag)return;
+ history.replaceState(null,'',location.pathname+location.hash);
+ var ask=document.getElementById('shareAsk'); if(!ask)return;
+ function open(){ ask.hidden=false; document.body.style.overflow='hidden'; }
+ function close(){ ask.hidden=true; document.body.style.overflow=''; }
+ ask.addEventListener('click',function(ev){ if(ev.target.getAttribute('data-close'))close(); });
+ function note(t){
+   document.getElementById('shareAskSub').textContent=t;
+   document.getElementById('shareAsReceipts').hidden=true; document.getElementById('shareAsMoment').hidden=true; open();
+ }
+ if(flag!=='1'||!window.caches){ note(flag==='nosw'?'That share arrived before the app was ready. Share it again.':'That share didn\u2019t come through. Share it again.'); return; }
+ caches.open('crcmz-share').then(function(c){
+   return c.match('/__shared/list').then(function(r){ return r?r.json():null; }).then(function(list){
+     if(!list||!list.files||!list.files.length){ note('Nothing came through. Share it again.'); return; }
+     return Promise.all(list.files.map(function(k){ return c.match(k).then(function(r){
+       return r.blob().then(function(b){ return new File([b],decodeURIComponent(r.headers.get('x-name')||'shared.jpg'),{type:b.type}); });
+     }); })).then(function(fs){
+       Promise.all(list.files.concat(['/__shared/list']).map(function(k){return c.delete(k);})).catch(function(){});
+       var imgs=fs.filter(function(f){return /^image\//.test(f.type)});
+       document.getElementById('shareAskSub').textContent='You shared '+fs.length+(fs.length===1?' photo':' photos')+'. Where do they go?';
+       document.getElementById('shareAskThumbs').innerHTML=imgs.slice(0,8).map(function(f){return '<img alt="" src="'+URL.createObjectURL(f)+'">'}).join('');
+       document.getElementById('shareAsReceipts').hidden=!imgs.length;
+       document.getElementById('shareAsReceipts').textContent=imgs.length>1?('Receipts \u2192 Split ('+imgs.length+')'):'Receipt \u2192 Split';
+       document.getElementById('shareAsReceipts').onclick=function(){ close(); location.hash='split'; setTimeout(function(){ if(window.spScanFiles)window.spScanFiles(imgs); },120); };
+       document.getElementById('shareAsMoment').onclick=function(){ close(); location.hash='moments'; setTimeout(function(){ if(window.__momentsCompose)window.__momentsCompose(fs.slice(0,10),list.text||''); },120); };
+       open();
+     });
+   });
+ }).catch(function(){ note('That share didn\u2019t come through. Share it again.'); });
+})();
+</script>
+<script>
 /* ================= V3 tab views =================
    Single-document app shell: five views, hash-deep-linkable.
    #food / #photos / #split / #fifa open that view at the top;
    section hashes (#stay, #days) land on Home, scrolled there. */
-var V3_VIEWS=['home','food','photos','split','tourney','buds','poll','pack','admin'];
+var V3_VIEWS=['home','food','photos','moments','split','tourney','buds','poll','pack','admin'];
 var cineEl=document.getElementById('cinematic');
 function showView(name){
  document.body.classList.add('switching');
@@ -6152,6 +6474,7 @@ function openSpSheet(){
  document.getElementById('spReceiptThumb').hidden=true;
  document.getElementById('spReceiptRemove').hidden=true;
  document.getElementById('spReceiptInput').value='';
+ var sn=document.getElementById('spScanNote'); if(sn){sn.textContent='';sn.className='sh-scan';}
  renderSpSheet();
  spSheetEl.classList.remove('closing'); spSheetEl.hidden=false; document.body.style.overflow='hidden';
 }
@@ -6175,6 +6498,9 @@ if(spSheetEl){
  });
  document.getElementById('spReceiptInput').addEventListener('change',function(ev){
    var f=ev.target.files&&ev.target.files[0]; if(!f)return;
+   spUseReceipt(f,!spDraft||!spDraft.cents);
+ });
+ function spUseReceipt(f,scan){
    var rd=new FileReader();
    rd.onload=function(){
      var img=new Image();
@@ -6184,16 +6510,182 @@ if(spSheetEl){
        cv.width=Math.round(img.width*scale); cv.height=Math.round(img.height*scale);
        cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
        try{spDraft.receiptPreview=cv.toDataURL('image/jpeg',0.82);}catch(e){spDraft.receiptPreview=null;}
-       if(cv.toBlob){cv.toBlob(function(b){spDraft.receiptBlob=b;},'image/jpeg',0.82);}
+       if(cv.toBlob){cv.toBlob(function(b){spDraft.receiptBlob=b; if(scan&&b)spScanReceipt(b);},'image/jpeg',0.82);}
        var th=document.getElementById('spReceiptThumb');
        if(spDraft.receiptPreview){th.src=spDraft.receiptPreview;th.hidden=false;document.getElementById('spReceiptRemove').hidden=false;}
      };
+     img.onerror=function(){ spScanNote("That photo couldn't be opened here. Try a JPEG, or type the amount in.",'bad'); };
      img.src=rd.result;
    };
    rd.readAsDataURL(f);
+ }
+ /* Scan receipt: the server's vision model reads the total, currency and place, and the
+    sheet fills in (you as payer, split equally). Nothing saves until Save expense. */
+ function spScanNote(t,cls){ var el=document.getElementById('spScanNote'); if(!el)return; el.textContent=t||''; el.className='sh-scan'+(cls?' '+cls:''); }
+ function spScanReceipt(blob){
+   var mine=spDraft; spScanNote('Reading the receipt…');
+   var fd=new FormData(); fd.append('receipt',blob,'receipt.jpg');
+   fetch('/api/receipts/scan',{method:'POST',body:fd})
+     .then(function(r){ if(r.status===401){location.href='/auth/login';throw new Error('auth');} return r.json().then(function(j){ if(!r.ok)throw new Error((j&&j.error)||'Could not read that receipt.'); return j; }); })
+     .then(function(j){
+       if(spDraft!==mine)return;
+       if(spDraft.cents){ spScanNote('Receipt says '+(j.currency==='USD'?'US$':'$')+spRegisterFormat(j.cents)+'. Your amount was kept.'); return; }
+       spDraft.cents=j.cents;
+       if(j.currency)spDraft.currency=j.currency;
+       document.getElementById('spAmtInput').value=spRegisterFormat(j.cents);
+       var desc=document.getElementById('spDesc');
+       if(!desc.value.trim())desc.value=[j.merchant,j.summary].filter(Boolean).join(' · ').slice(0,80);
+       renderSpSheet();
+       spScanNote(j.otherCurrency?('The receipt looks like it\u2019s in '+j.otherCurrency+'. Put the amount in CAD or USD before saving.')
+         :('Read off the receipt'+(j.merchant?' from '+j.merchant:'')+'. Check the amount, then save.'),j.otherCurrency?'bad':'ok');
+     })
+     .catch(function(e){ if(e&&e.message==='auth')return; if(spDraft===mine)spScanNote(e.message,'bad'); });
+ }
+ document.getElementById('spScanBtn').addEventListener('click',function(){ document.getElementById('spScanInput').click(); });
+ document.getElementById('spScanInput').addEventListener('change',function(ev){
+   var fs=Array.prototype.slice.call(ev.target.files||[]); ev.target.value=''; spScanFiles(fs);
+ });
+ /* One receipt: the Add expense sheet, filled in. Several: the batch sheet. */
+ window.spScanFiles=function(fs){
+   fs=fs.filter(function(f){return /^image\//.test(f.type||'')||/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name||'')});
+   if(!fs.length)return;
+   if(fs.length===1){ openSpSheet(); spUseReceipt(fs[0],true); return; }
+   spBatchOpen(fs);
+ };
+ /* ---------- Scan receipts: several at once ----------
+    Read two at a time (the AI server takes two at once), smallest first so results start
+    coming in quickly; listed in the order they were picked. Every amount can be fixed
+    before anything is saved; Add saves them one after another, each with its receipt. */
+ var spBatchEl=document.getElementById('spBatch'),spB=null;
+ function spShrink(file){
+   return new Promise(function(res,rej){
+     var rd=new FileReader();
+     rd.onerror=function(){rej(new Error('That photo couldn\u2019t be opened.'));};
+     rd.onload=function(){
+       var img=new Image();
+       img.onerror=function(){rej(new Error('That photo couldn\u2019t be opened here. Try a JPEG.'));};
+       img.onload=function(){
+         var sc=Math.min(1,1400/Math.max(img.width,img.height)),cv=document.createElement('canvas');
+         cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
+         cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+         var prev=''; try{prev=cv.toDataURL('image/jpeg',0.6);}catch(e){}
+         cv.toBlob(function(b){ b?res({blob:b,preview:prev}):rej(new Error('That photo couldn\u2019t be opened.')); },'image/jpeg',0.82);
+       };
+       img.src=rd.result;
+     };
+     rd.readAsDataURL(file);
+   });
+ }
+ function spScanBlob(blob){
+   var fd=new FormData(); fd.append('receipt',blob,'receipt.jpg');
+   return fetch('/api/receipts/scan',{method:'POST',body:fd}).then(function(r){
+     if(r.status===401){location.href='/auth/login';throw new Error('auth');}
+     return r.json().then(function(j){ if(!r.ok)throw new Error((j&&j.error)||'Could not read that receipt.'); return j; });
+   });
+ }
+ function spBatchOpen(files){
+   spFetchMe();
+   spB={payer:spMePerson,running:0,saving:false,items:files.slice(0,30).map(function(f,i){
+     return {i:i,file:f,size:f.size||0,state:'queued',cents:0,currency:null,desc:'',blob:null,note:''};
+   })};
+   var list=document.getElementById('spBatchList');
+   list.innerHTML=spB.items.map(function(it){
+     return '<div class="spb-row" data-i="'+it.i+'"><img class="sh-receipt-thumb" alt="Receipt '+(it.i+1)+'" hidden>'
+       +'<div class="spb-main"><input class="sh-desc" type="text" maxlength="80" placeholder="What was it?" aria-label="Receipt '+(it.i+1)+' description">'
+       +'<div class="spb-amt"><span class="spb-sym">$</span><input type="text" inputmode="numeric" placeholder="0.00" aria-label="Receipt '+(it.i+1)+' amount">'
+       +'<button type="button" class="spb-cur" aria-label="Currency">CAD</button></div><p class="spb-state" aria-live="polite">Waiting…</p></div>'
+       +'<button type="button" class="sh-mini-btn danger spb-x" aria-label="Leave receipt '+(it.i+1)+' out">\u2715</button></div>';
+   }).join('');
+   spB.items.forEach(function(it){
+     var row=list.querySelector('[data-i="'+it.i+'"]');
+     it.row=row;
+     var desc=row.querySelector('.sh-desc'),amt=row.querySelector('.spb-amt input'),cur=row.querySelector('.spb-cur');
+     desc.addEventListener('input',function(){it.desc=desc.value;it.descTouched=true;});
+     amt.addEventListener('input',function(){it.cents=spParseMoney(amt.value);amt.value=spRegisterFormat(it.cents);it.amtTouched=true;spBatchRender();});
+     cur.addEventListener('click',function(){it.currency=(it.currency||spBatchHome())==='USD'?'CAD':'USD';spBatchRender();});
+     row.querySelector('.spb-x').addEventListener('click',function(){it.state='removed';row.remove();spBatchRender();});
+   });
+   spBatchRender();
+   spBatchEl.classList.remove('closing'); spBatchEl.hidden=false; document.body.style.overflow='hidden';
+   spBatchPump();
+ }
+ function spBatchHome(){ return (spB&&SP_HOME[spB.payer])||'CAD'; }
+ function spBatchPump(){
+   if(!spB)return;
+   var b=spB;
+   while(b.running<2){
+     var next=b.items.filter(function(x){return x.state==='queued'}).sort(function(a,c){return a.size-c.size})[0];
+     if(!next)break;
+     b.running++; next.state='reading'; spBatchRender();
+     (function(it){
+       spShrink(it.file).then(function(r){
+         it.blob=r.blob;
+         var th=it.row&&it.row.querySelector('img'); if(th&&r.preview){th.src=r.preview;th.hidden=false;}
+         return spScanBlob(r.blob);
+       }).then(function(j){
+         if(it.state==='removed')return;
+         if(!it.amtTouched)it.cents=j.cents;
+         if(j.currency)it.currency=j.currency;
+         if(!it.descTouched)it.desc=[j.merchant,j.summary].filter(Boolean).join(' \u00b7 ').slice(0,80);
+         it.note=j.otherCurrency?('In '+j.otherCurrency+'? Put it in CAD or USD.'):(j.merchant?'Read from '+j.merchant:'Read off the receipt');
+         it.state='ready';
+       }).catch(function(e){
+         if(e&&e.message==='auth')return;
+         if(it.state!=='removed'){ it.state='failed'; it.note=(e&&e.message)||'Couldn\u2019t read it. Type the amount.'; }
+       }).then(function(){ b.running--; if(spB===b){ spBatchRender(); spBatchPump(); } });
+     })(next);
+   }
+ }
+ function spBatchRender(){
+   if(!spB)return;
+   var live=spB.items.filter(function(x){return x.state!=='removed'});
+   var read=live.filter(function(x){return x.state==='ready'||x.state==='failed'||x.state==='added'}).length;
+   var ready=live.filter(function(x){return x.cents>0&&x.blob&&x.state!=='added'&&x.state!=='reading'&&x.state!=='queued'});
+   document.getElementById('spBatchTitle').textContent=live.length+(live.length===1?' receipt':' receipts');
+   document.getElementById('spBatchSub').textContent=read<live.length?('Reading '+read+' of '+live.length+'…'):'All read. Check the amounts, then add them.';
+   document.getElementById('spBatchPayer').innerHTML=SP_PEOPLE.map(function(p){
+     return '<button type="button" class="p-chip'+(spB.payer===p?' on':'')+'" data-bpayer="'+p+'">'+spAvatar(p)+esc(p)+(p===spMePerson?'<span class="p-share">you</span>':'')+'</button>';
+   }).join('');
+   document.querySelectorAll('#spBatchPayer [data-bpayer]').forEach(function(btn){
+     btn.addEventListener('click',function(){spB.payer=btn.getAttribute('data-bpayer');spBatchRender();});
+   });
+   live.forEach(function(it){
+     var row=it.row; if(!row)return;
+     var desc=row.querySelector('.sh-desc'),amt=row.querySelector('.spb-amt input'),st=row.querySelector('.spb-state'),cur=it.currency||spBatchHome();
+     if(document.activeElement!==desc&&desc.value!==it.desc)desc.value=it.desc;
+     if(document.activeElement!==amt)amt.value=it.cents?spRegisterFormat(it.cents):'';
+     row.querySelector('.spb-cur').textContent=cur; row.querySelector('.spb-sym').textContent=cur==='USD'?'US$':'$';
+     st.textContent=it.state==='queued'?'Waiting…':it.state==='reading'?'Reading…':it.state==='added'?'Added \u2713':it.note;
+     st.className='spb-state'+(it.state==='failed'?' bad':'');
+     row.classList.toggle('added',it.state==='added');
+   });
+   var btn=document.getElementById('spBatchSave');
+   btn.disabled=spB.saving||!spB.payer||!ready.length;
+   if(!spB.saving)btn.textContent=ready.length?('Add '+ready.length+(ready.length===1?' expense':' expenses')):'Add expenses';
+ }
+ function closeSpBatch(){ if(spBatchEl.hidden)return; spBatchEl.hidden=true; document.body.style.overflow=''; spB=null; }
+ spBatchEl.addEventListener('click',function(ev){ if(ev.target.getAttribute('data-close'))closeSpBatch(); });
+ document.getElementById('spBatchSave').addEventListener('click',function(){
+   if(!spB||spB.saving)return;
+   var b=spB,btn=this,todo=b.items.filter(function(x){return x.state!=='removed'&&x.state!=='added'&&x.cents>0&&x.blob&&x.state!=='reading'&&x.state!=='queued'});
+   b.saving=true; spBatchRender();
+   var n=0,failed=0;
+   todo.reduce(function(p,it){
+     return p.then(function(){
+       btn.textContent='Adding '+(++n)+' of '+todo.length+'…';
+       return spAddExpense({payer:b.payer,desc:(it.desc||'').trim()||'Receipt',currency:it.currency||spBatchHome(),origCents:it.cents,
+         mode:'equal',parts:SP_PEOPLE.slice(),pct:{},exact:{},receiptBlob:it.blob})
+         .then(function(){it.state='added';spBatchRender();})
+         .catch(function(e){ if(e&&e.message==='auth')throw e; failed++; it.state='failed'; it.note='Couldn\u2019t save this one. Try again.'; });
+     });
+   },Promise.resolve()).then(function(){
+     b.saving=false; spFetchLedger();
+     if(!failed){ btn.textContent='ADDED \u2713'; setTimeout(function(){ if(spB===b)closeSpBatch(); },700); }
+     else spBatchRender();
+   }).catch(function(){ b.saving=false; });
  });
  document.getElementById('spReceiptRemove').addEventListener('click',function(){
-   spDraft.receiptBlob=null; spDraft.receiptPreview=null;
+   spDraft.receiptBlob=null; spDraft.receiptPreview=null; spScanNote('');
    document.getElementById('spReceiptThumb').hidden=true;
    document.getElementById('spReceiptRemove').hidden=true;
    document.getElementById('spReceiptInput').value='';
