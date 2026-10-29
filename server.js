@@ -1180,11 +1180,11 @@ Return ONLY a valid JSON object with no explanation or markdown:
   const PREVIEW_BOTS = /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|linkedinbot|pinterest|redditbot|skypeuripreview|meta-externalagent/i;
   const PREVIEW_HTML = '<!doctype html><html><head><meta charset="utf-8">'
     + '<title>CRCMZ BOYZ — Calgary Trip</title>'
-    + '<meta name="description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta name="description" content="Oct 29 – Nov 1, 2026 · Southeast Calgary. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
     + '<meta property="og:type" content="website">'
     + '<meta property="og:url" content="https://trip.crcmz.me/">'
     + '<meta property="og:title" content="CRCMZ BOYZ — Calgary Trip">'
-    + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Southeast Calgary. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
     + '<meta property="og:image" content="https://trip.crcmz.me/og-image.jpg">'
     + '<meta property="og:image:type" content="image/jpeg">'
     + '<meta property="og:image:width" content="1200">'
@@ -1732,7 +1732,16 @@ document.addEventListener('keydown', function(e) {
       const mapAttr = (p) => (p.authorAttributions
         ? p.authorAttributions.map((a) => ({ author: a.displayName || '', authorUri: a.uri || '' }))
         : []);
-      const photos = rawPhotos.map((p) => ({ name: p.name, attributions: mapAttr(p) }));
+      const photos = rawPhotos.map((p) => ({
+        name: p.name,
+        attributions: mapAttr(p),
+        // Pixel dims ride along (additive): the client picks the
+        // first landscape photo as the card gallery's opening slide
+        // (food/interior shots skew landscape; storefront openers
+        // skew portrait). Names themselves stay server-side.
+        widthPx: p.widthPx || 0,
+        heightPx: p.heightPx || 0,
+      }));
       const idx = venue.photoIndex < photos.length ? venue.photoIndex : 0;
       const photo = photos[idx] || null;
       const details = {
@@ -1768,6 +1777,11 @@ document.addEventListener('keydown', function(e) {
       photoCount: d.photoCount,
       photoIndex: d.photoIndex,
       photoAttributions: d.photos.map((p) => p.attributions),
+      // Per-index pixel dims, aligned with photoAttributions and the
+      // ?n= indexes of /api/places/photo (additive; older consumers
+      // ignore it). Lets the client open galleries on the first
+      // landscape photo instead of the storefront default.
+      photoDims: d.photos.map((p) => ({ w: p.widthPx || 0, h: p.heightPx || 0 })),
     };
   }
   app.get('/api/places/meta', requireAuth, async (req, res) => {
