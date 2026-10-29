@@ -1180,11 +1180,11 @@ Return ONLY a valid JSON object with no explanation or markdown:
   const PREVIEW_BOTS = /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|discordbot|slackbot|linkedinbot|pinterest|redditbot|skypeuripreview|meta-externalagent/i;
   const PREVIEW_HTML = '<!doctype html><html><head><meta charset="utf-8">'
     + '<title>CRCMZ BOYZ — Calgary Trip</title>'
-    + '<meta name="description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta name="description" content="Oct 29 – Nov 1, 2026 · Southeast Calgary. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
     + '<meta property="og:type" content="website">'
     + '<meta property="og:url" content="https://trip.crcmz.me/">'
     + '<meta property="og:title" content="CRCMZ BOYZ — Calgary Trip">'
-    + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Bayside, Airdrie. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
+    + '<meta property="og:description" content="Oct 29 – Nov 1, 2026 · Southeast Calgary. Itinerary, halal food guide, photo wall, expense split and the FC 27 tournament.">'
     + '<meta property="og:image" content="https://trip.crcmz.me/og-image.jpg">'
     + '<meta property="og:image:type" content="image/jpeg">'
     + '<meta property="og:image:width" content="1200">'

@@ -2506,7 +2506,7 @@ flash of Home. The router clears the tag when it takes over. */
       <span class="photo-album-chevron" aria-hidden="true">›</span>
     </a>
     <p class="photo-note photo-status" id="photoStatus" aria-live="polite"></p>
-    <div id="photoWall"><div class="photo-day"><span>Today</span><span class="photo-day-count">5</span></div><div class="photo-grid"><a class="photo-tile" href="assets/stay.jpg" aria-label="The house — Bayside, Airdrie"><img src="assets/stay.jpg" alt="The house — Bayside, Airdrie" loading="lazy"></a><a class="photo-tile" href="assets/prev-food.jpg" aria-label="Dinner spread"><img src="assets/prev-food.jpg" alt="Dinner spread" loading="lazy"></a><a class="photo-tile" href="assets/prev-photos.jpg" aria-label="Wall starter pack"><img src="assets/prev-photos.jpg" alt="Wall starter pack" loading="lazy"></a><a class="photo-tile" href="assets/prev-split.jpg" aria-label="Receipts for the pot"><img src="assets/prev-split.jpg" alt="Receipts for the pot" loading="lazy"></a><a class="photo-tile" href="assets/fc-logo.jpg" aria-label="FC 27 — tournament night"><img src="assets/fc-logo.jpg" alt="FC 27 — tournament night" loading="lazy"></a></div></div>
+    <div id="photoWall"><div class="photo-day"><span>Today</span><span class="photo-day-count">5</span></div><div class="photo-grid"><a class="photo-tile" href="assets/stay/hero-day.jpg" aria-label="The house"><img src="assets/stay/hero-day.jpg" alt="The house" loading="lazy"></a><a class="photo-tile" href="assets/prev-food.jpg" aria-label="Dinner spread"><img src="assets/prev-food.jpg" alt="Dinner spread" loading="lazy"></a><a class="photo-tile" href="assets/prev-photos.jpg" aria-label="Wall starter pack"><img src="assets/prev-photos.jpg" alt="Wall starter pack" loading="lazy"></a><a class="photo-tile" href="assets/prev-split.jpg" aria-label="Receipts for the pot"><img src="assets/prev-split.jpg" alt="Receipts for the pot" loading="lazy"></a><a class="photo-tile" href="assets/fc-logo.jpg" aria-label="FC 27 — tournament night"><img src="assets/fc-logo.jpg" alt="FC 27 — tournament night" loading="lazy"></a></div></div>
     <p class="photo-empty" id="photoEmpty" style="display: none;">Nothing on the wall yet. First shot of the weekend goes here.</p>
     <button class="photo-fab" type="button" id="photoFab" aria-label="Add photos">+</button>
     <input type="file" id="photoInput" accept="image/*,video/*,.heic,.heif" multiple="" hidden="">
@@ -2998,9 +2998,9 @@ function renderHeroText(){
    lines are no longer part of the copy at all: each pass derives
    them from the flights store at render (see passFlightLines). */
 var PASS_META=[
- {route:'YVR \u2192 YYC',pill:'LANDS <b>1:59 PM</b>',foot:'SMART LOCK ENTRY',
+ {route:'YVR \u2192 YYC',pill:'LANDS <b>1:59 PM</b>',foot:'DOOR CODE ENTRY',
   dataCls:'wide3',
-  data:[['Flight','AC 212'],['Terminal','M'],['Check-in','4:00\u201311:00 PM']]},
+  data:[['Flight','AC 212'],['Terminal','M'],['Check-in','From 4:00 PM']]},
  {route:'IAH \u2192 YYC',pill:'LANDS <b>11:30 AM</b>',foot:'DAY-TWO PASS',
   dataCls:'mid3',
   data:[['Flight','WS 1541'],['From','Houston'],['Crew','Complete']]},
@@ -3009,7 +3009,7 @@ var PASS_META=[
   data:[['Feature','Street Fighter'],['After','Meetup'],['Quiet hrs','10 PM']]},
  {route:'YYC \u2192 IAH',pill:'DEPARTS <b>6:00 PM</b>',foot:'RETURN PASS',
   dataCls:'wide1',
-  data:[['Checkout','By 11:00 AM'],['Flight','WS 1540'],['To','Houston']]}
+  data:[['Checkout','By 9:00 AM'],['Flight','WS 1540'],['To','Houston']]}
 ];
 function passFill(b,title){
  if(b.indexOf('[TO FILL]')<0)return b;
