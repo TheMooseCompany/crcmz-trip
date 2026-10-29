@@ -1,4 +1,4 @@
-// places-venues.js - the 50 Food-guide venues for the Google Places photo
+// places-venues.js - the 136 Food-guide venues for the Google Places photo
 // pipeline (server.js, GET /api/places/photo + /api/places/meta).
 //
 // Extracted 2026-10-16 from the Food cards baked into public/index.html:
@@ -123,4 +123,34 @@ module.exports = [
   { slug: "lutador", name: "Lutador", address: "Kensington Calgary AB", searchQuery: "Lutador Kensington Calgary AB", photoIndex: 0 },
   { slug: "jungle-chicken", name: "Jungle Chicken", address: "3304 64 St NE Calgary AB", searchQuery: "Jungle Chicken 3304 64 St NE Calgary AB", photoIndex: 0 },
   { slug: "calgary-momo-house", name: "Calgary Momo House", address: "Crowfoot Calgary AB", searchQuery: "Calgary Momo House Crowfoot Calgary AB", photoIndex: 0 },
+  { slug: "the-bro-kin-yolk-mahogany", name: "The Bro'Kin Yolk — Mahogany", address: "7 Mahogany Plaza SE Calgary AB", searchQuery: "The Bro'Kin Yolk 7 Mahogany Plaza SE Calgary AB", photoIndex: 0 },
+  { slug: "red-s-diner-58th-ave", name: "Red's Diner — 58th Ave", address: "324 58 Ave SE Calgary AB", searchQuery: "Red's Diner 324 58 Ave SE Calgary AB", photoIndex: 0 },
+  { slug: "oeb-breakfast-co", name: "OEB Breakfast Co.", address: "2207 4 St SW Calgary AB", searchQuery: "OEB Breakfast Co 2207 4 St SW Calgary AB", photoIndex: 0 },
+  { slug: "blue-star-diner", name: "Blue Star Diner", address: "809 1 Ave NE Calgary AB", searchQuery: "Blue Star Diner 809 1 Ave NE Calgary AB", photoIndex: 0 },
+  { slug: "galaxie-diner", name: "Galaxie Diner", address: "1413 11 St SW Calgary AB", searchQuery: "Galaxie Diner 1413 11 St SW Calgary AB", photoIndex: 0 },
+  { slug: "the-beltliner", name: "The Beltliner", address: "243 12 Ave SW Calgary AB", searchQuery: "The Beltliner 243 12 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "chix-eggshop", name: "Chix Eggshop", address: "624 6 Ave SE Calgary AB", searchQuery: "Chix Eggshop 624 6 Ave SE Calgary AB", photoIndex: 0 },
+  { slug: "thompsons-kitchen-bar", name: "Thompsons Kitchen & Bar", address: "700 Centre St S Calgary AB", searchQuery: "Thompsons Kitchen & Bar 700 Centre St S Calgary AB", photoIndex: 0 },
+  { slug: "yellow-door-bistro", name: "Yellow Door Bistro", address: "119 12 Ave SW Calgary AB", searchQuery: "Yellow Door Bistro 119 12 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "pfanntastic-pannenkoek-haus", name: "Pfanntastic Pannenkoek Haus", address: "Crowchild Trail SW Calgary AB", searchQuery: "Pfanntastic Pannenkoek Haus Calgary AB", photoIndex: 0 },
+  { slug: "starbelly", name: "Starbelly", address: "19489 Seton Cres SE Calgary AB", searchQuery: "Starbelly 19489 Seton Cres SE Calgary AB", photoIndex: 0 },
+  { slug: "globefish-sushi-ramen-and-izakaya-seton", name: "Globefish Sushi, Ramen and Izakaya — Seton", address: "19587 Seton Cres SE Calgary AB", searchQuery: "Globefish Seton 19587 Seton Cres SE Calgary AB", photoIndex: 0 },
+  { slug: "chairman-s-steakhouse", name: "Chairman's Steakhouse", address: "2251 Mahogany Blvd SE Calgary AB", searchQuery: "Chairman's Steakhouse 2251 Mahogany Blvd SE Calgary AB", photoIndex: 0 },
+  { slug: "moti-mahal", name: "Moti Mahal", address: "240 Midpark Way SE Calgary AB", searchQuery: "Moti Mahal 240 Midpark Way SE Calgary AB", photoIndex: 0 },
+  { slug: "the-park-kitchen-bar", name: "The Park Kitchen & Bar", address: "163 Quarry Park Blvd SE Calgary AB", searchQuery: "The Park Kitchen & Bar 163 Quarry Park Blvd SE Calgary AB", photoIndex: 0 },
+  { slug: "bow-valley-ranche-restaurant", name: "Bow Valley Ranche Restaurant", address: "15979 Bow Bottom Trail SE Calgary AB", searchQuery: "Bow Valley Ranche Restaurant 15979 Bow Bottom Trail SE Calgary AB", photoIndex: 0 },
+  { slug: "the-lake-house", name: "The Lake House", address: "747 Lake Bonavista Dr SE Calgary AB", searchQuery: "The Lake House 747 Lake Bonavista Dr SE Calgary AB", photoIndex: 0 },
+  { slug: "sushi-ginza", name: "Sushi Ginza", address: "10816 Macleod Trl SE Calgary AB", searchQuery: "Sushi Ginza 10816 Macleod Trl SE Calgary AB", photoIndex: 0 },
+  { slug: "alloy", name: "Alloy", address: "220 42 Ave SE Calgary AB", searchQuery: "Alloy 220 42 Ave SE Calgary AB", photoIndex: 0 },
+  { slug: "ten-foot-henry", name: "Ten Foot Henry", address: "1209 1 St SW Calgary AB", searchQuery: "Ten Foot Henry 1209 1 St SW Calgary AB", photoIndex: 0 },
+  { slug: "bridgette-bar", name: "Bridgette Bar", address: "739 10 Ave SW Calgary AB", searchQuery: "Bridgette Bar 739 10 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "river-caf", name: "River Café", address: "Prince's Island Park Calgary AB", searchQuery: "River Café Prince's Island Park Calgary AB", photoIndex: 0 },
+  { slug: "deane-house", name: "Deane House", address: "806 9 Ave SE Calgary AB", searchQuery: "Deane House 806 9 Ave SE Calgary AB", photoIndex: 0 },
+  { slug: "native-tongues-taqueria", name: "Native Tongues Taqueria", address: "235 12 Ave SW Calgary AB", searchQuery: "Native Tongues Taqueria 235 12 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "fonda-fora", name: "Fonda Fora", address: "630 4 Ave SW Calgary AB", searchQuery: "Fonda Fora 630 4 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "anju", name: "Anju", address: "344 17 Ave SW Calgary AB", searchQuery: "Anju 344 17 Ave SW Calgary AB", photoIndex: 0 },
+  { slug: "nupo", name: "Nupo", address: "631 Confluence Way SE Calgary AB", searchQuery: "Nupo 631 Confluence Way SE Calgary AB", photoIndex: 0 },
+  { slug: "teatro", name: "Teatro", address: "200 8 Ave SE Calgary AB", searchQuery: "Teatro 200 8 Ave SE Calgary AB", photoIndex: 0 },
+  { slug: "mercato", name: "Mercato", address: "2224 4 St SW Calgary AB", searchQuery: "Mercato 2224 4 St SW Calgary AB", photoIndex: 0 },
+  { slug: "thai-sa-on", name: "Thai Sa-On", address: "351 10 Ave SW Calgary AB", searchQuery: "Thai Sa-On 351 10 Ave SW Calgary AB", photoIndex: 0 },
 ];
