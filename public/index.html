@@ -750,6 +750,14 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sh-remain{font-size:13.5px;font-weight:600;margin-top:8px;color:var(--paper-mut)}
 .sh-remain.ok{color:#33419A}
 .sh-remain.bad{color:var(--danger)}
+/* By-nights (equal mode): toggle row + per-participant night steppers */
+.sh-nights{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sh-nights-note{font-size:12.5px;color:var(--paper-mut)}
+.sh-nights-rows{margin-top:10px}
+.sh-step{display:flex;align-items:center;gap:7px}
+.sh-step button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line-d);background:var(--paper-card);color:var(--ink);font:inherit;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.sh-step-n{font-weight:600;font-size:13.5px;min-width:54px;text-align:center;font-variant-numeric:tabular-nums}
+.sh-step-share{font-weight:600;font-size:13.5px;color:var(--paper-mut);min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
 .sh-desc{width:100%;border:1px solid var(--line-d);background:var(--paper-card);border-radius:14px;padding:13px 15px;font:inherit;font-size:15.5px;color:var(--ink)}
 .sh-desc:focus{outline:2px solid var(--amber);outline-offset:0}
 .sh-receipt-row{display:flex;align-items:center;gap:12px}
@@ -5598,6 +5606,26 @@ function spPercentShares(total,pctMap){
    .forEach(function(r){ if(left>0){shares[r.p]++;left--;} });
  return shares;
 }
+function spNightsShares(total,parts,nightsMap){
+ /* By-nights equal split (Model A): pay per night stayed, weighted
+    equal. Each participant's share is proportional to their nights;
+    floors are reconciled by largest remainder (the spPercentShares
+    pattern, roster order breaking ties) so shares sum EXACTLY to
+    the total. parts arrives payer-free; nightsMap carries an entry
+    for every part (see spDraftNights). */
+ var rows=parts.map(function(p){return {p:p,w:Math.max(1,(nightsMap&&nightsMap[p])||1)};});
+ var W=rows.reduce(function(s,r){return s+r.w},0);
+ if(!W)return {};
+ var shares={},sum=0;
+ rows.forEach(function(r){
+   r.raw=total*r.w/W; r.fl=Math.floor(r.raw); r.frac=r.raw-r.fl;
+   shares[r.p]=r.fl; sum+=r.fl;
+ });
+ var left=total-sum;
+ rows.slice().sort(function(a,b){return (b.frac-a.frac)||(SP_PEOPLE.indexOf(a.p)-SP_PEOPLE.indexOf(b.p))})
+   .forEach(function(r){ if(left>0){shares[r.p]++;left--; } });
+ return shares;
+}
 function spExactConvert(totalCad,exactOrig,currency){
  if(currency!=='USD')return Object.assign({},exactOrig);
  var shares={},sum=0,largest=null;
@@ -5607,8 +5635,8 @@ function spExactConvert(totalCad,exactOrig,currency){
  if(largest!==null)shares[largest]+=totalCad-sum;
  return shares;
 }
-function spComputeShares(mode,totalCad,currency,parts,pctMap,exactOrig){
- if(mode==='equal')return spEqualShares(totalCad,parts);
+function spComputeShares(mode,totalCad,currency,parts,pctMap,exactOrig,nightsMap){
+ if(mode==='equal')return nightsMap?spNightsShares(totalCad,parts,nightsMap):spEqualShares(totalCad,parts);
  if(mode==='percent')return spPercentShares(totalCad,pctMap);
  return spExactConvert(totalCad,exactOrig,currency);
 }
@@ -5715,7 +5743,7 @@ function spAddExpense(input){
  var cad=input.currency==='USD'?spUsdToCad(input.origCents):input.origCents;
  var body={payer:input.payer,desc:input.desc||'Expense',amountCentsCAD:cad,
    currency:input.currency,origCents:input.origCents,fxRate:input.currency==='USD'?SP_FX:null,
-   splitMode:input.mode,shares:spComputeShares(input.mode,cad,input.currency,input.parts||[],input.pct||{},input.exact||{}),
+   splitMode:input.mode,shares:spComputeShares(input.mode,cad,input.currency,input.parts||[],input.pct||{},input.exact||{},input.nights||null),
    receipt:null};
  function post(){
    return fetch('/api/expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
@@ -6049,12 +6077,24 @@ if(spDetailEl){
 var spSheetEl=document.getElementById('spSheet');
 var spDraft=null;
 function spNewDraft(){
- var d={payer:null,payerTouched:false,currency:'CAD',cents:0,mode:'equal',parts:{},exact:{},pct:{},receiptBlob:null,receiptPreview:null};
+ var d={payer:null,payerTouched:false,currency:'CAD',cents:0,mode:'equal',parts:{},exact:{},pct:{},byNights:false,nights:{},receiptBlob:null,receiptPreview:null};
  SP_PEOPLE.forEach(function(p){d.parts[p]=true});
  return d;
 }
 function spDraftCad(){ return spDraft.currency==='USD'?spUsdToCad(spDraft.cents):spDraft.cents; }
 function spDraftPartsList(){ return SP_PEOPLE.filter(function(p){return spDraft.parts[p]&&p!==spDraft.payer}); }
+function spMaxNights(){ return Math.max(1,((typeof CONTENT!=='undefined'&&CONTENT.days)?CONTENT.days.length:4)-1); }
+function spDraftNights(parts){
+ /* Effective nights per participant: the stored stepper value when
+    valid, else the trip maximum (everyone stays every night until
+    told otherwise). Keys are exactly the (payer-free) parts list. */
+ var max=spMaxNights(),out={};
+ (parts||[]).forEach(function(p){
+   var n=spDraft&&spDraft.nights?spDraft.nights[p]:null;
+   out[p]=(typeof n==='number'&&n>=1&&n<=max)?n:max;
+ });
+ return out;
+}
 /* Payer exclusion (owner rule): the payer never appears in the SPLIT
    section and never receives a share of their own expense. Setting
    the payer strips their entries from every split map at once, so a
@@ -6103,13 +6143,42 @@ function renderSpSheet(){
  var body=document.getElementById('spSplitBody'),cad=spDraftCad();
  var others=SP_PEOPLE.filter(function(p){return p!==spDraft.payer});
  if(spDraft.mode==='equal'){
-   var parts=spDraftPartsList(),shares=spEqualShares(cad,parts);
-   body.innerHTML='<div class="sh-chips">'+others.map(function(p){
+   var parts=spDraftPartsList();
+   var shares=spDraft.byNights?spNightsShares(cad,parts,spDraftNights(parts)):spEqualShares(cad,parts);
+   var maxN=spMaxNights();
+   var html='<div class="sh-nights"><button type="button" class="p-chip'+(spDraft.byNights?' on':'')+'" data-nights-toggle="1">By nights<span class="p-share">'+(spDraft.byNights?'On':'Off')+'</span></button>'
+     +(spDraft.byNights?'<span class="sh-nights-note">Split by nights stayed, of '+maxN+'</span>':'')+'</div>';
+   html+='<div class="sh-chips">'+others.map(function(p){
      var on=!!spDraft.parts[p];
      return '<button type="button" class="p-chip'+(on?' on':'')+'" data-part="'+p+'">'+spAvatar(p)+esc(p)+(on?'<span class="p-share">'+spFmtCAD(shares[p]||0)+'</span>':'')+'</button>';
    }).join('')+'</div>';
+   if(spDraft.byNights&&parts.length){
+     var effN=spDraftNights(parts);
+     html+='<div class="sh-rows sh-nights-rows">'+parts.map(function(p){
+       return '<div class="sh-row"><span class="nm">'+spAvatar(p)+esc(p)+'</span>'
+        +'<span class="sh-step"><button type="button" data-ndec="'+p+'" aria-label="Fewer nights">&minus;</button>'
+        +'<span class="sh-step-n">'+effN[p]+(effN[p]===1?' night':' nights')+'</span>'
+        +'<button type="button" data-ninc="'+p+'" aria-label="More nights">+</button></span>'
+        +'<span class="sh-step-share">'+spFmtCAD(shares[p]||0)+'</span></div>';
+     }).join('')+'</div>';
+   }
+   body.innerHTML=html;
+   var nt=body.querySelector('[data-nights-toggle]');
+   if(nt)nt.addEventListener('click',function(){
+     spDraft.byNights=!spDraft.byNights;
+     if(spDraft.byNights){ var mx=spMaxNights(); spDraftPartsList().forEach(function(p){ if(typeof spDraft.nights[p]!=='number')spDraft.nights[p]=mx; }); }
+     renderSpSheet();
+   });
    body.querySelectorAll('[data-part]').forEach(function(b){
      b.addEventListener('click',function(){var p=b.getAttribute('data-part');spDraft.parts[p]=!spDraft.parts[p];renderSpSheet();});
+   });
+   body.querySelectorAll('[data-ndec],[data-ninc]').forEach(function(b){
+     b.addEventListener('click',function(){
+       var dec=b.hasAttribute('data-ndec'),p=b.getAttribute(dec?'data-ndec':'data-ninc'),mx=spMaxNights();
+       var cur=spDraftNights([p])[p];
+       spDraft.nights[p]=Math.max(1,Math.min(mx,cur+(dec?-1:1)));
+       renderSpSheet();
+     });
    });
  }else if(spDraft.mode==='exact'){
    body.innerHTML='<div class="sh-rows">'+others.map(function(p){
@@ -6233,7 +6302,8 @@ if(spSheetEl){
    var saveBtn=this; saveBtn.disabled=true;
    spAddExpense({payer:spDraft.payer,desc:document.getElementById('spDesc').value.trim()||'Expense',
      currency:spDraft.currency,origCents:spDraft.cents,mode:spDraft.mode,
-     parts:spDraftPartsList(),pct:spStripPayer(spDraft.pct,spDraft.payer),exact:spStripPayer(spDraft.exact,spDraft.payer),receiptBlob:spDraft.receiptBlob})
+     parts:spDraftPartsList(),pct:spStripPayer(spDraft.pct,spDraft.payer),exact:spStripPayer(spDraft.exact,spDraft.payer),
+    nights:spDraft.byNights?spDraftNights(spDraftPartsList()):null,receiptBlob:spDraft.receiptBlob})
    .then(function(){
      /* MicroKit letter-swap: the label re-deals letter-by-letter to
         ADDED ✓, holds a beat, then the sheet closes as before */
