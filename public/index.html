@@ -1943,8 +1943,7 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
         border-radius: 22px; overflow: hidden;
         border: 1px solid var(--line);
         background: var(--panel2);
-        box-shadow: 0 26px 55px rgba(2, 3, 10, 0.5);
-        will-change: transform, opacity;
+        box-shadow: 0 18px 34px rgba(2, 3, 10, 0.45);
         user-select: none; -webkit-user-select: none;
       }
       .car-slide img {
@@ -1955,10 +1954,9 @@ html.cv-ok .bud-tile{content-visibility:auto;contain-intrinsic-size:auto 224px}
       .car-slide figcaption {
         position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px);
         padding: 6px 12px; border-radius: 999px;
-        background: rgba(10, 12, 24, 0.62); color: #fff;
+        background: rgba(10, 12, 24, 0.74); color: #fff;
         font-family: var(--font-mono); font-size: 11px; font-weight: 500;
         letter-spacing: 0.14em; text-transform: uppercase;
-        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
         pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .carousel.snapping .car-slide {
@@ -2276,11 +2274,11 @@ flash of Home. The router clears the tag when it takes over. */
           <span class="rating" id="stayRating">★ 4.9 · 51 reviews</span>
           <span class="stay-phase-chip" id="stayPhaseChip">Oct 29 – Nov 1</span>
           <div class="scene-headlines" id="sceneHeadlines">
-            <h1 class="scene-headline" id="headlineDay"><span class="mask"><span class="hl-main">Pool by <em>day.</em></span></span>
-              <span class="mask mask-sub"><span class="hl-sub">The backyard at the stay, in the listing's own photos. Keep scrolling — the light changes.</span></span>
+            <h1 class="scene-headline" id="headlineDay"><span class="mask"><span class="hl-main"><em>Day.</em></span></span>
+              <span class="mask mask-sub"><span class="hl-sub">Keep scrolling</span></span>
             </h1>
-            <h1 class="scene-headline" id="headlineNight"><span class="mask"><span class="hl-main">Lights by <em>night.</em></span></span>
-              <span class="mask mask-sub"><span class="hl-sub">Same yard after dark: pool lit, pergola glowing, sauna on.</span></span>
+            <h1 class="scene-headline" id="headlineNight"><span class="mask"><span class="hl-main"><em>Night.</em></span></span>
+              <span class="mask mask-sub"><span class="hl-sub"></span></span>
             </h1>
           </div>
           <div class="stay-scrim"><div class="stay-scrim-main"><div class="stay-scrim-name">Southeast Calgary</div><div class="stay-scrim-sub">Mid-Winter Heated Pool | Hot Tub &amp; Sauna</div></div></div>
@@ -2388,7 +2386,7 @@ flash of Home. The router clears the tag when it takes over. */
           </div>
         </div>
         <div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">Thu, Oct 29 · from 4:00 PM</div><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1616136472222440742" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Sun, Nov 1 · by 9:00 AM</div><button type="button" class="btn stay-tile-btn" id="copyDetails">Copy details</button></div></div>
-        <div class="stay-warns"><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Quiet hours 10:00 PM – 8:00 AM</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No smoking, including vaping and e-cigarettes</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>No events or parties are allowed in this home</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Fire safety: take care to avoid false fire alarms, especially while cooking — a false alarm that dispatches the fire department makes guests responsible for city fines and penalties</span></div><div class="stay-warn"><span aria-hidden="true">⚠</span><span>Pool and hot tub have no gate or lock</span></div></div>
+        
         <details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>Up to 12 overnight guests</li><li>Pets allowed (1 maximum)</li><li>No commercial photography or filming</li></ul><div class="amenities"><span>Heated pool + slide</span><span>Hot tub</span><span>Sauna</span><span>Cold plunge</span><span>BBQ</span><span>Pergola deck with fireplace</span><span>Game room</span><span>Home theatre</span><span>Pool table</span><span>Trampoline</span></div><p>Before checkout: if the Sauna, Cold Plunge, or BBQ was used, leave it in the condition you found it. If the garbage bin is full, place any extra garbage behind the door next to the garbage bins.</p><p class="host-line">Hosted by <b>Geo · Superhost</b></p></details>
       </div>
     </div>
@@ -3189,7 +3187,6 @@ function renderStay(){
   +'<div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">'+cEsc(s.checkIn)+'</div><a class="btn primary stay-tile-btn" href="'+cEsc(s.airbnbUrl)+'" target="_blank" rel="noopener">Open listing</a></div>'
   +'<div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">'+cEsc(s.checkOut)+'</div><button type="button" class="btn stay-tile-btn" id="copyDetails">Copy details</button></div>'
   +'</div>'
-  +(s.warns&&s.warns.length?'<div class="stay-warns">'+s.warns.map(function(r){return '<div class="stay-warn"><span aria-hidden="true">\u26a0</span><span>'+cEsc(r)+'</span></div>'}).join('')+'</div>':'')
   +'<details class="house-details"><summary>House rules &amp; amenities</summary>'
   +(s.rules&&s.rules.length?'<ul class="rules">'+s.rules.map(function(r){return '<li>'+cEsc(r)+'</li>'}).join('')+'</ul>':'')
   +'<div class="amenities">'+(s.amenities||[]).map(function(a){return '<span>'+cEsc(a)+'</span>'}).join('')+'</div>'
@@ -8572,6 +8569,8 @@ window.__stayCarInit = function () {
       }
 
       var layoutLastIdx = -1;
+      var parked = new Array(N);
+      for (var pi = 0; pi < N; pi++) parked[pi] = false;
       function layout() {
         var step = stepPx;
         var idx = Math.max(0, Math.min(N - 1, Math.round(pos)));
@@ -8579,6 +8578,27 @@ window.__stayCarInit = function () {
         for (var i = 0; i < N; i++) {
           var d = i - pos;
           var ad = Math.abs(d);
+          if (ad > 3) {
+            /* parked: outside the visible window, where opacity is
+               already 0 — drop the slide from compositing entirely so
+               the phone only ever composites the ~5 live slides
+               (owner-reported stutter fix: 20 shadowed, backdrop-
+               filtered layers were thrashing the iOS compositor) */
+            if (!parked[i]) {
+              parked[i] = true;
+              slides[i].style.opacity = "0";
+              slides[i].style.visibility = "hidden";
+              slides[i].style.willChange = "auto";
+            }
+            continue;
+          }
+          if (parked[i]) {
+            parked[i] = false;
+            slides[i].style.visibility = "visible";
+            slides[i].style.zIndex = String(100 - Math.round(ad * 10));
+            slides[i].style.pointerEvents = ad < 0.5 ? "auto" : "none";
+            slides[i].setAttribute("aria-hidden", ad < 0.5 ? "false" : "true");
+          }
           var rot = reduced ? 0 : Math.max(-58, Math.min(58, -d * 40));
           var tx = d * step;
           var tz = reduced ? 0 : -ad * 130;
@@ -8594,6 +8614,7 @@ window.__stayCarInit = function () {
             " rotateY(" + rot.toFixed(2) + "deg)" +
             " scale(" + sc.toFixed(3) + ")";
           slides[i].style.opacity = op.toFixed(3);
+          slides[i].style.willChange = ad < 1.6 ? "transform, opacity" : "auto";
           if (chromeDirty) {
             slides[i].style.zIndex = String(100 - Math.round(ad * 10));
             slides[i].style.pointerEvents = ad < 0.5 ? "auto" : "none";
