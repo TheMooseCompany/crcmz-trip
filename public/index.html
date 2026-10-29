@@ -1653,7 +1653,7 @@ body[data-view="food"] footer a{color:var(--peri)}
 .nm-track{display:flex;width:100%;height:100%;will-change:transform}
 .nm-track.snap{transition:transform .38s var(--glide)}
 .nm-slide{flex:0 0 100%;width:100%;height:100%;background:linear-gradient(150deg,#262F66,#10163A)}
-.nm-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.nm-slide img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none;user-select:none}
 .nm-slide img.nm-fade{opacity:0;transition:opacity .35s ease}
 .nm-slide img.nm-fade.in{opacity:1}
 .nm-dots{position:absolute;right:8px;bottom:8px;z-index:2;display:flex;gap:5px;align-items:center;background:rgba(6,8,24,.74);padding:5px 8px;border-radius:999px;pointer-events:none}
@@ -7430,6 +7430,7 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
     im.setAttribute('data-src',photoUrl(slug,n));
     im.addEventListener('error',function(){ dropSlide(n); });
    }
+   im.draggable=false; // a mouse drag must swipe the track, not drag the image out natively
    s.appendChild(im); track.appendChild(s);
    slides.push({n:n,el:s,img:im,loaded:p===0});
   });
@@ -7462,7 +7463,9 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
    track.classList.toggle('snap',!!animate);
    track.style.transform='translateX('+(-pos*100)+'%)';
    syncUI();
-   loadSlide(live[pos+1]); // keep one ahead of the swipe
+   if(animate)loadSlide(live[pos+1]); // a user swipe keeps one ahead;
+   // the initial placement must not - the viewport IO owns preloading
+   // for cards nobody has touched yet.
   }
   function dropSlide(n){
    var s=slides.filter(function(x){return x.n===n})[0];
