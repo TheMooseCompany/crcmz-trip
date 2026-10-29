@@ -4942,7 +4942,7 @@ fcRenderAll();
    through the server proxy. */
 var FOOD_CATS=CONTENT.foodCats;
 var FOOD=CONTENT.food;
-var FOOD_IMG={breakfast:'assets/food/cat-breakfast.jpg',me:'assets/food/cat-me.jpg',af:'assets/food/cat-af.jpg',pk:'assets/food/cat-pk.jpg',tk:'assets/food/cat-tk.jpg',bg:'assets/food/cat-bg.jpg',pz:'assets/food/cat-pz.jpg',ds:'assets/food/cat-ds.jpg',ca:'assets/food/cat-ca.jpg'};
+var FOOD_IMG={breakfast:'assets/food/cat-breakfast.jpg',me:'assets/food/cat-me.jpg',af:'assets/food/cat-af.jpg',pk:'assets/food/cat-pk.jpg',in:'assets/food/cat-pk.jpg',tk:'assets/food/cat-tk.jpg',bg:'assets/food/cat-bg.jpg',pz:'assets/food/cat-pz.jpg',ds:'assets/food/cat-ds.jpg',ca:'assets/food/cat-ca.jpg',bh:'assets/food/cat-breakfast.jpg'};
 var FOOD_ACCENT={breakfast:'early light',me:'tonight',af:'from the grill',pk:'with heat',tk:'saffron & smoke',bg:'stacked high',pz:'by the slice',ds:'something sweet',ca:'from the wok'};
 var FOOD_DAYS=[{id:'Thu',label:'Thu 29'},{id:'Fri',label:'Fri 30'},{id:'Sat',label:'Sat 31'},{id:'Sun',label:'Sun 1'}];
 var FOOD_PLAN_KEY='crcmz-food-plan-v1';
@@ -4959,6 +4959,7 @@ function foodRate(f){
  return 'Rating not verified';
 }
 function halalBadge(f){
+ if((f.cats||[]).indexOf('bh')>=0)return 'NOT HALAL';
  var n=(f.note||'').toLowerCase();
  if(n.indexOf('\u26a0')>=0||n.indexOf('partial')>=0)return '\u26a0 PARTIAL \u2014 ASK';
  if(n.indexOf('100% halal')>=0)return '100% HALAL';
