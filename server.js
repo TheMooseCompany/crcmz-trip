@@ -738,7 +738,7 @@ async function passwordLogin(){
   // and the rate they were logged at. Balances are computed by the client
   // from this raw ledger, so the numbers are always auditable.
   const LEDGER_PATH = process.env.LEDGER_PATH || path.join(__dirname, 'data', 'ledger.json');
-  const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi'];
+  const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi', 'Mazino'];
 
   function readLedger() {
     try {
