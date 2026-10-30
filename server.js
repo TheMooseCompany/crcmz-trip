@@ -168,8 +168,9 @@ async function main() {
   // A bridge request skips the session store: no cookie, nothing kept.
   const TRIP_APP_TOKEN = process.env.TRIP_APP_TOKEN || '';
   const APP_BRIDGE = [
-    ['GET', /^\/api\/(expenses|me|fx|moments)$/],
+    ['GET', /^\/api\/(expenses|me|fx|moments|people)$/],
     ['POST', /^\/api\/(expenses|settlements|receipts|moments)$/],
+    ['PUT', /^\/api\/people$/],
     ['DELETE', /^\/api\/expenses\/[\w-]+$/],
     ['POST', /^\/api\/moments\/[\w-]+\/like$/],
     ['DELETE', /^\/api\/moments\/[\w-]+$/],
@@ -787,7 +788,7 @@ async function passwordLogin(){
   // and the rate they were logged at. Balances are computed by the client
   // from this raw ledger, so the numbers are always auditable.
   const LEDGER_PATH = process.env.LEDGER_PATH || path.join(__dirname, 'data', 'ledger.json');
-  const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi'];
+  const PEOPLE = ['Mutasif', 'Moiz', 'Noor', 'Samad', 'Brendan', 'Zubi', 'Mazino', 'Ace'];
 
   function readLedger() {
     try {
@@ -1019,8 +1020,10 @@ If it is not a receipt or the total can't be read, return {"total": null, "confi
     ['Moiz', ['moiz', 'soup', 'interestingsoup', 'moiiz41510', 'mq']],
     ['Noor', ['noor']],
     ['Samad', ['samad', 'asamad']],
-    ['Brendan', ['brendan']],
+    ['Brendan', ['brendan', 'brenden']],
     ['Zubi', ['zubi']],
+    ['Mazino', ['mazino', 'maz']],
+    ['Ace', ['ace']],
   ];
   function matchPerson(user) {
     if (!user) return null;
@@ -1035,7 +1038,33 @@ If it is not a receipt or the total can't be read, return {"total": null, "confi
     return null;
   }
   app.get('/api/me', requireAuth, (req, res) => {
-    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user), isAdmin: isAdminUser(req.session.user), people: PEOPLE });
+    res.json({ name: displayName(req.session.user), person: matchPerson(req.session.user), isAdmin: isAdminUser(req.session.user), people: activePeople() });
+  });
+
+  // ---------- Split people (admin-gated write) ----------
+  // GET returns the live people list; PUT replaces it. These endpoints are also
+  // in APP_BRIDGE so the CRCMZ app can manage the list without a browser session.
+  app.get('/api/people', requireAuth, (req, res) => {
+    res.json({ people: activePeople() });
+  });
+
+  app.put('/api/people', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) {
+      return res.status(403).json({ error: 'Only Mutasif and Moiz can manage the split people.' });
+    }
+    const names = req.body && req.body.people;
+    if (!Array.isArray(names) || names.length === 0 || names.some((n) => typeof n !== 'string' || !n.trim())) {
+      return res.status(400).json({ error: 'people must be a non-empty array of names.' });
+    }
+    const cleaned = names.map((n) => n.trim());
+    if (new Set(cleaned.map((n) => n.toLowerCase())).size !== cleaned.length) {
+      return res.status(400).json({ error: 'Duplicate names.' });
+    }
+    const content = readContent() || defaultContent() || {};
+    content.splitPeople = cleaned.map((name) => ({ name }));
+    content.epoch = shippedEpoch();
+    writeContent(content);
+    res.json({ ok: true, people: activePeople() });
   });
 
   // ---------- Editable site content (admin-gated) ----------
