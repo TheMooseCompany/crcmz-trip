@@ -169,7 +169,7 @@ async function main() {
   const TRIP_APP_TOKEN = process.env.TRIP_APP_TOKEN || '';
   const APP_BRIDGE = [
     ['GET', /^\/api\/(expenses|me|fx|moments|people)$/],
-    ['POST', /^\/api\/(expenses|settlements|receipts|moments)$/],
+    ['POST', /^\/api\/(expenses|settlements|receipts|moments|expenses\/redistribute)$/],
     ['PUT', /^\/api\/people$/],
     ['DELETE', /^\/api\/expenses\/[\w-]+$/],
     ['POST', /^\/api\/moments\/[\w-]+\/like$/],
@@ -1065,6 +1065,31 @@ If it is not a receipt or the total can't be read, return {"total": null, "confi
     content.epoch = shippedEpoch();
     writeContent(content);
     res.json({ ok: true, people: activePeople() });
+  });
+
+  // ---------- Expense redistribution (admin-gated) ----------
+  // Recalculates shares for every equally-split expense so all current
+  // activePeople() are included. Non-equal-split expenses are left alone.
+  app.post('/api/expenses/redistribute', requireAuth, (req, res) => {
+    if (!isAdminUser(req.session.user)) {
+      return res.status(403).json({ error: 'Only Mutasif and Moiz can redistribute expenses.' });
+    }
+    const people = activePeople();
+    const n = people.length;
+    const ledger = readLedger();
+    let changed = 0;
+    for (const e of ledger.expenses) {
+      if (e.splitMode !== 'equal') continue;
+      const have = Object.keys(e.shares).sort().join(',');
+      const want = [...people].sort().join(',');
+      if (have === want) continue;
+      const base = Math.floor(e.amountCentsCAD / n);
+      const remainder = e.amountCentsCAD - base * n;
+      e.shares = Object.fromEntries(people.map((p, i) => [p, base + (i < remainder ? 1 : 0)]));
+      changed++;
+    }
+    if (changed > 0) writeLedger(ledger);
+    res.json({ ok: true, changed, total: ledger.expenses.length, people });
   });
 
   // ---------- Editable site content (admin-gated) ----------
