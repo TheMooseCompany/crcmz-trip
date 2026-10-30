@@ -774,7 +774,7 @@ button.nb-exp-row{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .nb-exp-row:last-child{border-bottom:0}
 .nb-exp-row .sp-glyph,.nb-exp-row .sp-thumb{width:38px;height:38px;border-radius:10px}
 .nb-exp-main{flex:1;min-width:0}
-.nb-exp-desc{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb-exp-desc{display:block;font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nb-exp-sub{display:block;color:var(--paper-mut);font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nb-exp-amt{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media(max-width:370px){
@@ -6086,7 +6086,7 @@ function spFmtOrig(e){
 }
 function spDate(ts){
  var d=new Date(ts);
- return SP_MONTHS[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+ return SP_MONTHS[d.getMonth()]+' '+d.getDate();
 }
 function spAvatar(name,cls){
  var ini=name.slice(0,2).toUpperCase();
