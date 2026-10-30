@@ -1638,6 +1638,7 @@ details.house-details summary{font-size:12px;letter-spacing:.08em}
 .stay-tile-time{font-size:20px;line-height:1.3;font-weight:600;color:var(--cream);margin-top:4px}
 .stay-tile p{color:var(--muted);font-size:14px;line-height:1.45;margin:4px 0 8px}
 .stay-tile-btn{min-height:44px;padding:10px 18px;font-size:14px}
+.stay-tile-wide{grid-column:1/-1}
 .stay-warns{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .stay-warn{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(242,179,61,.45);background:rgba(242,179,61,.10);color:var(--cream);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.45}
 .stay-receipt{border-top:1px dashed var(--line-d);margin-top:16px;padding-top:14px}
@@ -2470,7 +2471,7 @@ flash of Home. The router clears the tag when it takes over. */
             <button class="car-btn" type="button" id="carNext" aria-label="Next photo">→</button>
           </div>
         </div>
-        <div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">Thu, Oct 29 · from 4:00 PM</div><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1616136472222440742" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Sun, Nov 1 · by 9:00 AM</div><button type="button" class="btn stay-tile-btn" id="copyDetails">Copy details</button></div></div>
+        <div class="stay-tiles"><div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">Thu, Oct 29 · from 4:00 PM</div><a class="btn primary stay-tile-btn" href="https://www.airbnb.com/rooms/1616136472222440742" target="_blank" rel="noopener">Open listing</a></div><div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">Sun, Nov 1 · by 9:00 AM</div><button type="button" class="btn stay-tile-btn" id="copyDetails">Copy details</button></div><div class="stay-tile stay-tile-wide"><span class="stay-tile-lab">Get here</span><div class="stay-tile-time">Cranston · Southeast Calgary</div><a class="btn primary stay-tile-btn" href="https://www.google.com/maps/dir/?api=1&destination=4%20Cranarch%20Bay%20SE%2C%20Calgary%2C%20AB%20T3M%200W6" target="_blank" rel="noopener">Directions</a></div></div>
         
         <details class="house-details"><summary>House rules &amp; amenities</summary><ul class="rules"><li>Up to 12 overnight guests</li><li>Pets allowed (1 maximum)</li><li>No commercial photography or filming</li></ul><div class="amenities"><span>Heated pool + slide</span><span>Hot tub</span><span>Sauna</span><span>Cold plunge</span><span>BBQ</span><span>Pergola deck with fireplace</span><span>Game room</span><span>Home theatre</span><span>Pool table</span><span>Trampoline</span></div><p>Before checkout: if the Sauna, Cold Plunge, or BBQ was used, leave it in the condition you found it. If the garbage bin is full, place any extra garbage behind the door next to the garbage bins.</p><p class="host-line">Hosted by <b>Geo · Superhost</b></p></details>
       </div>
@@ -3332,6 +3333,7 @@ function renderStay(){
   +'<div class="stay-tiles">'
   +'<div class="stay-tile"><span class="stay-tile-lab">Check-in</span><div class="stay-tile-time">'+cEsc(s.checkIn)+'</div><a class="btn primary stay-tile-btn" href="'+cEsc(s.airbnbUrl)+'" target="_blank" rel="noopener">Open listing</a></div>'
   +'<div class="stay-tile"><span class="stay-tile-lab">Check-out</span><div class="stay-tile-time">'+cEsc(s.checkOut)+'</div><button type="button" class="btn stay-tile-btn" id="copyDetails">Copy details</button></div>'
+  +'<div class="stay-tile stay-tile-wide"><span class="stay-tile-lab">Get here</span><div class="stay-tile-time">Cranston · Southeast Calgary</div><a class="btn primary stay-tile-btn" href="https://www.google.com/maps/dir/?api=1&destination=4%20Cranarch%20Bay%20SE%2C%20Calgary%2C%20AB%20T3M%200W6" target="_blank" rel="noopener">Directions</a></div>'
   +'</div>'
   +'<details class="house-details"><summary>House rules &amp; amenities</summary>'
   +(s.rules&&s.rules.length?'<ul class="rules">'+s.rules.map(function(r){return '<li>'+cEsc(r)+'</li>'}).join('')+'</ul>':'')
